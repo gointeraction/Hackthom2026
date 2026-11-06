@@ -1,12 +1,5 @@
-// /api/admin/login — valida credenciales y emite un token firmado (HMAC).
-import { createToken } from '../../_lib/auth';
-
-const USERS = {
-  administrador: { password: 'Auyantepui2026**', role: 'admin' },
-  acreditacion: { password: 'Acreditacion2026**', role: 'acreditacion' },
-  jurado: { password: 'Jurado2026**', role: 'jurado' },
-  logistica: { password: 'Logistica2026**', role: 'logistica' },
-};
+// /api/admin/login — valida credenciales contra D1 y emite token firmado (HMAC).
+import { createToken, hashPassword } from '../../_lib/auth';
 
 export async function onRequestPost({ request, env }) {
   const data = await request.json().catch(() => null);
@@ -14,11 +7,19 @@ export async function onRequestPost({ request, env }) {
     return Response.json({ ok: false, error: 'Datos inválidos.' }, { status: 400 });
   }
 
-  const user = String(data.username || '').trim();
+  const username = String(data.username || '').trim().toLowerCase();
   const pass = String(data.password || '');
-  const account = USERS[user];
 
-  if (account && account.password === pass) {
+  if (!username || !pass) {
+    return Response.json({ ok: false, error: 'Credenciales incorrectas.' }, { status: 401 });
+  }
+
+  const hash = await hashPassword(pass, env.AUTH_SECRET);
+  const account = await env.DB.prepare(
+    'SELECT role FROM usuarios WHERE username = ? AND password_hash = ?'
+  ).bind(username, hash).first();
+
+  if (account) {
     const token = await createToken(account.role, env.AUTH_SECRET);
     return Response.json(
       { ok: true, role: account.role },

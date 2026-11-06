@@ -341,6 +341,7 @@
 
       <button class="menu-btn" data-panel="auditoria"><span class="ic">🕒</span> Auditoría</button>
       <button class="menu-btn" data-panel="errores"><span class="ic">🛠️</span> Errores</button>
+      <button class="menu-btn" data-panel="accesos"><span class="ic">🔐</span> Accesos</button>
       <button class="menu-btn" data-panel="agentes"><span class="ic">🤖</span> Agentes</button>
       <button class="menu-btn" data-panel="biblioteca"><span class="ic">📚</span> Biblioteca</button>
     </nav>
@@ -1061,6 +1062,38 @@
       <div class="audit-list" id="erroresList"></div>
     </section>
 
+    <!-- ACCESOS -->
+    <section class="panel" id="panel-accesos">
+      <div class="sec-head">
+        <span class="kicker">Seguridad</span>
+        <h2>Accesos y privilegios</h2>
+        <p>Gestiona los usuarios del panel y sus roles. Las contraseñas se guardan cifradas.</p>
+      </div>
+      <div class="form-card" style="margin-top:0">
+        <h3>➕ Agregar usuario</h3>
+        <form id="usuarioForm">
+          <div class="frow">
+            <div class="field"><label>Usuario *</label><input type="text" id="uUsername" required></div>
+            <div class="field"><label>Nombre (opcional)</label><input type="text" id="uNombre"></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Contraseña *</label><input type="password" id="uPassword" minlength="6" required></div>
+            <div class="field"><label>Rol *</label>
+              <select id="uRole" required>
+                <option value="admin">Administrador</option>
+                <option value="acreditacion">Acreditación</option>
+                <option value="jurado">Jurado</option>
+                <option value="logistica">Logística</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn">Crear usuario</button>
+          <div class="form-status" id="usuarioStatus"></div>
+        </form>
+      </div>
+      <div class="list" id="usuariosList"></div>
+    </section>
+
     <!-- AGENTES IA -->
     <section class="panel" id="panel-agentes">
       <div class="sec-head">
@@ -1169,7 +1202,7 @@
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','itinerario','logistica','acreditacion','evaluacion','resultados','cartas','presupuesto','auditoria','errores','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','itinerario','logistica','acreditacion','evaluacion','resultados','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['evaluaciones'],
       logistica: ['logistica'],
@@ -2004,8 +2037,46 @@
   renderBiblioteca();
   document.getElementById('searchBiblioteca').addEventListener('input', (e) => renderBiblioteca(e.target.value));
 
+  // ===== Accesos y privilegios =====
+  async function loadUsuarios() {
+    const cont = document.getElementById('usuariosList');
+    try {
+      const res = await fetch('/api/admin/usuarios');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const items = data.usuarios || [];
+      if (items.length === 0) { cont.innerHTML = '<div class="empty">Sin usuarios.</div>'; return; }
+      items.forEach((u) => {
+        const el = document.createElement('div');
+        el.className = 'audit-item';
+        el.innerHTML = `<div class="audit-meta"><strong>${esc(u.username)}</strong>${u.nombre ? ' · ' + esc(u.nombre) : ''}</div><span class="pill-s">${esc(u.role)}</span><button type="button" class="btn" onclick="delUsuario(${u.id})">Eliminar</button>`;
+        cont.appendChild(el);
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+  async function delUsuario(id) {
+    if (!confirm('¿Eliminar este usuario?')) return;
+    const res = await fetch('/api/admin/usuarios?id=' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (!data.ok) { alert(data.error || 'Error.'); }
+    loadUsuarios();
+  }
+  document.getElementById('usuarioForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      username: document.getElementById('uUsername').value.trim(),
+      nombre: document.getElementById('uNombre').value.trim(),
+      password: document.getElementById('uPassword').value,
+      role: document.getElementById('uRole').value,
+    };
+    const res = await fetch('/api/admin/usuarios', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) { document.getElementById('usuarioForm').reset(); setStatus('usuarioStatus', 'Usuario creado.', true); loadUsuarios(); }
+    else setStatus('usuarioStatus', data.error || 'Error.', false);
+  });
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
   }
 
   // ===== Login =====

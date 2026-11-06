@@ -1,10 +1,15 @@
-// functions/_lib/auth.js — autenticación con token firmado (HMAC-SHA256).
+// functions/_lib/auth.js — autenticación: tokens HMAC y hash de contraseñas.
 const enc = new TextEncoder();
 
 export async function hmacHex(secret, data) {
   const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const sig = await crypto.subtle.sign('HMAC', key, enc.encode(data));
   return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Hash de contraseña: HMAC-SHA256 de "password:<contraseña>" con clave AUTH_SECRET.
+export async function hashPassword(password, secret) {
+  return await hmacHex(secret, 'password:' + password);
 }
 
 export async function createToken(role, secret, ttlSeconds = 86400) {
