@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="es-VE">
+<head>
+<!--
+  ============================================================
+  Hackathon UNETI IA 2026 — Página de convocatoria
+  Especificación fuente: ConvocatoriaWeb/00..03 (SDD)
+  ------------------------------------------------------------
+  ASSUMPTIONS / PLACEHOLDERS:
+  - Mentores: nombres NO reales. Son placeholders "Prof. [Nombre]".
+    Reemplazar con los profesores confirmados.
+  - Aliados: instituciones sugeridas (MPPCT, CNTI, CONATEL, UNETI, CANTV).
+    Logotipos pendientes de confirmar/descargar.
+  - Premios: montos pendientes de definir por patrocinadores.
+  - Formulario: valida en cliente y envía a /api/register (Pages Function
+    que guarda la inscripción en D1).
+  ============================================================
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hackathon UNETI IA 2026 · IA Ética y Ciberseguridad</title>
+<meta name="description" content="Participa en el Hackathon UNETI IA el 13 y 14 de noviembre de 2026 en Caracas. Dos días para crear soluciones de IA Ética y Ciberseguridad con visión de sector público. Inscripción gratuita.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hackathon UNETI IA 2026">
+<meta property="og:description" content="Dos días · IA Ética y Ciberseguridad · 13 y 14 de noviembre · Caracas.">
+<meta property="og:image" content="https://placehold.co/1200x630/0B1F3A/00B4D8?text=Hackathon+UNETI+IA">
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "Hackathon UNETI IA 2026",
+  "startDate": "2026-11-13T09:00:00-04:00",
+  "endDate": "2026-11-14T18:00:00-04:00",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "location": {
+    "@type": "Place",
+    "name": "Edificio Ministerio de Ciencia y Tecnología, Piso 12",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Avenida Universidad, esquina El Chorro",
+      "addressLocality": "Caracas",
+      "addressCountry": "VE"
+    }
+  },
+  "isAccessibleForFree": true
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --navy-900: #0B1F3A;
+    --navy-800: #12345F;
+    --cyan: #00B4D8;
+    --green: #06A77D;   /* IA Ética */
+    --rose: #E63966;    /* Ciberseguridad */
+    --bg: #F5F7FB;
+    --surface: #FFFFFF;
+    --ink: #0B1B2B;
+    --ink-soft: #4E5B6B;
+    --line: #E3E8EF;
+    --ok: #169A6A;
+    --err: #D64545;
+    --radius: 14px;
+    --radius-sm: 9px;
+    --shadow: 0 2px 12px rgba(11,31,58,.08);
+    --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+    text-wrap: pretty;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; letter-spacing: -0.02em; }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Header ---------- */
+  .site-header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,31,58,.92);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; }
+  .brand-logo { height: 34px; width: auto; display: block; background: #fff; border-radius: 6px; padding: 3px 8px; }
+  .footer-logo { height: 44px; width: auto; background: #fff; border-radius: 6px; padding: 4px 8px; margin-bottom: 14px; }
+  .nav-links { display: flex; align-items: center; gap: 22px; font-size: .92rem; }
+  .nav-links a { color: rgba(255,255,255,.82); transition: color .15s; }
+  .nav-links a:hover { color: #fff; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 22px; border-radius: var(--radius-sm);
+    font-weight: 600; font-size: .95rem; cursor: pointer; border: 2px solid transparent;
+    transition: transform .12s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--cyan); color: #06202B; }
+  .btn-primary:hover { background: #00C4E8; }
+  .btn-ghost { border-color: rgba(255,255,255,.35); color: #fff; background: transparent; }
+  .btn-ghost:hover { border-color: #fff; }
+  .btn-block { width: 100%; }
+  .menu-toggle { display: none; background: none; border: 0; color: #fff; cursor: pointer; padding: 8px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    background:
+      radial-gradient(1100px 500px at 85% -10%, rgba(0,180,216,.25), transparent 60%),
+      linear-gradient(160deg, var(--navy-900), var(--navy-800));
+    color: #fff;
+    padding: 96px 0 88px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(700px 420px at 50% 0%, #000 40%, transparent 78%);
+    pointer-events: none;
+  }
+  .hero .wrap { position: relative; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: .82rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 20px;
+  }
+  .eyebrow .bar { width: 22px; height: 2px; background: var(--cyan); }
+  .hero h1 { font-size: clamp(2.1rem, 5vw, 3.4rem); max-width: 820px; margin-bottom: 18px; }
+  .hero h1 em { font-style: normal; color: var(--cyan); }
+  .hero p.lead { font-size: clamp(1.02rem, 2vw, 1.2rem); color: rgba(255,255,255,.86); max-width: 640px; margin-bottom: 28px; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
+    font-size: .9rem; color: rgba(255,255,255,.94);
+  }
+  .pill svg { width: 16px; height: 16px; color: var(--cyan); flex-shrink: 0; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  /* ---------- Sections ---------- */
+  section { padding: 72px 0; }
+  section.alt { background: var(--surface); }
+  .sec-head { max-width: 720px; margin-bottom: 40px; }
+  .sec-kicker {
+    font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 12px; display: block;
+  }
+  .sec-head h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); margin-bottom: 14px; }
+  .sec-head p { color: var(--ink-soft); }
+
+  /* About */
+  .about-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: start; }
+  .about-copy p { color: var(--ink-soft); margin-bottom: 14px; }
+  .about-facts { display: grid; gap: 14px; }
+  .fact {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .fact b { display: block; font-family: var(--font-display); font-size: 1rem; margin-bottom: 2px; }
+  .fact span { color: var(--ink-soft); font-size: .9rem; }
+
+  /* Ejes */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 28px; box-shadow: var(--shadow);
+  }
+  .card .tag { display: inline-block; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 4px 10px; border-radius: 999px; margin-bottom: 14px; }
+  .tag.etica { background: rgba(6,167,125,.12); color: var(--green); }
+  .tag.seg { background: rgba(230,57,102,.12); color: var(--rose); }
+  .card h3 { font-size: 1.35rem; margin-bottom: 10px; }
+  .card p { color: var(--ink-soft); }
+
+  /* Quién */
+  .who-list { display: grid; gap: 12px; max-width: 720px; }
+  .who-list li { list-style: none; display: flex; gap: 12px; align-items: flex-start; color: var(--ink-soft); }
+  .who-list li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); margin-top: 8px; flex-shrink: 0; }
+  .note { margin-top: 20px; background: rgba(0,180,216,.08); border: 1px solid rgba(0,180,216,.25); border-radius: var(--radius-sm); padding: 14px 18px; font-weight: 600; }
+
+  /* Agenda */
+  .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .day { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); }
+  .day h3 { font-size: 1.2rem; margin-bottom: 4px; }
+  .day .day-sub { color: var(--cyan); font-weight: 600; font-size: .9rem; margin-bottom: 18px; }
+  .slot { display: flex; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .slot time { font-family: var(--font-display); font-weight: 600; color: var(--navy-900); min-width: 92px; font-size: .9rem; }
+  .slot span { color: var(--ink-soft); font-size: .95rem; }
+
+  /* Mentores y aliados */
+  .mentor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .mentor {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px; box-shadow: var(--shadow);
+  }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%; margin-bottom: 14px;
+    background: linear-gradient(140deg, var(--navy-800), var(--navy-900));
+    color: var(--cyan); display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
+  }
+  .mentor h4 { font-size: 1.05rem; margin-bottom: 2px; }
+  .mentor .role { color: var(--cyan); font-size: .85rem; font-weight: 600; }
+  .mentor .field { color: var(--ink-soft); font-size: .88rem; margin-top: 8px; }
+  .pending-note { margin-top: 22px; font-size: .85rem; color: var(--ink-soft); }
+  .aliados { margin-top: 40px; }
+  .aliados h3 { font-size: 1.1rem; margin-bottom: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+    padding: 10px 18px; font-weight: 600; font-size: .92rem; color: var(--ink-soft);
+    box-shadow: var(--shadow);
+  }
+
+  /* Premios */
+  .prizes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .prize { text-align: center; padding: 30px 24px; position: relative; overflow: hidden; }
+  .prize .rank { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; line-height: 1; margin-bottom: 8px; }
+  .prize.gold .rank { color: #D9A514; }
+  .prize.silver .rank { color: #8B98A9; }
+  .prize.bronze .rank { color: #B0713A; }
+  .prize h3 { font-size: 1.15rem; margin-bottom: 6px; }
+  .prize p { color: var(--ink-soft); font-size: .92rem; }
+  .prize.win-1 { border-top: 3px solid #D9A514; }
+  .prize.win-2 { border-top: 3px solid #8B98A9; }
+  .prize.win-3 { border-top: 3px solid #B0713A; }
+
+  /* Formulario */
+  .form-shell {
+    max-width: 640px; margin: 0 auto;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 36px; box-shadow: var(--shadow);
+  }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-weight: 600; font-size: .92rem; margin-bottom: 7px; }
+  .field .req { color: var(--err); }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+    font-family: var(--font-body); font-size: 1rem; color: var(--ink); background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,180,216,.15);
+  }
+  .field input[aria-invalid="true"], .field select[aria-invalid="true"] { border-color: var(--err); }
+  .field .hint { font-size: .82rem; color: var(--ink-soft); margin-top: 5px; }
+  .field .error { font-size: .82rem; color: var(--err); margin-top: 5px; display: none; }
+  .field.has-error .error { display: block; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; }
+  .check input { width: auto; margin-top: 3px; }
+  .check label { font-weight: 500; font-size: .9rem; color: var(--ink-soft); margin: 0; }
+  .form-msg { display: none; margin-top: 18px; padding: 14px 16px; border-radius: var(--radius-sm); font-weight: 600; }
+  .form-msg.ok { display: block; background: rgba(22,154,106,.1); color: var(--ok); border: 1px solid rgba(22,154,106,.3); }
+  .form-msg.err { display: block; background: rgba(214,69,69,.08); color: var(--err); border: 1px solid rgba(214,69,69,.3); }
+  .goth { position: absolute; left: -9999px; }
+
+  /* FAQ */
+  .faq { max-width: 760px; }
+  .faq-item { border: 1px solid var(--line); border-radius: var(--radius-sm); margin-bottom: 10px; background: var(--surface); overflow: hidden; }
+  .faq-q {
+    width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+    padding: 16px 18px; font-family: var(--font-body); font-size: 1rem; font-weight: 600; color: var(--ink);
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+  }
+  .faq-q .ic { flex-shrink: 0; transition: transform .2s; color: var(--cyan); font-size: 1.3rem; line-height: 1; }
+  .faq-item.open .faq-q .ic { transform: rotate(45deg); }
+  .faq-a { display: none; padding: 0 18px 16px; color: var(--ink-soft); }
+  .faq-item.open .faq-a { display: block; }
+
+  /* Contacto */
+  .contact { text-align: center; }
+  .contact a.mail { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; color: var(--navy-900); border-bottom: 2px solid var(--cyan); }
+
+  /* Footer */
+  .site-footer { background: var(--navy-900); color: rgba(255,255,255,.7); padding: 40px 0; font-size: .9rem; }
+  .footer-grid { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .site-footer a { color: #fff; }
+  .site-footer .links { display: flex; gap: 20px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .about-grid, .agenda, .grid-2, .prizes { grid-template-columns: 1fr; }
+    .mentor-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    section { padding: 56px 0; }
+    .nav-links {
+      display: none; position: absolute; top: 64px; left: 0; right: 0;
+      background: var(--navy-900); flex-direction: column; align-items: stretch;
+      padding: 12px 24px 20px; gap: 4px; border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .nav-links .btn { margin-top: 10px; }
+    .menu-toggle { display: block; }
+    .mentor-grid { grid-template-columns: 1fr; }
+    .row-2 { grid-template-columns: 1fr; }
+    .hero { padding: 64px 0; }
+    .form-shell { padding: 26px 20px; }
+  }
+</style>
+<style>
+/* ===== Modern motion & pro UX upgrade ===== */
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(30px); }
+.reveal.in-view { opacity: 1; transform: translateY(0); }
+
+/* Shared smooth transitions (reveal + hover + shadow) */
+.sec-head, .card, .fact, .day, .mentor, .prize, .faq-item, .form-shell {
+  transition:
+    opacity .7s cubic-bezier(.22,.61,.36,1),
+    transform .45s cubic-bezier(.22,.61,.36,1),
+    box-shadow .45s cubic-bezier(.22,.61,.36,1),
+    border-color .3s ease;
+}
+
+/* Hover lift (defined after reveal so :hover wins) */
+.card:hover, .fact:hover, .mentor:hover, .prize:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 46px -22px rgba(11,31,58,.30);
+}
+.day:hover { transform: translateY(-4px); box-shadow: 0 18px 36px -20px rgba(11,31,58,.22); }
+.faq-item:hover { border-color: var(--cyan); }
+
+/* Hero entrance */
+.hero { animation: heroFade 1.1s ease both; }
+.hero .wrap > * { animation: heroRise .9s cubic-bezier(.22,.61,.36,1) both; }
+.hero .wrap > *:nth-child(1) { animation-delay: .04s; }
+.hero .wrap > *:nth-child(2) { animation-delay: .15s; }
+.hero .wrap > *:nth-child(3) { animation-delay: .26s; }
+.hero .wrap > *:nth-child(4) { animation-delay: .37s; }
+.hero .wrap > *:nth-child(5) { animation-delay: .48s; }
+@keyframes heroFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes heroRise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Floating glow orb */
+.hero::after {
+  content: ""; position: absolute; width: 470px; height: 470px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,180,216,.30), transparent 68%);
+  top: -150px; right: -110px; filter: blur(36px);
+  animation: floatOrb 10s ease-in-out infinite; pointer-events: none;
+}
+@keyframes floatOrb {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-22px, -26px); }
+}
+
+/* Button shine */
+.btn { position: relative; overflow: hidden; }
+.btn-primary { background: linear-gradient(135deg, #00B4D8, #00C4E8); }
+.btn-primary::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.42) 50%, transparent 75%);
+  transform: translateX(-130%); transition: transform .75s ease;
+}
+.btn-primary:hover::after { transform: translateX(130%); }
+.btn:active { transform: translateY(0) scale(.98); }
+
+/* Nav underline */
+.nav-links a:not(.btn) { position: relative; }
+.nav-links a:not(.btn)::after {
+  content: ""; position: absolute; left: 0; bottom: -5px; width: 0; height: 2px;
+  background: var(--cyan); border-radius: 2px; transition: width .3s ease;
+}
+.nav-links a:not(.btn):hover::after { width: 100%; }
+
+/* Header scrolled */
+.site-header.scrolled { box-shadow: 0 10px 34px rgba(0,0,0,.30); }
+
+/* Chip hover */
+.chip { transition: transform .25s ease, border-color .25s ease, color .25s ease, box-shadow .25s ease; }
+.chip:hover { transform: translateY(-3px); border-color: var(--cyan); color: var(--ink); box-shadow: 0 10px 22px -12px rgba(0,180,216,.45); }
+
+/* Gradient kicker */
+.sec-kicker { color: var(--cyan); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .sec-kicker {
+    background: linear-gradient(135deg, #00B4D8, #06A77D);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+}
+
+/* Focus */
+:focus-visible { outline: 3px solid rgba(0,180,216,.75); outline-offset: 2px; border-radius: 4px; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
+</style>
+<style>
+/* ===== Asistente IA (chat widget) ===== */
+.chat-fab {
+  position: fixed; right: 22px; bottom: 22px; z-index: 100;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: linear-gradient(135deg, #00B4D8, #06A77D);
+  color: #fff; border: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 12px 30px -6px rgba(0,180,216,.55);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.chat-fab:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 18px 42px -8px rgba(0,180,216,.65); }
+.chat-fab svg { width: 26px; height: 26px; }
+
+.chat-panel {
+  position: fixed; right: 22px; bottom: 92px; z-index: 100;
+  width: 370px; max-width: calc(100vw - 32px); height: 540px; max-height: calc(100vh - 120px);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: 0 30px 70px -20px rgba(11,31,58,.42);
+  display: flex; flex-direction: column; overflow: hidden;
+  opacity: 0; transform: translateY(16px) scale(.97); pointer-events: none;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.chat-panel.open { opacity: 1; transform: none; pointer-events: auto; }
+
+.chat-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; background: linear-gradient(135deg, var(--navy-900), var(--navy-800)); color: #fff;
+}
+.chat-title { display: flex; align-items: center; gap: 10px; }
+.chat-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #00B4D8, #06A77D); color: #06202B; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: var(--font-display); flex-shrink: 0; }
+.chat-title strong { display: block; font-size: .95rem; }
+.chat-title small { color: rgba(255,255,255,.72); font-size: .74rem; }
+.chat-close { background: none; border: 0; color: #fff; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 2px; }
+
+.chat-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
+.msg { max-width: 86%; padding: 10px 14px; border-radius: 14px; font-size: .9rem; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word; animation: msgIn .25s ease; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.msg.bot { background: var(--surface); border: 1px solid var(--line); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--ink); }
+.msg.user { background: linear-gradient(135deg, #00B4D8, #06A77D); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.msg.typing { display: flex; align-items: center; gap: 5px; }
+.msg.typing .typing-label { font-style: italic; color: var(--ink-soft); margin-right: 3px; }
+.msg.typing .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: typing-bounce 1.2s infinite ease-in-out; }
+.msg.typing .dot:nth-child(2) { animation-delay: .15s; }
+.msg.typing .dot:nth-child(3) { animation-delay: .3s; }
+@keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .35; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+.chat-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; background: var(--surface); border-top: 1px solid var(--line); }
+.sug { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 12px; font-size: .8rem; cursor: pointer; color: var(--ink-soft); font-family: var(--font-body); transition: border-color .2s, color .2s; }
+.sug:hover { border-color: var(--cyan); color: var(--ink); }
+
+.chat-input { display: flex; gap: 8px; padding: 12px; background: var(--surface); border-top: 1px solid var(--line); }
+.chat-input input { flex: 1; padding: 11px 16px; border: 1px solid var(--line); border-radius: 999px; font-size: .92rem; font-family: var(--font-body); }
+.chat-input input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+.chat-input button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: linear-gradient(135deg, #00B4D8, #06A77D); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .2s ease; }
+.chat-input button:hover { transform: scale(1.06); }
+.chat-input button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+</style>
+<style>
+/* Metodología SDD */
+.sdd { display: grid; gap: 14px; max-width: 780px; list-style: none; counter-reset: sdd; margin: 0; padding: 0; }
+.sdd li { display: flex; gap: 14px; align-items: flex-start; color: var(--ink-soft); counter-increment: sdd; }
+.sdd li::before {
+  content: counter(sdd); flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, #00B4D8, #06A77D); color: #fff; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: .95rem;
+}
+.sdd strong { color: var(--ink); }
+</style>
+<style>
+/* Banco de proyectos */
+.proj-list { padding-left: 20px; margin: 14px 0 0; display: grid; gap: 8px; color: var(--ink-soft); font-size: .92rem; line-height: 1.5; }
+.proj-list li { padding-left: 4px; }
+.proj-list li::marker { color: var(--cyan); font-weight: 700; }
+</style>
+<style>
+/* Video intro */
+.video-shell { position: relative; max-width: 800px; margin: 0 auto; border-radius: var(--radius); overflow: hidden; box-shadow: 0 20px 50px -20px rgba(11,31,58,.4); background: #000; }
+.video-shell video { width: 100%; display: block; aspect-ratio: 16/9; background: #000; }
+.play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 84px; height: 84px; border-radius: 50%; background: rgba(0,180,216,.92); border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.45); transition: transform .2s ease, background .2s ease, opacity .2s ease; z-index: 2; }
+.play-btn:hover { transform: translate(-50%, -50%) scale(1.08); background: #00C4E8; }
+.play-btn svg { width: 36px; height: 36px; margin-left: 4px; }
+.play-btn.hidden { opacity: 0; pointer-events: none; }
+</style>
+<style>
+/* Hero parallax */
+.hero-bg { position: absolute; left: 0; right: 0; top: -30%; height: 160%; background: url('/paralax.jpg') center/cover no-repeat; will-change: transform; z-index: 0; }
+.hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(11,31,58,.93), rgba(18,52,95,.86)); }
+.hero .wrap { position: relative; z-index: 1; }
+</style>
+<style>
+/* Registro grupal */
+.seg { display: inline-flex; background: var(--line); border-radius: 10px; padding: 4px; gap: 4px; }
+.seg-btn { flex: 1; border: 0; background: transparent; padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: .9rem; cursor: pointer; color: var(--ink-soft); font-family: var(--font-body); transition: background .15s ease, color .15s ease; }
+.seg-btn.active { background: #fff; color: var(--navy-900); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.member-hint { font-size: .85rem; color: var(--ink-soft); background: rgba(0,180,216,.08); border: 1px dashed rgba(0,180,216,.35); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; }
+.member-block { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 14px; background: #FBFCFE; }
+.member-title { font-size: 1rem; margin-bottom: 12px; color: var(--navy-900); }
+.member-title .opt { color: var(--ink-soft); font-weight: 500; font-size: .82rem; }
+</style>
+<style>
+/* Countdown */
+.countdown { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+.cd-unit { display: flex; flex-direction: column; align-items: center; min-width: 70px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 12px 10px; }
+.cd-num { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; line-height: 1; }
+.cd-label { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65); margin-top: 5px; }
+.cd-live { font-weight: 700; letter-spacing: .04em; }
+</style>
+<style>
+/* Ubicación y galería */
+.map-card { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); min-height: 320px; }
+.map-card iframe { width: 100%; height: 100%; min-height: 320px; border: 0; display: block; }
+.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.gallery-item { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.gallery-item img { width: 100%; height: 220px; object-fit: cover; display: block; }
+@media (max-width: 760px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
+</style>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "860ad444891b4c4cbfd7166b6be7a379"}'></script><!-- End Cloudflare Web Analytics -->
+<style>
+/* Comunicados */
+.comunicados { display: grid; gap: 12px; max-width: 760px; margin: 0 auto; }
+.comunicado { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
+.comunicado h3 { font-size: 1.05rem; margin-bottom: 6px; color: var(--navy-900); }
+.comunicado p { font-size: .92rem; color: var(--ink-soft); }
+.comunicado .com-fecha { font-size: .78rem; color: #9AA7B5; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap nav">
+    <a href="#inicio" class="brand"><img src="/logo.png" alt="Logo UNETI" class="brand-logo"><span>Hackathon UNETI IA</span></a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav class="nav-links" id="navLinks">
+      <a href="#evento">Sobre el evento</a>
+      <a href="#ejes">Ejes</a>
+      <a href="#mentores">Mentores</a>
+      <a href="#agenda">Agenda</a>
+      <a href="#premios">Premios</a>
+      <a href="#patrocinadores">Patrocinadores</a>
+      <a href="#faq">FAQ</a>
+      <a href="#inscripcion" class="btn btn-primary">Inscríbete</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg" id="heroBg" aria-hidden="true"></div>
+    <div class="wrap">
+      <span class="eyebrow"><span class="bar"></span> Hackathon UNETI IA · Edición 2026</span>
+      <h1>Construye el futuro con <em>Inteligencia Artificial Ética</em> y Ciberseguridad</h1>
+      <p class="lead">Dos días para crear soluciones tecnológicas con visión de implementación en el sector público.</p>
+      <div class="hero-meta">
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          13 y 14 de noviembre · 9:00 am – 6:00 pm
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          Edificio MPPCT, Piso 12 · Caracas
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          10 equipos de 5 · Cupo limitado
+        </span>
+      </div>
+      <div class="hero-cta">
+        <a href="#inscripcion" class="btn btn-primary">Inscríbete ahora</a>
+        <a href="#ejes" class="btn btn-ghost">Conoce los ejes</a>
+      </div>
+      <div class="countdown" id="countdown" aria-label="Cuenta regresiva para el evento">
+        <div class="cd-unit"><span class="cd-num" id="cdDias">0</span><span class="cd-label">Días</span></div>
+        <div class="cd-unit"><span class="cd-num" id="cdHoras">0</span><span class="cd-label">Horas</span></div>
+        <div class="cd-unit"><span class="cd-num" id="cdMin">0</span><span class="cd-label">Min</span></div>
+        <div class="cd-unit"><span class="cd-num" id="cdSeg">0</span><span class="cd-label">Seg</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO INTRO -->
+  <section id="video" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Video</span>
+        <h2>Conoce el evento</h2>
+        <p>Mira el video introductorio del Hackathon UNETI IA.</p>
+      </div>
+      <div class="video-shell">
+        <video id="introVideo" controls preload="metadata" playsinline muted>
+          <source src="/videointro.mp4" type="video/mp4">
+          Tu navegador no soporta video HTML5.
+        </video>
+        <button class="play-btn" id="playBtn" aria-label="Reproducir video">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section id="evento">
+    <div class="wrap about-grid">
+      <div class="about-copy">
+        <span class="sec-kicker">Sobre el evento</span>
+        <h2>¿Qué es el Hackathon UNETI IA?</h2>
+        <p>Es un evento presencial de dos días donde estudiantes de todo el país se reúnen para diseñar y construir soluciones basadas en Inteligencia Artificial.</p>
+        <p>Esta edición se enfoca en dos grandes desafíos —<strong>IA Ética</strong> y <strong>Ciberseguridad</strong>— con el objetivo de generar propuestas con visión de implementación en entes públicos.</p>
+        <p>No necesitas ser experto: contarás con mentores, acceso a servidores y una dinámica guiada para convertir una idea en un prototipo funcional.</p>
+      </div>
+      <div class="about-facts">
+        <div class="fact"><b>Gratuito</b><span>Inscripción sin costo, con confirmación por correo.</span></div>
+        <div class="fact"><b>Presencial</b><span>100% presencial en la sede UNETI.</span></div>
+        <div class="fact"><b>Mentoría</b><span>Profesores y especialistas acompañan a los equipos.</span></div>
+        <div class="fact"><b>Certificado</b><span>Constancia de participación para todos los inscritos.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EJES -->
+  <section id="ejes" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Ejes de la edición</span>
+        <h2>Dos desafíos, un mismo propósito</h2>
+        <p>Elige un eje y desarrolla una solución con impacto real en el sector público.</p>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <span class="tag etica">IA Ética y Responsable</span>
+          <h3>Inteligencia Artificial confiable</h3>
+          <p>Herramientas para que la IA sea más justa, transparente, privada y explicable: auditoría de sesgos, explicabilidad, privacidad de datos y detección de desinformación.</p>
+        </article>
+        <article class="card">
+          <span class="tag seg">Ciberseguridad</span>
+          <h3>Protección de la información</h3>
+          <p>Soluciones para detectar, prevenir y responder a amenazas digitales: detección de intrusos, anti-phishing, análisis de malware y protección de infraestructura crítica.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROYECTOS -->
+  <section id="proyectos">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Banco de proyectos</span>
+        <h2>Posibles proyectos a contemplar</h2>
+        <p>40 ideas organizadas en dos ejes. Cada equipo elige una y la acota a un MVP funcional en los 2 días.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <span class="tag etica">Eje 1 · IA Ética</span>
+          <h3>IA Ética y Responsable</h3>
+          <ol class="proj-list">
+            <li>Plataforma nacional de auditoría algorítmica</li>
+            <li>Registro soberano de modelos de IA del Estado</li>
+            <li>Generador de "Fichas de modelo" con validez regulatoria</li>
+            <li>Motor de equidad para programas sociales y becas</li>
+            <li>Sistema de explicabilidad de decisiones administrativas</li>
+            <li>Anonimización de datos para datos abiertos del Estado</li>
+            <li>Plataforma de privacidad diferencial para estadísticas públicas</li>
+            <li>Sistema de gestión de consentimiento y derechos del titular</li>
+            <li>Detector de desinformación para la esfera pública</li>
+            <li>Verificación de identidad documental con detección de fraude</li>
+            <li>Asistente ciudadano estatal con IA explicable</li>
+            <li>Evaluación de impacto algorítmico (DPIA algorítmico)</li>
+            <li>Observatorio de transparencia algorítmica</li>
+            <li>IA explicable de apoyo al diagnóstico en salud pública</li>
+            <li>Plataforma de datos sintéticos con privacidad</li>
+            <li>Detector de deepfakes para comunicados oficiales</li>
+            <li>Trazabilidad de decisiones automatizadas (ledger)</li>
+            <li>Guardián de integridad de LLMs en servicios públicos</li>
+            <li>Detector de sesgo en contratación pública</li>
+            <li>Plataforma de certificación en IA ética para servidores públicos</li>
+          </ol>
+        </div>
+        <div class="card">
+          <span class="tag seg">Eje 2 · Ciberseguridad</span>
+          <h3>Ciberseguridad</h3>
+          <ol class="proj-list" start="21">
+            <li>SOC nacional asistido por IA (SIEM + detección)</li>
+            <li>Plataforma de inteligencia de amenazas (CTI) para infraestructura crítica</li>
+            <li>IDS/IPS para redes gubernamentales</li>
+            <li>Motor de detección de phishing dirigido a funcionarios</li>
+            <li>Protección de sistemas SCADA/IoT industrial</li>
+            <li>Gestión de identidad y acceso con riesgo adaptativo (IAM)</li>
+            <li>Identidad digital ciudadana y firma electrónica segura</li>
+            <li>CSIRT con triaje y playbooks automatizados</li>
+            <li>Analizador de malware a escala nacional (sandbox + ML)</li>
+            <li>Escáner de vulnerabilidades de aplicaciones del Estado</li>
+            <li>Sistema de prevención de fuga de datos (DLP)</li>
+            <li>Gestión de superficie de ataque (attack surface)</li>
+            <li>Detección de fraude en programas sociales</li>
+            <li>Anti-bots y anti-fraude en trámites en línea</li>
+            <li>Integridad y auditoría de procesos electorales/consultas</li>
+            <li>Plataforma de coordinación de incidentes entre entes</li>
+            <li>OSINT de amenazas con NLP sobre fuentes abiertas</li>
+            <li>Ciber-resiliencia y continuidad de servicios públicos</li>
+            <li>Protección de datos biométricos del Estado</li>
+            <li>Observatorio nacional de ciberseguridad</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIÉN -->
+  <section id="quien">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Participantes</span>
+        <h2>¿Quién puede participar?</h2>
+      </div>
+      <ul class="who-list">
+        <li>Estudiantes de UNETI y de otras universidades e institutos del país (alcance nacional).</li>
+        <li>Carreras de informática, telecomunicaciones, ingeniería y afines.</li>
+        <li>Equipos de 3 a 5 integrantes, o inscríbete individual y te asignamos equipo.</li>
+      </ul>
+      <p class="note">El evento es gratuito y las inscripciones se confirman por correo electrónico.</p>
+    </div>
+  </section>
+
+  <!-- AGENDA -->
+  <section id="agenda" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Agenda</span>
+        <h2>Dos días, de 9:00 am a 6:00 pm</h2>
+      </div>
+      <div class="agenda">
+        <div class="day">
+          <h3>Día 1</h3>
+          <p class="day-sub">Viernes 13 de noviembre</p>
+          <div class="slot"><time>09:00</time><span>Apertura y presentación de los retos</span></div>
+          <div class="slot"><time>10:00</time><span>Charla técnica y conformación de equipos</span></div>
+          <div class="slot"><time>12:00</time><span>Almuerzo</span></div>
+          <div class="slot"><time>13:00</time><span>Ideación y primer desarrollo</span></div>
+        </div>
+        <div class="day">
+          <h3>Día 2</h3>
+          <p class="day-sub">Sábado 14 de noviembre</p>
+          <div class="slot"><time>09:00</time><span>Desarrollo y mentorías</span></div>
+          <div class="slot"><time>13:00</time><span>Última iteración y entrega</span></div>
+          <div class="slot"><time>15:30</time><span>Demos ante el jurado</span></div>
+          <div class="slot"><time>17:30</time><span>Premiación y clausura</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHARLAS TÉCNICAS -->
+  <section id="charlas">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Formación</span>
+        <h2>Charlas técnicas</h2>
+        <p>Durante el evento se impartirá conocimiento en las siguientes tecnologías:</p>
+      </div>
+      <div class="chips" style="max-width:760px">
+        <span class="chip">DeepSeek Harness</span>
+        <span class="chip">Antigravity</span>
+        <span class="chip">Cloudflare</span>
+        <span class="chip">OpenClaw</span>
+        <span class="chip">Creación y gestión de Agentes IA</span>
+        <span class="chip">Canaima GNU/Linux</span>
+      </div>
+      <p class="note" style="margin-top:20px; max-width:760px">Sistema operativo de desarrollo: <strong>Canaima GNU/Linux</strong> — la distribución nacional de GNU/Linux.</p>
+    </div>
+  </section>
+
+  <!-- METODOLOGÍA -->
+  <section id="metodologia" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Metodología de desarrollo</span>
+        <h2>Specification-Driven Development (SDD)</h2>
+        <p>La especificación es la fuente única de verdad: primero defines <strong>qué</strong> construir y <strong>cómo verificarlo</strong>; después, los agentes de IA generan el código a partir de ella.</p>
+      </div>
+      <ol class="sdd">
+        <li><strong>Especificar</strong> — problema, requisitos, historias de usuario y criterios de aceptación.</li>
+        <li><strong>Diseñar</strong> — arquitectura, modelo de datos y contratos de API.</li>
+        <li><strong>Generar</strong> — los agentes de IA (DeepSeek Harness, Antigravity, OpenClaw, Cloudflare) crean el código usando la spec como contexto.</li>
+        <li><strong>Verificar</strong> — cada criterio de aceptación se convierte en una prueba.</li>
+        <li><strong>Iterar</strong> — si algo falla, actualiza la spec y regenera; no corrijas el código a ciegas.</li>
+      </ol>
+      <p class="note" style="margin-top:24px">Regla de oro: <strong>spec primero, código después</strong>. La spec es un documento vivo: todo cambio se refleja primero en ella.</p>
+    </div>
+  </section>
+
+  <!-- MENTORES Y ALIADOS -->
+  <section id="mentores">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Acompañamiento</span>
+        <h2>Mentores y aliados</h2>
+        <p>Profesores y especialistas que guiarán a los equipos durante los dos días, junto a las instituciones aliadas.</p>
+      </div>
+      <div class="mentor-grid">
+        <div class="mentor">
+          <div class="avatar">IA</div>
+          <h4>Docente Unetista</h4>
+          <span class="role">Mentor/a</span>
+          <p class="field">Inteligencia Artificial</p>
+        </div>
+        <div class="mentor">
+          <div class="avatar">CS</div>
+          <h4>Docente Unetista</h4>
+          <span class="role">Mentor/a</span>
+          <p class="field">Ciberseguridad</p>
+        </div>
+        <div class="mentor">
+          <div class="avatar">CD</div>
+          <h4>Docente Unetista</h4>
+          <span class="role">Mentor/a</span>
+          <p class="field">Ciencia de Datos</p>
+        </div>
+        <div class="mentor">
+          <div class="avatar">TC</div>
+          <h4>Docente Unetista</h4>
+          <span class="role">Mentor/a</span>
+          <p class="field">Telecomunicaciones</p>
+        </div>
+        <div class="mentor">
+          <div class="avatar">ET</div>
+          <h4>Docente Unetista</h4>
+          <span class="role">Mentor/a</span>
+          <p class="field">Ética y Gobernanza de IA</p>
+        </div>
+        <div class="mentor">
+          <div class="avatar">SW</div>
+          <h4>Docente Unetista</h4>
+          <span class="role">Mentor/a</span>
+          <p class="field">Desarrollo de Software</p>
+        </div>
+      </div>
+      <p class="pending-note">* Lista de mentores por confirmar. Reemplazar los nombres de ejemplo por los profesores participantes.</p>
+
+      <div class="aliados">
+        <h3>Aliados institucionales</h3>
+        <div class="chips">
+          <span class="chip">UNETI</span>
+          <span class="chip">MPPCT</span>
+          <span class="chip">CNTI</span>
+          <span class="chip">CONATEL</span>
+          <span class="chip">CANTV</span>
+          <span class="chip">CAVECOM-E</span>
+        </div>
+        <p class="pending-note">* Logotipos y aliados por confirmar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREMIOS -->
+  <section id="premios" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Reconocimiento</span>
+        <h2>Premios</h2>
+      </div>
+      <div class="prizes">
+        <div class="card prize win-1"><div class="rank">1º</div><h3>Primer lugar</h3><p>Representa a UNETI en Venezuela Innova 2026</p></div>
+        <div class="card prize win-2"><div class="rank">2º</div><h3>Segundo lugar</h3><p>Representa a UNETI en Venezuela Innova 2026</p></div>
+        <div class="card prize win-3"><div class="rank">3º</div><h3>Tercer lugar</h3><p>Representa a UNETI en Venezuela Innova 2026</p></div>
+      </div>
+      <p class="note" style="margin-top:24px">Los 3 primeros ganadores representarán a UNETI en el <strong>Hackathon Venezuela Innova 2026</strong> · Caracas · 26 al 28 de noviembre. Todos los participantes reciben certificado de participación y habrá menciones por eje.</p>
+      <p class="note" style="margin-top:12px">Los participantes serán invitados a una <strong>Master Class</strong> y a <strong>Mentoría para Startups</strong> tras el evento.</p>
+      <p class="note" style="margin-top:12px"><strong>Criterios de evaluación de los proyectos:</strong> viabilidad técnica y calidad del MVP · impacto y relevancia del problema · innovación y uso de IA · calidad del pitch · ética y responsabilidad de la IA · escalabilidad y sostenibilidad.</p>
+    </div>
+  </section>
+
+  <!-- PATROCINADORES -->
+  <section id="patrocinadores" class="alt">
+    <div class="wrap">
+      <div class="sec-head" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <span class="sec-kicker">Patrocinadores</span>
+        <h2>¿Quieres patrocinar el evento?</h2>
+        <p>Déjanos tus datos y te contactaremos. Indícanos si puedes apoyar con patrocinio metálico o con insumos para el evento.</p>
+      </div>
+
+      <div class="note" style="max-width:760px; margin:0 auto 26px"><strong>Presencia de tu marca:</strong> <strong>antes del evento</strong> (sitio web, redes y convocatoria), <strong>durante el evento</strong> (pantalla principal, escenario, materiales impresos y charlas) y <strong>pos-evento</strong> (agradecimiento, video resumen y reporte de alcance).</div>
+      <form class="form-shell" id="sponsorForm" novalidate>
+        <div class="row-2">
+          <div class="field">
+            <label for="spEmpresa">Empresa / Organización <span class="req">*</span></label>
+            <input type="text" id="spEmpresa" name="empresa" required>
+            <span class="error">Ingresa el nombre.</span>
+          </div>
+          <div class="field">
+            <label for="spContacto">Persona de contacto <span class="req">*</span></label>
+            <input type="text" id="spContacto" name="contacto" required>
+            <span class="error">Ingresa el contacto.</span>
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="spCorreo">Correo electrónico <span class="req">*</span></label>
+            <input type="email" id="spCorreo" name="correo" required>
+            <span class="error">Ingresa un correo válido.</span>
+          </div>
+          <div class="field">
+            <label for="spTelefono">Teléfono</label>
+            <input type="tel" id="spTelefono" name="telefono">
+          </div>
+        </div>
+        <div class="field">
+          <label>¿En qué puedes apoyar? <span class="req">*</span></label>
+          <div style="display:grid; gap:8px">
+            <div class="check"><input type="checkbox" id="spMetalico" name="tipo" value="metálico"><label for="spMetalico">Patrocinio metálico</label></div>
+            <div class="check"><input type="checkbox" id="spInsumos" name="tipo" value="insumos"><label for="spInsumos">Insumos para el evento</label></div>
+            <div class="check"><input type="checkbox" id="spOtro" name="tipo" value="otro"><label for="spOtro">Otro</label></div>
+          </div>
+          <span class="error" id="spTipoError" style="display:none">Selecciona al menos una opción.</span>
+        </div>
+        <div class="field">
+          <label for="spDetalle">Detalle del apoyo (opcional)</label>
+          <textarea id="spDetalle" name="detalle" rows="3" placeholder="Ej.: monto, equipos, alimentos, espacio, premios..."></textarea>
+        </div>
+        <div class="field check">
+          <input type="checkbox" id="spConsent" name="consent" required>
+          <label for="spConsent">Acepto el tratamiento de mis datos para ser contactado. <span class="req">*</span></label>
+        </div>
+        <div class="field"><span class="error" id="spConsentError" style="display:none">Debes aceptar el tratamiento de datos.</span></div>
+        <input type="text" name="_gotcha" class="goth" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="patrocinio" style="margin:14px 0"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="spSubmit">Enviar interés de patrocinio</button>
+        <div class="form-msg" id="spMsg" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- INSCRIPCIÓN -->
+  <section id="inscripcion">
+    <div class="wrap">
+      <div class="sec-head" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <span class="sec-kicker">Registro</span>
+        <h2>Inscríbete</h2>
+        <p>Completa el formulario. La participación es gratuita y el cupo es limitado.</p>
+      </div>
+
+      <p class="note" style="max-width:760px; margin:0 auto 26px">Los grupos serán <strong>preseleccionados según su propuesta de desarrollo</strong> (presencial en UNETI o remoto), con base en estos criterios: <strong>viabilidad técnica y calidad del MVP · impacto y relevancia del problema · innovación y uso de IA · calidad del pitch · ética y responsabilidad de la IA · escalabilidad y sostenibilidad</strong>. <strong>Los participantes individuales participan de forma remota</strong>. A quienes participen de forma remota se les enviará un <strong>instructivo y las condiciones de participación</strong>.</p>
+
+      <form class="form-shell" id="registro" novalidate>
+        <div class="field">
+          <label>Tipo de registro <span class="req">*</span></label>
+          <div class="seg" id="segTipo">
+            <button type="button" class="seg-btn active" data-tipo="individual">Individual</button>
+            <button type="button" class="seg-btn" data-tipo="grupal">Grupal (5 integrantes)</button>
+          </div>
+        </div>
+
+        <div id="indFields">
+        <div class="row-2">
+          <div class="field">
+            <label for="nombre">Nombre <span class="req">*</span></label>
+            <input type="text" id="nombre" name="nombre" autocomplete="given-name" required>
+            <span class="error">Ingresa tu nombre.</span>
+          </div>
+          <div class="field">
+            <label for="apellido">Apellido <span class="req">*</span></label>
+            <input type="text" id="apellido" name="apellido" autocomplete="family-name" required>
+            <span class="error">Ingresa tu apellido.</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="correo">Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="correo" name="correo" autocomplete="email" required>
+          <span class="error">Ingresa un correo válido.</span>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="nacimiento">Fecha de nacimiento <span class="req">*</span></label>
+            <input type="date" id="nacimiento" name="nacimiento" required>
+            <span class="error">Ingresa una fecha válida.</span>
+          </div>
+          <div class="field">
+            <label for="anio">Año en la carrera <span class="req">*</span></label>
+            <select id="anio" name="anio" required>
+              <option value="" selected disabled>Selecciona…</option>
+              <option>1er año</option>
+              <option>2do año</option>
+              <option>3er año</option>
+              <option>4to año</option>
+              <option>5to año</option>
+            </select>
+            <span class="error">Selecciona tu año en la carrera.</span>
+          </div>
+        </div>
+        </div>
+
+        <div id="gruFields" style="display:none">
+          <div class="member-hint">Ingresa los datos de los 5 integrantes del grupo.</div>
+          <div id="gruMembers"></div>
+          <div class="field">
+            <label for="gPropuesta">Propuesta de desarrollo <span class="req">*</span></label>
+            <textarea id="gPropuesta" rows="4" placeholder="Describe brevemente la solución que tu equipo quiere desarrollar en el Hackathon."></textarea>
+            <span class="error">Describe la propuesta de tu equipo.</span>
+          </div>
+        </div>
+
+        <div class="field check">
+          <input type="checkbox" id="consent" name="consent" required>
+          <label for="consent">Acepto el tratamiento de mis datos personales para la gestión de la inscripción. <span class="req">*</span></label>
+        </div>
+        <div class="field">
+          <span class="error" id="consentError">Debes aceptar el tratamiento de datos.</span>
+        </div>
+
+        <!-- Honeypot anti-spam -->
+        <input type="text" name="_gotcha" class="goth" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="inscripcion" style="margin:14px 0"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Enviar inscripción</button>
+
+        <div class="form-msg" id="formMsg" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- COMUNICADOS -->
+  <section id="comunicados">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Comunicados</span>
+        <h2>Anuncios del evento</h2>
+        <p>Información y novedades para los participantes.</p>
+      </div>
+      <div class="comunicados" id="comunicadosList"></div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Preguntas frecuentes</span>
+        <h2>Resolvemos tus dudas</h2>
+      </div>
+      <div class="faq">
+        <div class="faq-item open">
+          <button class="faq-q" aria-expanded="true">¿Cuánto cuesta participar?<span class="ic">+</span></button>
+          <div class="faq-a">Nada. La inscripción es totalmente gratuita.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">¿Puedo participar sin equipo?<span class="ic">+</span></button>
+          <div class="faq-a">Sí. Te asignamos a un equipo el primer día del evento.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">¿Necesito ser experto en IA?<span class="ic">+</span></button>
+          <div class="faq-a">No. Hay mentores y una dinámica guiada para todos los niveles.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">¿Debo llevar mi equipo de trabajo?<span class="ic">+</span></button>
+          <div class="faq-a">Sí, lleva tu laptop. La sede cuenta con servidores y conectividad.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">¿Hay comida durante el evento?<span class="ic">+</span></button>
+          <div class="faq-a">Se ofrecen almuerzos y refrigerios durante los dos días.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">¿Cómo sé si quedé seleccionado?<span class="ic">+</span></button>
+          <div class="faq-a">Recibirás una confirmación por correo con todos los detalles.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UBICACIÓN -->
+  <section id="ubicacion" class="alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Ubicación</span>
+        <h2>Cómo llegar</h2>
+        <p>Edificio MPPCT, Piso 12 · Av. Universidad, esquina El Chorro · Caracas.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Dirección</h3>
+          <p>Edificio Ministerio de Ciencia y Tecnología (MPPCT)<br>Piso 12<br>Av. Universidad, esquina El Chorro<br>Caracas, Venezuela</p>
+          <h3 style="margin-top:16px">Referencias</h3>
+          <ul style="margin-left:20px; color:var(--ink-soft)">
+            <li>Cerca de la UCV y de la Plaza Venezuela.</li>
+            <li>Metro: estación Ciudad Universitaria.</li>
+            <li>Transporte público por Av. Universidad.</li>
+          </ul>
+        </div>
+        <div class="map-card">
+          <iframe title="Mapa del evento" src="https://maps.google.com/maps?q=Av.+Universidad+Esquina+El+Chorro+Caracas+Venezuela&output=embed" loading="lazy"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERÍA -->
+  <section id="galeria">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-kicker">Galería</span>
+        <h2>Galería del evento</h2>
+        <p>Momentos destacados del Hackathon UNETI IA 2026.</p>
+      </div>
+      <div class="gallery" id="gallery"></div>
+      <p class="note" id="galleryEmpty" style="max-width:760px; margin:0 auto">Las fotos del evento se publicarán aquí después de su realización.</p>
+    </div>
+  </section>
+
+  <!-- TRANSMISIÓN EN VIVO -->
+  <section id="transmision" class="alt">
+    <div class="wrap">
+      <div class="sec-head" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <span class="sec-kicker">Transmisión en vivo</span>
+        <h2>Sigue el evento en vivo</h2>
+        <p>La transmisión en vivo del Hackathon UNETI IA 2026 se realizará en nuestro canal de YouTube.</p>
+      </div>
+      <div style="text-align:center">
+        <a class="btn btn-primary" href="https://www.youtube.com/@UNETIEducativo/streams" target="_blank" rel="noopener">Ver transmisión en YouTube</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONA DE PARTICIPANTES -->
+  <section id="zona" class="alt">
+    <div class="wrap">
+      <div class="sec-head" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <span class="sec-kicker">Participantes</span>
+        <h2>Zona de participantes</h2>
+        <p>Entrega tu proyecto, consulta a mentores, registra tu asistencia y monitorea tu progreso desde el panel remoto.</p>
+      </div>
+      <div class="note" style="max-width:760px; margin:0 auto 20px">📧 <strong>Atención:</strong> una semana antes del evento (a partir del <strong>6 de noviembre</strong>) recibirás tu <strong>código de acceso</strong> (de participante o de grupo) en el correo con el que te inscribiste, junto con las instrucciones. <strong>Revisa tu bandeja de entrada y la carpeta de spam.</strong></div>
+      <div style="text-align:center; margin-bottom:20px"><a class="btn btn-primary" href="/remoto.html">📶 Ver mi panel remoto</a></div>
+      <form class="form-shell" id="estatusForm" style="max-width:560px; margin:0 auto" novalidate>
+        <h3 style="margin-bottom:14px">ℹ️ Consulta tu estatus</h3>
+        <div class="field"><label>Correo de inscripción <span class="req">*</span></label><input type="email" id="sCorreo" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Consultar estatus</button>
+        <div class="form-msg" id="estatusMsg"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto" class="contact">
+    <div class="wrap">
+      <span class="sec-kicker">Contacto</span>
+      <h2 style="margin-bottom:12px">¿Tienes preguntas?</h2>
+      <p style="color:var(--ink-soft); margin-bottom:8px">Escríbenos a</p>
+      <a class="mail" href="mailto:hackathon@uneti.edu.ve">hackathon@uneti.edu.ve</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <img src="/logo.png" alt="Logo UNETI" class="footer-logo"><br>
+      <strong>Hackathon UNETI IA 2026</strong><br>
+      Organizado por la Universidad Nacional Experimental de las Telecomunicaciones e Informática (UNETI).
+    </div>
+    <div class="links">
+      <a href="#inscripcion">Inscripción</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contacto">Contacto</a>
+      <a href="/admin.html">Admin</a>
+    </div>
+  </div>
+  <p class="wrap" style="margin-top:16px; font-size:.78rem; color:rgba(255,255,255,.5)">Tus datos personales se tratan conforme al aviso de privacidad del evento y se utilizan únicamente para la gestión de tu participación.</p>
+</footer>
+
+<!-- ASISTENTE IA -->
+<button class="chat-fab" id="chatFab" aria-label="Abrir asistente IA" aria-expanded="false" aria-controls="chatPanel">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="Asistente IA del Hackathon">
+  <div class="chat-head">
+    <div class="chat-title">
+      <span class="chat-avatar">IA</span>
+      <div>
+        <strong>Asistente IA del Hackathon</strong>
+        <small>Dudas sobre tecnologías y proyectos</small>
+      </div>
+    </div>
+    <button class="chat-close" id="chatClose" aria-label="Cerrar asistente">&times;</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="msg bot">Hola, soy el asistente del Hackathon UNETI IA. Pregúntame sobre las tecnologías (DeepSeek Harness, Antigravity, Cloudflare, OpenClaw, Agentes IA) o sobre los 40 proyectos en los que puedes participar.</div>
+  </div>
+  <div class="chat-suggestions" id="chatSuggestions">
+    <button class="sug">¿Qué es DeepSeek Harness?</button>
+    <button class="sug">¿Qué es Cloudflare?</button>
+    <button class="sug">Proyectos de Ciberseguridad</button>
+    <button class="sug">Recomiéndame un proyecto de IA Ética</button>
+  </div>
+  <form class="chat-input" id="chatForm">
+    <input type="text" id="chatInput" placeholder="Escribe tu pregunta…" autocomplete="off">
+    <button type="submit" id="chatSend" aria-label="Enviar mensaje">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </form>
+</div>
+
+<script>
+  // Menú móvil
+  const toggle = document.getElementById('menuToggle');
+  const nav = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => {
+    const open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    nav.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }));
+
+  // FAQ acordeón (uno abierto a la vez)
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  // Formulario
+  const form = document.getElementById('registro');
+  const msg = document.getElementById('formMsg');
+  const consentError = document.getElementById('consentError');
+
+  function setError(input, bad) {
+    input.setAttribute('aria-invalid', String(bad));
+    input.closest('.field').classList.toggle('has-error', bad);
+  }
+
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  // Tipo de registro (individual / grupal)
+  const segTipo = document.getElementById('segTipo');
+  const indFields = document.getElementById('indFields');
+  const gruFields = document.getElementById('gruFields');
+  let tipoRegistro = 'individual';
+  segTipo.addEventListener('click', (e) => {
+    const btn = e.target.closest('.seg-btn');
+    if (!btn) return;
+    tipoRegistro = btn.dataset.tipo;
+    segTipo.querySelectorAll('.seg-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    indFields.style.display = tipoRegistro === 'individual' ? '' : 'none';
+    gruFields.style.display = tipoRegistro === 'grupal' ? '' : 'none';
+  });
+
+  // Generar campos del grupo (hasta 5 integrantes)
+  const gruMembers = document.getElementById('gruMembers');
+  let memberHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    memberHTML += `
+      <div class="member-block">
+        <h4 class="member-title">Integrante ${i}<span class="req"> *</span></h4>
+        <div class="row-2">
+          <div class="field"><label>Nombre</label><input type="text" class="g-nombre" data-i="${i}"></div>
+          <div class="field"><label>Apellido</label><input type="text" class="g-apellido" data-i="${i}"></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Correo</label><input type="email" class="g-correo" data-i="${i}"></div>
+          <div class="field"><label>Fecha de nacimiento</label><input type="date" class="g-nacimiento" data-i="${i}"></div>
+        </div>
+        <div class="field">
+          <label>Año en la carrera</label>
+          <select class="g-anio" data-i="${i}">
+            <option value="" selected>Selecciona…</option>
+            <option>1er año</option><option>2do año</option><option>3er año</option><option>4to año</option><option>5to año</option>
+          </select>
+        </div>
+      </div>`;
+  }
+  gruMembers.innerHTML = memberHTML;
+
+  function collectIndividual() {
+    const nombre = form.nombre;
+    const apellido = form.apellido;
+    const correo = form.correo;
+    const nacimiento = form.nacimiento;
+    const anio = form.anio;
+
+    const nombreOk = nombre.value.trim().length >= 2;
+    const apellidoOk = apellido.value.trim().length >= 2;
+    const correoOk = validEmail(correo.value.trim());
+    const d = nacimiento.value ? new Date(nacimiento.value) : null;
+    const fechaOk = !!d && !isNaN(d.getTime()) && d <= new Date();
+    const anioOk = anio.value !== '';
+
+    setError(nombre, !nombreOk);
+    setError(apellido, !apellidoOk);
+    setError(correo, !correoOk);
+    setError(nacimiento, !fechaOk);
+    setError(anio, !anioOk);
+
+    if (!(nombreOk && apellidoOk && correoOk && fechaOk && anioOk)) return null;
+
+    return {
+      tipo: 'individual',
+      nombre: nombre.value.trim(),
+      apellido: apellido.value.trim(),
+      correo: correo.value.trim(),
+      nacimiento: nacimiento.value,
+      anio: anio.value,
+    };
+  }
+
+  function collectGroup() {
+    const miembros = [];
+    for (let i = 1; i <= 5; i++) {
+      const nombre = gruMembers.querySelector(`.g-nombre[data-i="${i}"]`).value.trim();
+      const apellido = gruMembers.querySelector(`.g-apellido[data-i="${i}"]`).value.trim();
+      const correo = gruMembers.querySelector(`.g-correo[data-i="${i}"]`).value.trim();
+      const nacimiento = gruMembers.querySelector(`.g-nacimiento[data-i="${i}"]`).value;
+      const anio = gruMembers.querySelector(`.g-anio[data-i="${i}"]`).value;
+
+      const tieneAlgo = nombre || apellido || correo || nacimiento || anio;
+      if (!tieneAlgo) continue;
+
+      if (nombre.length < 2 || apellido.length < 2 || !validEmail(correo)) {
+        return { error: `Revisa los datos del integrante ${i}.` };
+      }
+      miembros.push({ nombre, apellido, correo, nacimiento, anio });
+    }
+
+    if (miembros.length !== 5) return { error: 'El grupo debe tener exactamente 5 integrantes.' };
+    const propuesta = document.getElementById('gPropuesta').value.trim();
+    if (propuesta.length < 10) return { error: 'Describe la propuesta de desarrollo de tu equipo.' };
+    return { tipo: 'grupal', propuesta, miembros };
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    msg.className = 'form-msg';
+
+    const consentOk = form.consent.checked;
+    consentError.style.display = consentOk ? 'none' : 'block';
+
+    // Honeypot anti-spam
+    if (form._gotcha && form._gotcha.value !== '') { return; }
+
+    // Turnstile
+    const turnstileToken = getTurnstileToken(form);
+    if (!turnstileToken) {
+      msg.classList.add('err');
+      msg.textContent = 'Completa la verificación de seguridad.';
+      return;
+    }
+
+    let payload = null;
+    let errorMsg = null;
+
+    if (tipoRegistro === 'individual') {
+      payload = collectIndividual();
+      if (!payload) errorMsg = 'Revisa los campos marcados e inténtalo de nuevo.';
+    } else {
+      const r = collectGroup();
+      if (r.error) errorMsg = r.error;
+      else payload = r;
+    }
+
+    if (!consentOk && !errorMsg) {
+      errorMsg = 'Debes aceptar el tratamiento de datos.';
+    }
+
+    if (errorMsg) {
+      msg.classList.add('err');
+      msg.textContent = errorMsg;
+      return;
+    }
+
+    payload.turnstile = turnstileToken;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok) {
+          msg.classList.add('ok');
+          msg.textContent = data.codigo
+            ? `¡Inscripción recibida! Tu código de acceso es: ${data.codigo}. Guárdalo (también te lo enviaremos por correo).`
+            : '¡Inscripción recibida! Te enviaremos la confirmación por correo.';
+          form.reset();
+          consentError.style.display = 'none';
+          tipoRegistro = 'individual';
+          segTipo.querySelectorAll('.seg-btn').forEach((b) => b.classList.toggle('active', b.dataset.tipo === 'individual'));
+          indFields.style.display = '';
+          gruFields.style.display = 'none';
+        } else {
+          msg.classList.add('err');
+          msg.textContent = data.error || 'No se pudo enviar. Inténtalo de nuevo.';
+        }
+      })
+      .catch(() => {
+        msg.classList.add('err');
+        msg.textContent = 'Error de conexión. Inténtalo de nuevo.';
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.textContent = 'Enviar inscripción';
+      });
+  });
+
+  // ===== Modern motion: scroll reveal =====
+  const revealEls = document.querySelectorAll('.sec-head, .card, .fact, .day, .mentor, .prize, .form-shell, .faq-item');
+  revealEls.forEach((el) => el.classList.add('reveal'));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach((el) => io.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add('in-view'));
+  }
+
+  // ===== Header shadow on scroll =====
+  const header = document.querySelector('.site-header');
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 10);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // ===== Asistente IA (chat) =====
+  const chatFab = document.getElementById('chatFab');
+  const chatPanel = document.getElementById('chatPanel');
+  const chatClose = document.getElementById('chatClose');
+  const chatBody = document.getElementById('chatBody');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+  const chatSuggestions = document.getElementById('chatSuggestions');
+  const chatHistory = [];
+
+  function toggleChat(open) {
+    const isOpen = open !== undefined ? open : !chatPanel.classList.contains('open');
+    chatPanel.classList.toggle('open', isOpen);
+    chatFab.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) chatInput.focus();
+  }
+  chatFab.addEventListener('click', () => toggleChat());
+  chatClose.addEventListener('click', () => toggleChat(false));
+
+  function addMsg(role, text) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.textContent = text;
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return div;
+  }
+
+  async function sendChat(text) {
+    const question = (text || chatInput.value).trim();
+    if (!question) return;
+    chatInput.value = '';
+    addMsg('user', question);
+    chatSuggestions.style.display = 'none';
+    chatHistory.push({ role: 'user', content: question });
+
+    const typing = addMsg('bot', '');
+    typing.classList.add('typing');
+    typing.innerHTML = '<span class="typing-label">Pensando</span><span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+    chatSend.disabled = true;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: chatHistory })
+      });
+      const data = await res.json().catch(() => ({}));
+      typing.remove();
+      const reply = data.response || data.error || 'No pude responder en este momento.';
+      chatHistory.push({ role: 'assistant', content: reply });
+      addMsg('bot', reply);
+    } catch (e) {
+      typing.remove();
+      addMsg('bot', 'Error de conexión. Inténtalo de nuevo.');
+    } finally {
+      chatSend.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  chatForm.addEventListener('submit', (e) => { e.preventDefault(); sendChat(); });
+  chatSuggestions.querySelectorAll('.sug').forEach((b) => {
+    b.addEventListener('click', () => sendChat(b.textContent));
+  });
+
+  // ===== Formulario de Patrocinadores =====
+  const spForm = document.getElementById('sponsorForm');
+  const spMsg = document.getElementById('spMsg');
+  const spSubmit = document.getElementById('spSubmit');
+  const spTipoError = document.getElementById('spTipoError');
+  const spConsentError = document.getElementById('spConsentError');
+
+  spForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    spMsg.className = 'form-msg';
+
+    const empresa = spForm.empresa.value.trim();
+    const contacto = spForm.contacto.value.trim();
+    const correo = spForm.correo.value.trim();
+    const telefono = spForm.telefono.value.trim();
+    const detalle = spForm.detalle.value.trim();
+    const tipos = Array.from(spForm.querySelectorAll('input[name="tipo"]:checked')).map((c) => c.value);
+    const consent = spForm.consent.checked;
+
+    const empresaOk = empresa.length >= 2;
+    const contactoOk = contacto.length >= 2;
+    const correoOk = validEmail(correo);
+    const tiposOk = tipos.length > 0;
+    const consentOk = consent;
+
+    setError(spForm.empresa, !empresaOk);
+    setError(spForm.contacto, !contactoOk);
+    setError(spForm.correo, !correoOk);
+    spTipoError.style.display = tiposOk ? 'none' : 'block';
+    spConsentError.style.display = consentOk ? 'none' : 'block';
+
+    if (spForm._gotcha && spForm._gotcha.value !== '') { return; }
+
+    // Turnstile
+    const turnstileToken = getTurnstileToken(spForm);
+    if (!turnstileToken) {
+      spMsg.classList.add('err');
+      spMsg.textContent = 'Completa la verificación de seguridad.';
+      return;
+    }
+
+    if (!(empresaOk && contactoOk && correoOk && tiposOk && consentOk)) {
+      spMsg.classList.add('err');
+      spMsg.textContent = 'Revisa los campos marcados e inténtalo de nuevo.';
+      return;
+    }
+
+    spSubmit.disabled = true;
+    spSubmit.textContent = 'Enviando…';
+    try {
+      const res = await fetch('/api/sponsors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ empresa, contacto, correo, telefono, tipo: tipos, detalle, turnstile: turnstileToken }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        spMsg.classList.add('ok');
+        spMsg.textContent = '¡Gracias! Te contactaremos a la brevedad.';
+        spForm.reset();
+        spTipoError.style.display = 'none';
+        spConsentError.style.display = 'none';
+      } else {
+        spMsg.classList.add('err');
+        spMsg.textContent = data.error || 'Error al enviar.';
+      }
+    } catch (e) {
+      spMsg.classList.add('err');
+      spMsg.textContent = 'Error de conexión. Inténtalo de nuevo.';
+    } finally {
+      spSubmit.disabled = false;
+      spSubmit.textContent = 'Enviar interés de patrocinio';
+    }
+  });
+
+  // Video intro
+  const introVideo = document.getElementById('introVideo');
+  const playBtn = document.getElementById('playBtn');
+  if (introVideo && playBtn) {
+    playBtn.addEventListener('click', () => introVideo.play());
+    introVideo.addEventListener('play', () => playBtn.classList.add('hidden'));
+    introVideo.addEventListener('pause', () => playBtn.classList.remove('hidden'));
+    introVideo.addEventListener('ended', () => playBtn.classList.remove('hidden'));
+
+    // Reproducción automática (en silencio) cuando el video entra en pantalla
+    if ('IntersectionObserver' in window) {
+      const vio = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            introVideo.play().catch(() => {});
+            vio.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      vio.observe(introVideo);
+    }
+  }
+
+  // Parallax del hero
+  const heroBg = document.getElementById('heroBg');
+  if (heroBg && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let ticking = false;
+    const updateParallax = () => {
+      heroBg.style.transform = 'translateY(' + (window.scrollY * 0.3) + 'px)';
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { requestAnimationFrame(updateParallax); ticking = true; }
+    }, { passive: true });
+  }
+
+  // Countdown hacia el evento
+  const target = new Date('2026-11-13T09:00:00-04:00');
+  function tickCountdown() {
+    const now = new Date();
+    const diff = target - now;
+    if (diff <= 0) {
+      document.getElementById('countdown').innerHTML = '<span class="cd-live">¡El evento está en marcha!</span>';
+      return;
+    }
+    document.getElementById('cdDias').textContent = Math.floor(diff / 86400000);
+    document.getElementById('cdHoras').textContent = Math.floor((diff % 86400000) / 3600000);
+    document.getElementById('cdMin').textContent = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('cdSeg').textContent = Math.floor((diff % 60000) / 1000);
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+
+  // Galería de fotos
+  const GALERIA = []; // Añade rutas de fotos: '/fotos/foto1.jpg'
+  function renderGallery() {
+    const g = document.getElementById('gallery');
+    const empty = document.getElementById('galleryEmpty');
+    if (GALERIA.length === 0) {
+      g.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    g.innerHTML = GALERIA.map((src) => `<div class="gallery-item"><img src="${src}" alt="Foto del evento" loading="lazy"></div>`).join('');
+  }
+  renderGallery();
+
+  // ===== Comunicados y zona de participantes =====
+  function getTurnstileToken(form) {
+    const input = form.querySelector('[name="cf-turnstile-response"]');
+    return (input && input.value) ? input.value : '';
+  }
+
+  async function loadComunicados() {
+    const cont = document.getElementById('comunicadosList');
+    try {
+      const res = await fetch('/api/comunicados');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const cs = data.comunicados || [];
+      if (cs.length === 0) { cont.innerHTML = '<div class="note" style="max-width:760px;margin:0 auto">Aún no hay comunicados.</div>'; return; }
+      cs.forEach((c) => {
+        const el = document.createElement('div');
+        el.className = 'comunicado';
+        const h = document.createElement('h3'); h.textContent = c.titulo;
+        const p = document.createElement('p'); p.textContent = c.contenido;
+        const f = document.createElement('div'); f.className = 'com-fecha'; f.textContent = (c.created_at || '').replace('T', ' ').slice(0, 16);
+        el.appendChild(h); el.appendChild(p); el.appendChild(f);
+        cont.appendChild(el);
+      });
+    } catch (e) {
+      cont.innerHTML = '<div class="note" style="max-width:760px;margin:0 auto">Error al cargar comunicados.</div>';
+    }
+  }
+  loadComunicados();
+
+  // Estatus del participante
+  document.getElementById('estatusForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const m = document.getElementById('estatusMsg');
+    m.className = 'form-msg';
+    const correo = document.getElementById('sCorreo').value.trim();
+    const res = await fetch('/api/estatus?correo=' + encodeURIComponent(correo));
+    const data = await res.json();
+    if (data.ok) {
+      const r = data.registro;
+      m.classList.add('ok');
+      m.textContent = `Hola ${r.nombre} ${r.apellido}. Código: ${r.codigo || '—'}. Modalidad: ${r.modalidad || '—'}.${r.acreditado ? ' Ya estás acreditado/a.' : ''}`;
+    } else {
+      m.classList.add('err'); m.textContent = data.error || 'No encontrado.';
+    }
+  });
+</script>
+</body>
+</html>

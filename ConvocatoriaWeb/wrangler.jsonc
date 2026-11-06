@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "hackathon-uneti-ia",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-01-01",
+  "ai": { "binding": "AI" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "registrations",
+      "database_id": "932b724f-854a-4a37-b161-f541ee34ba93",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

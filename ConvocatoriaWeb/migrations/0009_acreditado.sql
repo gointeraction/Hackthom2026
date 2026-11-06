@@ -1,0 +1,1 @@
+ALTER TABLE registrations ADD COLUMN acreditado INTEGER NOT NULL DEFAULT 0;

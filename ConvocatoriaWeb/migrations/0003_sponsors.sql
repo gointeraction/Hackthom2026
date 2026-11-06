@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS sponsors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  empresa TEXT NOT NULL,
+  contacto TEXT NOT NULL,
+  correo TEXT NOT NULL,
+  telefono TEXT,
+  tipo TEXT NOT NULL DEFAULT '[]',
+  detalle TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS judges (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL,
+  organizacion TEXT,
+  correo TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS scores (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  judge_id INTEGER NOT NULL,
+  team_id INTEGER NOT NULL,
+  criterio TEXT NOT NULL,
+  puntaje INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(judge_id, team_id, criterio)
+);
+
+CREATE INDEX IF NOT EXISTS idx_scores_team ON scores(team_id);

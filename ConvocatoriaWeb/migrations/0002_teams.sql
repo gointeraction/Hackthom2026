@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS teams (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL,
+  mentor TEXT NOT NULL,
+  eje TEXT NOT NULL,
+  proyecto TEXT,
+  integrantes TEXT NOT NULL DEFAULT '[]',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_teams_eje ON teams(eje);

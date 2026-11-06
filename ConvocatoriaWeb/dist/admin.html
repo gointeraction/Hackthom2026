@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="es-VE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de Administración · Hackathon UNETI IA</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-900: #0B1F3A; --navy-800: #12345F;
+    --cyan: #00B4D8; --green: #06A77D; --rose: #E63966;
+    --bg: #F5F7FB; --surface: #FFFFFF;
+    --ink: #0B1B2B; --ink-soft: #4E5B6B; --line: #E3E8EF;
+    --radius: 14px; --radius-sm: 9px;
+    --shadow: 0 2px 12px rgba(11,31,58,.08);
+    --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); color: var(--ink); background: var(--bg); line-height: 1.6; }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing: -0.02em; }
+
+  /* Barra superior */
+  .admin-bar { background: var(--navy-900); color: #fff; padding: 14px 0; border-bottom: 3px solid var(--cyan); position: sticky; top: 0; z-index: 50; }
+  .admin-bar .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .admin-bar .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; }
+  .admin-bar .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 4px rgba(0,180,216,.2); }
+  .badge { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: rgba(0,180,216,.15); color: var(--cyan); border: 1px solid rgba(0,180,216,.4); }
+
+  /* Layout */
+  .app { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 250px 1fr; align-items: start; }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--line); padding: 20px 12px; position: sticky; top: 56px; min-height: calc(100vh - 56px); }
+  .sidebar .menu-label { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #9AA7B5; padding: 0 14px; margin: 4px 0 8px; }
+  .sidebar nav { display: grid; gap: 4px; }
+  .menu-btn { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: transparent; padding: 11px 14px; border-radius: 9px; font-weight: 600; font-size: .92rem; color: var(--ink-soft); cursor: pointer; font-family: var(--font-body); transition: background .15s ease, color .15s ease; }
+  .menu-btn:hover { background: #F0F4F9; color: var(--ink); }
+  .menu-btn.active { background: var(--navy-900); color: #fff; }
+  .menu-btn .ic { font-size: 1.1rem; width: 22px; text-align: center; }
+  .menu-btn .cnt { margin-left: auto; font-size: .74rem; font-weight: 700; background: rgba(0,180,216,.12); color: var(--cyan); padding: 1px 8px; border-radius: 999px; }
+  .menu-btn.active .cnt { background: rgba(255,255,255,.18); color: #fff; }
+
+  /* Submenús agrupados */
+  .menu-group { margin-top: 2px; }
+  .menu-group-toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; border: 0; background: transparent; padding: 9px 14px; font-family: var(--font-body); font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: #9AA7B5; cursor: pointer; text-align: left; border-radius: 9px; }
+  .menu-group-toggle:hover { color: var(--ink); background: #F0F4F9; }
+  .menu-group-toggle .gt { font-size: .7rem; transition: transform .18s ease; }
+  .menu-group-toggle.open .gt { transform: rotate(180deg); }
+  .menu-group-items { display: none; margin: 2px 0 6px; padding-left: 8px; border-left: 2px solid var(--line); margin-left: 20px; }
+  .menu-group-items.open { display: grid; gap: 4px; }
+  .menu-group-items .menu-btn { padding: 8px 12px; font-size: .86rem; }
+
+  .main { padding: 30px 30px 70px; min-width: 0; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .sec-head { margin-bottom: 22px; }
+  .sec-head .kicker { display: block; font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; }
+  .sec-head h2 { font-size: 1.65rem; }
+  .sec-head p { color: var(--ink-soft); margin-top: 6px; }
+
+  /* Tabla rúbrica */
+  .table-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--navy-900); color: #fff; text-align: left; padding: 13px 16px; font-size: .85rem; letter-spacing: .03em; }
+  tbody td { padding: 13px 16px; border-top: 1px solid var(--line); font-size: .95rem; color: var(--ink-soft); }
+  tbody tr:last-child td { font-weight: 700; color: var(--ink); background: #F0F7FA; }
+  td.weight { font-family: var(--font-display); font-weight: 700; color: var(--navy-900); white-space: nowrap; }
+  .scale-note { margin-top: 14px; font-size: .85rem; color: var(--ink-soft); }
+
+  /* Listas y tarjetas */
+  .teams { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .team, .sponsor-item, .group-block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+  .team-top, .sp-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .team-top h3 { font-size: 1.05rem; }
+  .team-top strong, .sp-top strong { font-size: 1.02rem; }
+  .tag, .tipo-tag { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .tag.etica { background: rgba(6,167,125,.12); color: var(--green); }
+  .tag.seg { background: rgba(230,57,102,.12); color: var(--rose); }
+  .tipo-tag { background: rgba(0,180,216,.12); color: var(--cyan); }
+  .team .proyecto { font-size: .85rem; color: var(--ink-soft); margin-bottom: 10px; }
+  .team .mentor { font-size: .85rem; font-weight: 600; color: var(--navy-800); background: rgba(0,180,216,.08); border: 1px solid rgba(0,180,216,.25); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 10px; }
+  .team ol { list-style: none; display: grid; gap: 5px; }
+  .team ol li { display: flex; gap: 10px; font-size: .9rem; color: var(--ink-soft); }
+  .team ol li::before { content: "•"; color: var(--cyan); font-weight: 700; }
+
+  .sponsors { display: grid; gap: 12px; }
+  .sp-rows { display: grid; gap: 4px; font-size: .9rem; color: var(--ink-soft); }
+  .sp-rows b { color: var(--ink); }
+  .propuesta { font-size: .9rem; color: var(--ink-soft); background: rgba(6,167,125,.08); border: 1px solid rgba(6,167,125,.2); border-radius: var(--radius-sm); padding: 10px 12px; margin: 10px 0; }
+  .modalidad-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: .88rem; flex-wrap: wrap; }
+  .modalidad-row label { font-weight: 600; }
+  .modalidad-row select { padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: .88rem; }
+
+  /* Documento instructivo */
+  .doc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); }
+  .doc h3 { font-size: 1.05rem; margin: 22px 0 8px; color: var(--navy-900); }
+  .doc h3:first-child { margin-top: 0; }
+  .doc p, .doc li { font-size: .94rem; color: var(--ink-soft); }
+  .doc ul, .doc ol { margin-left: 22px; margin-bottom: 10px; }
+  .doc table { margin: 12px 0; }
+  .doc-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .doc-actions .form-status { margin: 0; flex: 1; }
+
+  /* Itinerario */
+  .itinerario h3 { margin: 22px 0 10px; color: var(--navy-900); font-size: 1.05rem; }
+  .itinerario h3:first-child { margin-top: 0; }
+  .grupo-log { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px 18px; margin-bottom: 12px; }
+  .grupo-log h4 { font-size: 1rem; color: var(--navy-900); margin-bottom: 6px; }
+  .grupo-log ul { margin-left: 20px; }
+  .grupo-log li { font-size: .9rem; color: var(--ink-soft); }
+  .logistica { display: grid; gap: 12px; }
+  .logistica .grupo-log { margin-bottom: 0; }
+  .logistica .field { margin-bottom: 12px; }
+  .logistica textarea { min-height: 0; }
+  .save-row { display: flex; align-items: center; gap: 12px; }
+  .save-row .form-status { margin: 0; flex: 1; }
+
+  /* Acreditación */
+  .acreditacion { display: grid; gap: 12px; }
+  .acred-row { padding: 8px 0; border-bottom: 1px solid #F0F2F5; font-size: .92rem; }
+  .acred-row:last-child { border-bottom: 0; }
+  .acred-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .acred-row input[type=checkbox] { width: auto; margin: 0; }
+  .acred-row small { color: var(--ink-soft); }
+
+  /* Evaluador */
+  .eval-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px; }
+  .eval-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .eval-top strong { font-size: .95rem; }
+  .eval-score { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--cyan); background: rgba(0,180,216,.1); padding: 2px 12px; border-radius: 999px; }
+  .eval-just { font-size: .86rem; color: var(--ink-soft); margin: 8px 0; }
+  .eval-estado { display: flex; align-items: center; gap: 10px; font-size: .88rem; }
+  .eval-estado select { padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: .88rem; }
+  .counts { display: flex; gap: 14px; margin: 18px 0 14px; flex-wrap: wrap; }
+  .counts span { font-weight: 700; font-size: .9rem; padding: 6px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+
+  /* Resultados */
+  .resultados { display: grid; gap: 10px; }
+  .res-item { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px 16px; }
+  .res-item.top { border-color: #F0D48A; background: linear-gradient(135deg, #FFFBEA, #FFF4CE); }
+  .res-rank { font-size: 1.3rem; font-weight: 700; width: 46px; text-align: center; }
+  .res-name { flex: 1; font-weight: 600; }
+  .res-meta { font-size: .82rem; color: var(--ink-soft); }
+  .res-score { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--navy-900); white-space: nowrap; }
+
+  /* Dashboard */
+  .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .dash-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px; text-align: center; }
+  .dash-num { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; color: var(--navy-900); display: block; }
+  .dash-label { font-size: .82rem; color: var(--ink-soft); }
+  .export-box { margin-top: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .export-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .export-links .btn { text-decoration: none; }
+  .logout-btn { background: rgba(230,57,102,.15); color: var(--rose); border: 1px solid rgba(230,57,102,.3); padding: 7px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: .85rem; }
+
+  /* Presupuesto */
+  .budget-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .budget-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px; text-align: center; }
+  .budget-num { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; display: block; }
+  .budget-card.ing .budget-num { color: var(--green); }
+  .budget-card.egr .budget-num { color: var(--rose); }
+  .budget-card.bal .budget-num { color: var(--navy-900); }
+  .budget-list { display: grid; gap: 8px; margin-top: 16px; }
+  .budget-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 16px; }
+  .budget-item-main { display: flex; flex-direction: column; }
+  .budget-item-cat { font-size: .8rem; color: var(--ink-soft); }
+  .budget-item-monto { font-weight: 700; }
+  .budget-item-monto.ingreso { color: var(--green); }
+  .budget-item-monto.egreso { color: var(--rose); }
+
+  /* Búsqueda */
+  .search-input { width: 100%; max-width: 360px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: .92rem; margin-bottom: 14px; }
+  .search-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+
+  /* Auditoría */
+  .audit-list { display: grid; gap: 8px; }
+  .audit-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 14px; font-size: .88rem; }
+  .audit-item .audit-rol { font-weight: 700; text-transform: uppercase; font-size: .74rem; padding: 3px 10px; border-radius: 999px; background: rgba(0,180,216,.12); color: var(--cyan); white-space: nowrap; }
+  .audit-item .audit-meta { flex: 1; color: var(--ink-soft); }
+  .audit-item .audit-time { font-size: .78rem; color: #9AA7B5; white-space: nowrap; }
+  .codigo { font-size: .82rem; color: var(--ink-soft); margin: 2px 0 8px; }
+  .codigo strong { color: var(--navy-900); font-family: var(--font-display); letter-spacing: .05em; }
+
+  /* Tabla de datos */
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 760px; }
+  .data-table th { text-align: left; padding: 12px 14px; background: var(--bg); color: var(--ink-soft); font-weight: 700; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .data-table tr:last-child td { border-bottom: 0; }
+  .data-table a { color: var(--cyan); text-decoration: none; }
+  .badge-pend { background: #FFF3D6; color: #9a6a00; padding: 1px 7px; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+  .st-pendiente { color: #9a6a00; font-weight: 700; }
+  .st-respondida { color: #1a9e5c; font-weight: 700; }
+  .legacy-tag { background: #FFEBEE; color: #c0392b; padding: 1px 7px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+
+  /* Agentes IA */
+  .agente-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; }
+  .agente-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+  .agente-head h3 { font-size: 1.05rem; color: var(--navy-900); }
+  .agente-card p { color: var(--ink-soft); font-size: .9rem; }
+  .agente-result { margin-top: 12px; display: grid; gap: 8px; }
+  .agente-result .ar-item { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: .88rem; }
+  .agente-result a { color: var(--cyan); text-decoration: none; word-break: break-all; }
+
+  /* Biblioteca de proyectos */
+  .biblio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .biblio-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; text-decoration: none; color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+  .biblio-card:hover { border-color: var(--cyan); box-shadow: 0 2px 8px rgba(0,180,216,.12); }
+  .biblio-num { font-family: var(--font-display); font-weight: 700; color: var(--cyan); font-size: 1.1rem; min-width: 28px; }
+  .biblio-titulo { flex: 1; font-weight: 600; font-size: .9rem; }
+  .biblio-eje { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(0,180,216,.1); color: var(--cyan); white-space: nowrap; }
+  @media (max-width: 760px) { .biblio-grid { grid-template-columns: 1fr; } }
+  .tipo-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .judges { display: grid; gap: 10px; margin-bottom: 22px; }
+  .judge-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 16px; }
+  .judge-item .info { display: flex; flex-direction: column; }
+  .judge-item .info strong { font-size: .95rem; }
+  .judge-item .info span { font-size: .82rem; color: var(--ink-soft); }
+  .judge-item .del { background: none; border: 0; color: #D64545; cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 4px; }
+  .count { font-size: .85rem; color: var(--ink-soft); margin-bottom: 12px; }
+
+  .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); padding: 28px; text-align: center; color: var(--ink-soft); }
+
+  /* Formularios */
+  .form-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; margin-top: 24px; }
+  .form-card h3 { font-size: 1.1rem; margin-bottom: 14px; }
+  .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: 6px; }
+  .field input, .field select, .field textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: .95rem; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+  .field textarea { min-height: 100px; resize: vertical; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 11px 22px; border-radius: var(--radius-sm); font-weight: 600; font-size: .95rem; cursor: pointer; border: 0; background: linear-gradient(135deg, #00B4D8, #06A77D); color: #fff; transition: transform .15s ease; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-block { width: 100%; }
+  .form-status { margin-top: 14px; padding: 12px 14px; border-radius: var(--radius-sm); font-weight: 600; display: none; }
+  .form-status.ok { display: block; background: rgba(22,154,106,.1); color: #169A6A; border: 1px solid rgba(22,154,106,.3); }
+  .form-status.err { display: block; background: rgba(214,69,69,.08); color: #D64545; border: 1px solid rgba(214,69,69,.3); }
+
+  /* Evaluaciones */
+  .score-grid { display: grid; gap: 10px; margin-top: 6px; }
+  .score-row { display: flex; align-items: center; gap: 12px; }
+  .score-row label { flex: 1; font-size: .9rem; font-weight: 500; }
+  .score-row input[type=number] { width: 68px; padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: .95rem; text-align: center; }
+  .peso { font-size: .8rem; color: var(--ink-soft); width: 42px; text-align: right; font-weight: 600; }
+
+  /* Login */
+  .login-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(11,31,58,.97); display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-overlay.hidden { display: none; }
+  .login-box { background: var(--surface); border-radius: var(--radius); padding: 34px; width: 100%; max-width: 400px; box-shadow: 0 30px 70px rgba(0,0,0,.45); }
+  .login-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; color: var(--navy-900); margin-bottom: 8px; }
+  .login-brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); }
+  .login-box h2 { font-size: 1.35rem; margin-bottom: 6px; }
+  .login-box p { color: var(--ink-soft); font-size: .9rem; margin-bottom: 22px; }
+
+  footer { background: var(--navy-900); color: rgba(255,255,255,.6); padding: 22px 0; font-size: .85rem; text-align: center; }
+
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; min-height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 10px; }
+    .sidebar .menu-label { display: none; }
+    .sidebar nav { display: flex; overflow-x: auto; gap: 6px; }
+    .menu-btn { white-space: nowrap; width: auto; }
+    .main { padding: 20px 16px 50px; }
+    .teams, .frow { grid-template-columns: 1fr; }
+    table { font-size: .85rem; }
+    thead th, tbody td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="admin-bar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span> Panel de Administración · Hackathon UNETI IA</div>
+    <div style="display:flex; align-items:center; gap:10px">
+      <span class="badge">Uso interno</span>
+      <button type="button" class="logout-btn" id="logoutBtn">Salir</button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="menu-label">Navegación</div>
+    <nav>
+      <button class="menu-btn active" data-panel="dashboard"><span class="ic">📊</span> Dashboard</button>
+
+      <div class="menu-group">
+        <button type="button" class="menu-group-toggle" data-group="inscripciones">👥 Inscripciones <span class="gt">▾</span></button>
+        <div class="menu-group-items" data-group="inscripciones">
+          <button class="menu-btn" data-panel="equipos"><span class="ic">👥</span> Equipos <span class="cnt" id="cntEquipos">0</span></button>
+          <button class="menu-btn" data-panel="participantes"><span class="ic">🧑‍🎓</span> Participantes <span class="cnt" id="cntParticipantes">0</span></button>
+          <button class="menu-btn" data-panel="jurados"><span class="ic">⚖️</span> Jurados <span class="cnt" id="cntJurados">0</span></button>
+          <button class="menu-btn" data-panel="remotos"><span class="ic">🧑‍💻</span> Remotos</button>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button type="button" class="menu-group-toggle" data-group="evaluacion">🏆 Evaluación <span class="gt">▾</span></button>
+        <div class="menu-group-items" data-group="evaluacion">
+          <button class="menu-btn" data-panel="criterios"><span class="ic">📋</span> Criterios</button>
+          <button class="menu-btn" data-panel="evaluaciones"><span class="ic">⭐</span> Evaluaciones</button>
+          <button class="menu-btn" data-panel="evaluacion"><span class="ic">🎯</span> Evaluación IA</button>
+          <button class="menu-btn" data-panel="resultados"><span class="ic">🏆</span> Resultados</button>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button type="button" class="menu-group-toggle" data-group="operacion">🚚 Logística y operación <span class="gt">▾</span></button>
+        <div class="menu-group-items" data-group="operacion">
+          <button class="menu-btn" data-panel="itinerario"><span class="ic">🗓️</span> Itinerario</button>
+          <button class="menu-btn" data-panel="logistica"><span class="ic">🧰</span> Logística</button>
+          <button class="menu-btn" data-panel="acreditacion"><span class="ic">✅</span> Acreditación</button>
+          <button class="menu-btn" data-panel="asistencia"><span class="ic">📶</span> Asistencia remota</button>
+          <button class="menu-btn" data-panel="entregas"><span class="ic">📦</span> Entregas</button>
+          <button class="menu-btn" data-panel="consultas"><span class="ic">💬</span> Consultas</button>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button type="button" class="menu-group-toggle" data-group="comunicacion">📣 Comunicación <span class="gt">▾</span></button>
+        <div class="menu-group-items" data-group="comunicacion">
+          <button class="menu-btn" data-panel="comunicados"><span class="ic">📣</span> Comunicados</button>
+          <button class="menu-btn" data-panel="cartas"><span class="ic">📨</span> Cartas</button>
+          <button class="menu-btn" data-panel="instructivo"><span class="ic">📄</span> Instructivo Remoto</button>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <button type="button" class="menu-group-toggle" data-group="finanzas">💰 Finanzas <span class="gt">▾</span></button>
+        <div class="menu-group-items" data-group="finanzas">
+          <button class="menu-btn" data-panel="presupuesto"><span class="ic">💰</span> Presupuesto</button>
+          <button class="menu-btn" data-panel="patrocinadores"><span class="ic">🤝</span> Patrocinadores <span class="cnt" id="cntPatrocinadores">0</span></button>
+        </div>
+      </div>
+
+      <button class="menu-btn" data-panel="auditoria"><span class="ic">🕒</span> Auditoría</button>
+      <button class="menu-btn" data-panel="errores"><span class="ic">🛠️</span> Errores</button>
+      <button class="menu-btn" data-panel="agentes"><span class="ic">🤖</span> Agentes</button>
+      <button class="menu-btn" data-panel="biblioteca"><span class="ic">📚</span> Biblioteca</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="panel active" id="panel-dashboard">
+      <div class="sec-head">
+        <span class="kicker">Resumen</span>
+        <h2>Panel de control</h2>
+        <p>Vista general del evento y exportación de datos.</p>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card"><span class="dash-num" id="dInscritos">0</span><span class="dash-label">Inscritos totales</span></div>
+        <div class="dash-card"><span class="dash-num" id="dIndividuales">0</span><span class="dash-label">Individuales (remotos)</span></div>
+        <div class="dash-card"><span class="dash-num" id="dGrupos">0</span><span class="dash-label">Grupos</span></div>
+        <div class="dash-card"><span class="dash-num" id="dEquipos">0</span><span class="dash-label">Equipos</span></div>
+        <div class="dash-card"><span class="dash-num" id="dJurados">0</span><span class="dash-label">Jurados</span></div>
+        <div class="dash-card"><span class="dash-num" id="dPatrocinadores">0</span><span class="dash-label">Patrocinadores</span></div>
+        <div class="dash-card"><span class="dash-num" id="dEvaluaciones">0</span><span class="dash-label">Equipos evaluados</span></div>
+        <div class="dash-card"><span class="dash-num" id="dPreseleccionados">0</span><span class="dash-label">Preseleccionados</span></div>
+        <div class="dash-card"><span class="dash-num" id="dFinales">0</span><span class="dash-label">Finales</span></div>
+      </div>
+      <div class="export-box">
+        <h3>Exportar a CSV</h3>
+        <div class="export-links">
+          <a class="btn" href="/api/admin/export?tipo=inscritos" download>Inscritos</a>
+          <a class="btn" href="/api/admin/export?tipo=patrocinadores" download>Patrocinadores</a>
+          <a class="btn" href="/api/admin/export?tipo=equipos" download>Equipos</a>
+          <a class="btn" href="/api/admin/export?tipo=jurados" download>Jurados</a>
+          <a class="btn" href="/api/admin/export?tipo=puntajes" download>Puntajes</a>
+          <a class="btn" href="/api/admin/export?tipo=resultados" download>Resultados</a>
+          <a class="btn" href="/api/admin/backup" download style="background:linear-gradient(135deg,#0B1F3A,#12345F)">Backup completo (JSON)</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRITERIOS -->
+    <section class="panel" id="panel-criterios">
+      <div class="sec-head">
+        <span class="kicker">Evaluación</span>
+        <h2>Criterios de evaluación de proyectos</h2>
+        <p>Rúbrica oficial para el jurado. Cada criterio se puntúa de 1 a 5 y se pondera según su peso.</p>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Criterio</th><th>Peso</th><th>Qué se evalúa</th></tr></thead>
+          <tbody>
+            <tr><td>Viabilidad técnica / calidad del MVP</td><td class="weight">25%</td><td>Funciona, arquitectura, robustez, uso correcto de datos.</td></tr>
+            <tr><td>Impacto y relevancia del problema</td><td class="weight">20%</td><td>Magnitud y claridad del problema abordado.</td></tr>
+            <tr><td>Innovación y uso de IA</td><td class="weight">20%</td><td>Aplicación efectiva y creativa de Inteligencia Artificial.</td></tr>
+            <tr><td>Calidad del pitch</td><td class="weight">15%</td><td>Claridad, storytelling y defensa de decisiones técnicas.</td></tr>
+            <tr><td>Ética y responsabilidad de la IA</td><td class="weight">10%</td><td>Privacidad, sesgos, transparencia y uso responsable.</td></tr>
+            <tr><td>Escalabilidad / sostenibilidad</td><td class="weight">10%</td><td>Potencial de crecimiento y continuidad.</td></tr>
+            <tr><td>Total</td><td class="weight">100%</td><td>Máximo 5 puntos por criterio × peso = 5.0 total.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="scale-note"><strong>Escala:</strong> 1 = Insuficiente · 2 = Regular · 3 = Bueno · 4 = Muy bueno · 5 = Excelente.</p>
+    </section>
+
+    <!-- EQUIPOS -->
+    <section class="panel" id="panel-equipos">
+      <div class="sec-head">
+        <span class="kicker">Equipos</span>
+        <h2>Conformación de equipos</h2>
+        <p>Equipos con sus integrantes y mentor.</p>
+      </div>
+      <div class="teams" id="teamsGrid"></div>
+      <div class="empty" id="teamsEmpty" style="display:none">No hay equipos conformados todavía.</div>
+      <div class="form-card">
+        <h3>➕ Agregar equipo</h3>
+        <form id="teamForm">
+          <div class="frow">
+            <div class="field"><label>Nombre del equipo *</label><input type="text" id="fNombre" required></div>
+            <div class="field"><label>Mentor/a *</label><input type="text" id="fMentor" required></div>
+          </div>
+          <div class="frow">
+            <div class="field">
+              <label>Eje *</label>
+              <select id="fEje" required>
+                <option value="IA Ética">IA Ética</option>
+                <option value="Ciberseguridad">Ciberseguridad</option>
+              </select>
+            </div>
+            <div class="field"><label>Proyecto (opcional)</label><input type="text" id="fProyecto"></div>
+          </div>
+          <div class="field">
+            <label>Integrantes (uno por línea) *</label>
+            <textarea id="fIntegrantes" placeholder="Nombre Apellido&#10;Nombre Apellido&#10;Nombre Apellido&#10;Nombre Apellido&#10;Nombre Apellido" required></textarea>
+          </div>
+          <div class="field">
+            <label>Correo de contacto (opcional, para enviar el código de grupo)</label>
+            <input type="email" id="fContacto" placeholder="correo@ejemplo.com">
+          </div>
+          <button type="submit" class="btn">Guardar equipo</button>
+          <div class="form-status" id="teamStatus"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- PARTICIPANTES -->
+    <section class="panel" id="panel-participantes">
+      <div class="sec-head">
+        <span class="kicker">Participantes</span>
+        <h2>Participantes inscritos</h2>
+        <p>Personas que han completado el formulario de inscripción.</p>
+      </div>
+      <input type="text" class="search-input" id="searchParticipantes" placeholder="Buscar por nombre o correo...">
+      <div style="margin-bottom:12px">
+        <button type="button" class="btn" id="enviarCodigosBtn">📧 Enviar códigos por correo</button>
+        <div class="form-status" id="enviarCodigosStatus"></div>
+      </div>
+      <div class="sponsors" id="registrationsList"></div>
+    </section>
+
+    <!-- JURADOS -->
+    <section class="panel" id="panel-jurados">
+      <div class="sec-head">
+        <span class="kicker">Jurados</span>
+        <h2>Jurados invitados</h2>
+        <p>Define los jurados (máximo 10) que evaluarán los proyectos.</p>
+      </div>
+      <p class="count" id="judgeCount">0 / 10 jurados</p>
+      <div class="judges" id="judgesList"></div>
+      <div class="form-card">
+        <h3>➕ Agregar jurado</h3>
+        <form id="judgeForm">
+          <div class="frow">
+            <div class="field"><label>Nombre completo *</label><input type="text" id="jNombre" required></div>
+            <div class="field"><label>Organización</label><input type="text" id="jOrg"></div>
+          </div>
+          <div class="field"><label>Correo</label><input type="email" id="jCorreo"></div>
+          <button type="submit" class="btn">Guardar jurado</button>
+          <div class="form-status" id="judgeStatus"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- EVALUACIONES -->
+    <section class="panel" id="panel-evaluaciones">
+      <div class="sec-head">
+        <span class="kicker">Evaluaciones</span>
+        <h2>Evaluación de proyectos</h2>
+        <p>Selecciona un jurado y un equipo, y puntúa cada criterio de 1 a 5.</p>
+      </div>
+      <div class="form-card">
+        <form id="scoreForm">
+          <div class="frow">
+            <div class="field"><label>Jurado *</label><select id="sJudge" required><option value="">Selecciona…</option></select></div>
+            <div class="field"><label>Equipo *</label><select id="sTeam" required><option value="">Selecciona…</option></select></div>
+          </div>
+          <div class="score-grid" id="scoreGrid"></div>
+          <button type="submit" class="btn" style="margin-top:16px">Guardar evaluación</button>
+          <div class="form-status" id="scoreStatus"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- PATROCINADORES -->
+    <section class="panel" id="panel-patrocinadores">
+      <div class="sec-head">
+        <span class="kicker">Patrocinadores</span>
+        <h2>Patrocinadores registrados</h2>
+        <p>Empresas que han manifestado interés en patrocinar el evento.</p>
+      </div>
+      <input type="text" class="search-input" id="searchPatrocinadores" placeholder="Buscar por empresa o contacto...">
+      <div class="sponsors" id="sponsorsList"></div>
+    </section>
+
+    <!-- INSTRUCTIVO -->
+    <section class="panel" id="panel-instructivo">
+      <div class="sec-head">
+        <span class="kicker">Documento</span>
+        <h2>Instructivo de participación remota</h2>
+        <p>Para participantes individuales y equipos remotos.</p>
+      </div>
+      <div class="doc">
+        <div class="doc-actions">
+          <button type="button" class="btn" id="copyInstructivo">Copiar texto</button>
+          <div class="form-status" id="copyStatus"></div>
+        </div>
+        <div id="instructivoText">
+          <h3>1. Bienvenida</h3>
+          <p>¡Gracias por participar en el <strong>Hackathon UNETI IA 2026</strong>! Participas en la modalidad remota, con los mismos derechos y la misma rúbrica de evaluación que los participantes presenciales.</p>
+
+          <h3>2. Requisitos técnicos</h3>
+          <ul>
+            <li>Laptop o PC con cámara y micrófono (recomendado).</li>
+            <li>Conexión a internet estable (mínimo 5 Mbps recomendado).</li>
+            <li>Navegador Chrome o Firefox actualizado.</li>
+            <li>Correo activo (el usado al inscribirte).</li>
+            <li>Editor de código, Git/GitHub y el software que requiera tu proyecto.</li>
+            <li>Sistema operativo recomendado: Canaima GNU/Linux.</li>
+          </ul>
+
+          <h3>3. Acceso a las plataformas</h3>
+          <ul>
+            <li>Reunión principal y charlas: enlace de videoconferencia enviado por correo antes del evento.</li>
+            <li>Chat y soporte: canal oficial del evento.</li>
+            <li>Servidores: credenciales de acceso enviadas por correo.</li>
+          </ul>
+
+          <h3>4. Dinámica durante el evento</h3>
+          <ol>
+            <li>Apertura (9:00 am): conexión a la videoconferencia y bienvenida.</li>
+            <li>Charlas técnicas transmitidas por videoconferencia.</li>
+            <li>Desarrollo del proyecto con apoyo del mentor por el canal oficial.</li>
+            <li>Revisión con mentores en bloques programados.</li>
+            <li>Entrega al final del segundo día.</li>
+          </ol>
+
+          <h3>Agenda remota</h3>
+          <h4>Día 1 — viernes 13</h4>
+          <table>
+            <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
+            <tbody>
+              <tr><td>9:00 – 9:30</td><td>Apertura y bienvenida (videoconferencia)</td></tr>
+              <tr><td>9:30 – 10:30</td><td>Charla técnica 1</td></tr>
+              <tr><td>10:30 – 11:00</td><td>Receso</td></tr>
+              <tr><td>11:00 – 12:30</td><td>Charla técnica 2</td></tr>
+              <tr><td>12:30 – 13:30</td><td>Receso (almuerzo)</td></tr>
+              <tr><td>13:30 – 18:00</td><td>Desarrollo del proyecto + mentoría virtual</td></tr>
+            </tbody>
+          </table>
+          <h4>Día 2 — sábado 14</h4>
+          <table>
+            <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
+            <tbody>
+              <tr><td>9:00 – 13:00</td><td>Desarrollo del proyecto + mentoría virtual</td></tr>
+              <tr><td>13:00 – 14:00</td><td>Receso (almuerzo)</td></tr>
+              <tr><td>14:00 – 15:30</td><td>Preparación del pitch</td></tr>
+              <tr><td>15:30 – 17:30</td><td>Presentaciones virtuales ante el jurado</td></tr>
+              <tr><td>17:30 – 18:00</td><td>Deliberación</td></tr>
+              <tr><td>18:00</td><td>Premiación y cierre (videoconferencia)</td></tr>
+            </tbody>
+          </table>
+
+          <h3>5. Entrega del proyecto</h3>
+          <ul>
+            <li>Repositorio (GitHub/GitLab) con código y README.md.</li>
+            <li>Demo funcional (video de máximo 5 minutos).</li>
+            <li>Documento SDD resumido.</li>
+            <li>Presentación (pitch) de máximo 5 minutos.</li>
+          </ul>
+
+          <h3>6. Evaluación</h3>
+          <table>
+            <thead><tr><th>Criterio</th><th>Peso</th></tr></thead>
+            <tbody>
+              <tr><td>Viabilidad técnica / MVP</td><td class="weight">25%</td></tr>
+              <tr><td>Impacto y relevancia</td><td class="weight">20%</td></tr>
+              <tr><td>Innovación y uso de IA</td><td class="weight">20%</td></tr>
+              <tr><td>Calidad del pitch</td><td class="weight">15%</td></tr>
+              <tr><td>Ética y responsabilidad de la IA</td><td class="weight">10%</td></tr>
+              <tr><td>Escalabilidad / sostenibilidad</td><td class="weight">10%</td></tr>
+            </tbody>
+          </table>
+
+          <h3>7. Condiciones de participación</h3>
+          <ol>
+            <li>Compromiso de participación durante los dos días del evento.</li>
+            <li>Inscripción con datos reales (no se permite la suplantación).</li>
+            <li>Trabajo en equipo y comunicación activa.</li>
+            <li>Uso exclusivo de los recursos para el proyecto del Hackathon.</li>
+            <li>Propiedad intelectual del equipo, autorizando la difusión académica por UNETI.</li>
+            <li>Conducta respetuosa y ética en todos los canales.</li>
+            <li>Entrega del proyecto dentro de los plazos establecidos.</li>
+            <li>Aceptación de estas condiciones y de las indicaciones del comité organizador.</li>
+          </ol>
+
+          <h3>8. Soporte y contacto</h3>
+          <p>Correo: <strong>hackathon@uneti.edu.ve</strong> · Soporte durante el evento: 8:30 am – 6:30 pm.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ITINERARIO -->
+    <section class="panel" id="panel-itinerario">
+      <div class="sec-head">
+        <span class="kicker">Operación</span>
+        <h2>Itinerario interno por grupo logístico</h2>
+        <p>Viernes 13 y sábado 14 de noviembre · 9:00 am – 6:00 pm.</p>
+      </div>
+      <div class="itinerario">
+        <h3>Agenda general — Día 1 (viernes 13)</h3>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
+            <tbody>
+              <tr><td>7:30 – 8:30</td><td>Montaje y preparación (grupos logísticos)</td></tr>
+              <tr><td>8:00 – 9:00</td><td>Acreditación de participantes</td></tr>
+              <tr><td>9:00 – 9:30</td><td>Acto de apertura</td></tr>
+              <tr><td>9:30 – 10:30</td><td>Charla técnica 1</td></tr>
+              <tr><td>10:30 – 11:00</td><td>Refrigerio</td></tr>
+              <tr><td>11:00 – 12:30</td><td>Charla técnica 2</td></tr>
+              <tr><td>12:30 – 13:30</td><td>Almuerzo</td></tr>
+              <tr><td>13:30 – 14:00</td><td>Conformación de equipos</td></tr>
+              <tr><td>14:00 – 18:00</td><td>Desarrollo + mentoría</td></tr>
+              <tr><td>18:00</td><td>Cierre Día 1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Agenda general — Día 2 (sábado 14)</h3>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
+            <tbody>
+              <tr><td>9:00 – 9:30</td><td>Bienvenida y repaso</td></tr>
+              <tr><td>9:30 – 11:00</td><td>Desarrollo + mentoría</td></tr>
+              <tr><td>11:00 – 11:30</td><td>Refrigerio</td></tr>
+              <tr><td>11:30 – 13:00</td><td>Desarrollo final</td></tr>
+              <tr><td>13:00 – 14:00</td><td>Almuerzo</td></tr>
+              <tr><td>14:00 – 15:30</td><td>Preparación de pitch</td></tr>
+              <tr><td>15:30 – 17:30</td><td>Presentaciones ante el jurado</td></tr>
+              <tr><td>17:30 – 18:00</td><td>Deliberación del jurado</td></tr>
+              <tr><td>18:00</td><td>Premiación y cierre</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Por grupo logístico</h3>
+        <div class="grupo-log"><h4>1. Coordinación General</h4><ul><li>Pre-evento: supervisar plan maestro, permisos MPPCT y reuniones de seguimiento.</li><li>Día 1 · 7:30: apertura de sede y coordinación de grupos.</li><li>Días 1 y 2: supervisión general y resolución de incidencias.</li><li>Día 2 · 18:00: cierre y evaluación post-evento.</li></ul></div>
+        <div class="grupo-log"><h4>2. Registro y Acreditación</h4><ul><li>Día 1 · 8:00–9:00: acreditación (verificar inscritos y gafetes).</li><li>Validar lista de preseleccionados (presencial) y remotos.</li><li>Días 1 y 2: control de asistencia.</li></ul></div>
+        <div class="grupo-log"><h4>3. Tecnología y Servidores</h4><ul><li>Día 1 · 7:30–8:30: montaje de red, video beam, servidores y estaciones.</li><li>Días 1 y 2: soporte técnico continuo.</li><li>Día 2 · 15:00: prueba de audio/video para pitches.</li><li>Día 2 · 18:30: desmontaje.</li></ul></div>
+        <div class="grupo-log"><h4>4. Salas y Espacios</h4><ul><li>Día 1 · 7:30: mesas, sillas, señalización y distribución.</li><li>Días 1 y 2: control de aforo y orden.</li><li>Día 2 · 18:00: desmontaje y limpieza.</li></ul></div>
+        <div class="grupo-log"><h4>5. Catering y Alimentación</h4><ul><li>Día 1: refrigerio 10:30 y almuerzo 12:30.</li><li>Día 2: refrigerio 11:00 y almuerzo 13:00.</li><li>Coordinar proveedor, distribución y dietas especiales.</li></ul></div>
+        <div class="grupo-log"><h4>6. Comunicaciones y Difusión</h4><ul><li>Pre-evento: convocatoria y redes sociales.</li><li>Días 1 y 2: cobertura (fotos/videos) y redes en vivo.</li><li>Enviar instructivo a remotos.</li><li>Día 2 · 18:00: comunicado de resultados.</li></ul></div>
+        <div class="grupo-log"><h4>7. Protocolo y Charlas</h4><ul><li>Día 1 · 9:00: acto de apertura (autoridades).</li><li>Coordinar charlistas y agenda técnica.</li><li>Día 2 · 18:00: acto de premiación.</li></ul></div>
+        <div class="grupo-log"><h4>8. Jurados y Evaluación</h4><ul><li>Día 1: entrega de rúbrica y materiales.</li><li>Día 2 · 15:30–17:30: evaluación de pitches.</li><li>Día 2 · 17:30: deliberación y resultados.</li></ul></div>
+        <div class="grupo-log"><h4>9. Voluntariado y Soporte</h4><ul><li>Días 1 y 2: apoyo general y orientación de participantes.</li><li>Tareas puntuales asignadas por Coordinación General.</li></ul></div>
+        <div class="grupo-log"><h4>10. Seguridad y Accesos</h4><ul><li>Día 1 · 7:30: coordinar accesos con MPPCT.</li><li>Días 1 y 2: control de ingreso y listas.</li><li>Día 2 · 18:00: salida ordenada.</li></ul></div>
+      </div>
+    </section>
+
+    <!-- LOGÍSTICA -->
+    <section class="panel" id="panel-logistica">
+      <div class="sec-head">
+        <span class="kicker">Operación</span>
+        <h2>Conformación de responsables de logística</h2>
+        <p>Asigna responsables a cada grupo logístico y detalla sus insumos y actividades.</p>
+      </div>
+      <div class="logistica" id="logisticaList"></div>
+    </section>
+
+    <!-- ACREDITACIÓN -->
+    <section class="panel" id="panel-acreditacion">
+      <div class="sec-head">
+        <span class="kicker">Acreditación</span>
+        <h2>Verificación de grupos presenciales</h2>
+        <p>Marca a los integrantes que se presentaron físicamente en la sede.</p>
+      </div>
+      <div class="acreditacion" id="acreditacionList"></div>
+    </section>
+
+    <!-- EVALUACIÓN -->
+    <section class="panel" id="panel-evaluacion">
+      <div class="sec-head">
+        <span class="kicker">Selección</span>
+        <h2>Motor de evaluación y selección de propuestas</h2>
+        <p>El agente evaluador puntúa las propuestas; luego preselecciona 20 y el comité elige 10.</p>
+      </div>
+
+      <div class="form-card" style="margin-top:0">
+        <h3>🤖 Prompt del agente Evaluador</h3>
+        <div class="field"><textarea id="evalPrompt" rows="10"></textarea></div>
+        <div class="save-row">
+          <button type="button" class="btn" id="savePrompt">Guardar prompt</button>
+          <button type="button" class="btn" id="runEval" style="background:linear-gradient(135deg,#E63966,#B5179E)">Evaluar propuestas con IA</button>
+          <div class="form-status" id="evalStatus"></div>
+        </div>
+      </div>
+
+      <div class="counts">
+        <span id="cntPreseleccionados">0/20 preseleccionados</span>
+        <span id="cntFinales">0/10 finales</span>
+      </div>
+      <div class="evals" id="evalsList"></div>
+    </section>
+
+    <!-- RESULTADOS -->
+    <section class="panel" id="panel-resultados">
+      <div class="sec-head">
+        <span class="kicker">Resultados</span>
+        <h2>Sumarización de evaluaciones del jurado</h2>
+        <p>Promedio ponderado de las evaluaciones, ordenado por puntaje. Los 3 primeros son los ganadores.</p>
+      </div>
+      <div class="resultados" id="resultadosList"></div>
+    </section>
+
+    <!-- CARTAS -->
+    <section class="panel" id="panel-cartas">
+      <div class="sec-head">
+        <span class="kicker">Comunicaciones</span>
+        <h2>Comunicaciones y cartas</h2>
+        <p>Cartas y comunicaciones oficiales del evento, listas para copiar y enviar.</p>
+      </div>
+
+      <div class="doc">
+        <div class="doc-actions">
+          <button type="button" class="btn" id="copyCartaPatrocinio">Copiar carta de patrocinio</button>
+          <div class="form-status" id="cartaStatus"></div>
+        </div>
+        <div id="cartaPatrocinioText">
+          <p style="text-align:right; color:var(--ink-soft)">Caracas, ____ de noviembre de 2026</p>
+          <p><strong>Señores</strong><br>[Nombre de la Empresa]<br>Presente.−</p>
+          <p><strong>Asunto: Propuesta de patrocinio — Hackathon UNETI IA 2026</strong></p>
+          <p>Reciba un cordial saludo. Nos complace dirigirnos a ustedes para invitarles a formar parte como <strong>patrocinadores</strong> del <strong>Hackathon UNETI IA 2026</strong>, evento de Inteligencia Artificial Ética y Ciberseguridad, organizado por la Universidad Nacional Experimental de las Telecomunicaciones e Informática (UNETI), a celebrarse los días <strong>13 y 14 de noviembre de 2026</strong> en la ciudad de Caracas.</p>
+          <p>El evento reunirá a estudiantes de todo el país, quienes desarrollarán soluciones tecnológicas con visión de implementación en el sector público. Su marca tendrá presencia en las siguientes instancias:</p>
+          <p><strong>Antes del evento:</strong> sitio web oficial, redes sociales, convocatoria y correos.</p>
+          <p><strong>Durante el evento:</strong> pantalla principal, escenario, materiales impresos, charlas técnicas y cobertura.</p>
+          <p><strong>Pos-evento:</strong> publicación de agradecimiento, video resumen, comunicado de resultados, certificado de agradecimiento y reporte de alcance.</p>
+          <p>Agradecemos de antemano su valiosa consideración y quedamos a su disposición para ampliar la información.</p>
+          <p>Atentamente,<br><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026<br>hackathon@uneti.edu.ve</p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions">
+          <button type="button" class="btn" id="copyPropuestaPatrocinio">Copiar propuesta de patrocinio</button>
+          <div class="form-status" id="propuestaStatus"></div>
+        </div>
+        <div id="propuestaPatrocinioText">
+          <h3>Propuesta de Patrocinio — Hackathon UNETI IA 2026</h3>
+          <p>El <strong>Hackathon UNETI IA</strong> es un evento presencial de dos días donde estudiantes de todo el país diseñan y construyen soluciones de <strong>Inteligencia Artificial Ética</strong> y <strong>Ciberseguridad</strong>, con visión de implementación en el sector público venezolano.</p>
+
+          <h3>Presencia de tu logo</h3>
+          <h4>Antes del evento</h4>
+          <table>
+            <thead><tr><th>Canal</th><th>Presencia</th></tr></thead>
+            <tbody>
+              <tr><td>Sitio web oficial</td><td>Logo en la sección "Patrocinadores"</td></tr>
+              <tr><td>Redes sociales</td><td>Menciones y logo en publicaciones</td></tr>
+              <tr><td>Convocatoria oficial</td><td>Logo en piezas gráficas de difusión</td></tr>
+              <tr><td>Correos de inscripción</td><td>Logo en la firma de comunicaciones</td></tr>
+            </tbody>
+          </table>
+
+          <h4>Durante el evento</h4>
+          <table>
+            <thead><tr><th>Canal</th><th>Presencia</th></tr></thead>
+            <tbody>
+              <tr><td>Pantalla principal / video beam</td><td>Rotación de logos entre charlas</td></tr>
+              <tr><td>Fondo de escenario</td><td>Banner con logos de patrocinadores</td></tr>
+              <tr><td>Materiales impresos</td><td>Agenda, gafetes y señalización</td></tr>
+              <tr><td>Charlas técnicas</td><td>Mención al inicio de cada charla</td></tr>
+              <tr><td>Cobertura en redes</td><td>Fotos y videos con visibilidad de marca</td></tr>
+            </tbody>
+          </table>
+
+          <h4>Pos-evento</h4>
+          <table>
+            <thead><tr><th>Canal</th><th>Presencia</th></tr></thead>
+            <tbody>
+              <tr><td>Publicación de agradecimiento</td><td>Web y redes sociales</td></tr>
+              <tr><td>Video resumen</td><td>Logos en los créditos</td></tr>
+              <tr><td>Comunicado de resultados</td><td>Mención a los patrocinadores</td></tr>
+              <tr><td>Certificado de agradecimiento</td><td>Reconocimiento formal</td></tr>
+              <tr><td>Reporte de alcance</td><td>Métricas (asistentes, impresiones, publicaciones)</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Niveles de patrocinio</h3>
+          <table>
+            <thead><tr><th>Nivel</th><th>Aporte</th><th>Presencia</th></tr></thead>
+            <tbody>
+              <tr><td>Oro 🥇</td><td>Patrocinio metálico principal o insumos clave</td><td>Logo en todas las fases + banner principal + mención en apertura y premiación</td></tr>
+              <tr><td>Plata 🥈</td><td>Aporte medio</td><td>Logo en web, redes, pantalla principal y agradecimiento</td></tr>
+              <tr><td>Bronce 🥉</td><td>Aporte de apoyo / insumos</td><td>Logo en web y agradecimiento</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Formas de apoyar</h3>
+          <ul>
+            <li><strong>Patrocinio metálico:</strong> aporte económico para premios, catering, logística y producción.</li>
+            <li><strong>Insumos para el evento:</strong> alimentos, equipos, material gráfico, espacios, conectividad o premios.</li>
+          </ul>
+
+          <p>Contacto: <strong>hackathon@uneti.edu.ve</strong></p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions">
+          <button type="button" class="btn" id="copyCartaJurado">Copiar carta al jurado</button>
+          <div class="form-status" id="juradoStatus"></div>
+        </div>
+        <div id="cartaJuradoText">
+          <p style="text-align:right; color:var(--ink-soft)">Caracas, ____ de noviembre de 2026</p>
+          <p><strong>Señor(a)</strong><br>[Nombre del Jurado]<br>Presente.−</p>
+          <p><strong>Asunto: Invitación como miembro del jurado — Hackathon UNETI IA 2026</strong></p>
+          <p>Reciba un cordial saludo. Nos complace invitarle a formar parte del <strong>jurado calificador</strong> del <strong>Hackathon UNETI IA 2026</strong>, evento de Inteligencia Artificial Ética y Ciberseguridad, a celebrarse los días <strong>13 y 14 de noviembre de 2026</strong> en la ciudad de Caracas.</p>
+          <p>Su experiencia y criterio serán fundamentales para evaluar los proyectos de los equipos participantes. La evaluación se realizará el <strong>sábado 14 de noviembre, de 3:30 pm a 6:00 pm</strong>, según la siguiente rúbrica:</p>
+          <table>
+            <thead><tr><th>Criterio</th><th>Peso</th></tr></thead>
+            <tbody>
+              <tr><td>Viabilidad técnica / calidad del MVP</td><td>25%</td></tr>
+              <tr><td>Impacto y relevancia del problema</td><td>20%</td></tr>
+              <tr><td>Innovación y uso de IA</td><td>20%</td></tr>
+              <tr><td>Calidad del pitch</td><td>15%</td></tr>
+              <tr><td>Ética y responsabilidad de la IA</td><td>10%</td></tr>
+              <tr><td>Escalabilidad / sostenibilidad</td><td>10%</td></tr>
+            </tbody>
+          </table>
+          <p>Agradecemos de antemano su valiosa participación y quedamos a su disposición para cualquier información adicional.</p>
+          <p>Atentamente,<br><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026<br>hackathon@uneti.edu.ve</p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions">
+          <button type="button" class="btn" id="copyCartaAutoridades">Copiar carta a autoridades</button>
+          <div class="form-status" id="autoridadesStatus"></div>
+        </div>
+        <div id="cartaAutoridadesText">
+          <p style="text-align:right; color:var(--ink-soft)">Caracas, ____ de noviembre de 2026</p>
+          <p><strong>Señor(a)</strong><br>[Nombre de la Autoridad]<br>[Cargo]<br>[Institución]<br>Presente.−</p>
+          <p><strong>Asunto: Invitación al Hackathon UNETI IA 2026</strong></p>
+          <p>Reciba un cordial saludo. Nos dirigimos a usted con el fin de invitarle al <strong>Hackathon UNETI IA 2026</strong>, evento de Inteligencia Artificial Ética y Ciberseguridad, organizado por la Universidad Nacional Experimental de las Telecomunicaciones e Informática (UNETI), a celebrarse los días <strong>13 y 14 de noviembre de 2026</strong> en la ciudad de Caracas.</p>
+          <p>El evento reunirá a estudiantes de todo el país, quienes desarrollarán soluciones tecnológicas con visión de implementación en el sector público. Nos honraría contar con su presencia en las siguientes instancias:</p>
+          <ul>
+            <li><strong>Acto de apertura:</strong> viernes 13 de noviembre, 9:00 am.</li>
+            <li><strong>Premiación y cierre:</strong> sábado 14 de noviembre, 6:00 pm.</li>
+          </ul>
+          <p>Agradecemos de antemano su atención y su valioso apoyo al desarrollo tecnológico del país.</p>
+          <p>Atentamente,<br><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026<br>hackathon@uneti.edu.ve</p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions"><button type="button" class="btn" id="copyCartaMentores">Copiar invitación a mentores</button><div class="form-status" id="mentoresStatus"></div></div>
+        <div id="cartaMentoresText">
+          <p style="text-align:right; color:var(--ink-soft)">Caracas, ____ de noviembre de 2026</p>
+          <p><strong>Señor(a)</strong><br>[Nombre del Mentor]<br>Presente.−</p>
+          <p><strong>Asunto: Invitación como mentor — Hackathon UNETI IA 2026</strong></p>
+          <p>Reciba un cordial saludo. Nos complace invitarle a participar como <strong>mentor</strong> del <strong>Hackathon UNETI IA 2026</strong>, evento de Inteligencia Artificial Ética y Ciberseguridad, a celebrarse los días <strong>13 y 14 de noviembre de 2026</strong> en Caracas.</p>
+          <p>Su rol consistirá en acompañar y orientar a un equipo de estudiantes durante el desarrollo de su proyecto. Su experiencia será clave para guiar a los participantes.</p>
+          <p>Agradecemos de antemano su disposición y valiosa contribución al evento.</p>
+          <p>Atentamente,<br><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026<br>hackathon@uneti.edu.ve</p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions"><button type="button" class="btn" id="copyConvocatoria">Copiar convocatoria</button><div class="form-status" id="convocatoriaStatus"></div></div>
+        <div id="convocatoriaText">
+          <p style="text-align:right; color:var(--ink-soft)">Caracas, ____ de noviembre de 2026</p>
+          <p><strong>Convocatoria oficial — Hackathon UNETI IA 2026</strong></p>
+          <p>La Universidad Nacional Experimental de las Telecomunicaciones e Informática (UNETI) convoca a estudiantes de todo el país a participar en el <strong>Hackathon UNETI IA 2026</strong>, evento de Inteligencia Artificial Ética y Ciberseguridad, a celebrarse los días <strong>13 y 14 de noviembre de 2026</strong> en Caracas.</p>
+          <p><strong>Participación:</strong> individual (remota) o en grupos de 5 integrantes (con propuesta de desarrollo). Los grupos serán preseleccionados según su propuesta para participar presencialmente en la sede UNETI; el resto participará de forma remota.</p>
+          <p>La inscripción es gratuita y el cupo es limitado. Regístrate en el sitio web oficial del evento.</p>
+          <p>Atentamente,<br><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026<br>hackathon@uneti.edu.ve</p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions"><button type="button" class="btn" id="copyCartaAceptacion">Copiar carta de aceptación</button><div class="form-status" id="aceptacionStatus"></div></div>
+        <div id="cartaAceptacionText">
+          <p style="text-align:right; color:var(--ink-soft)">Caracas, ____ de noviembre de 2026</p>
+          <p><strong>Señor(a)</strong><br>[Nombre del Participante]<br>Presente.−</p>
+          <p><strong>Asunto: Confirmación de inscripción — Hackathon UNETI IA 2026</strong></p>
+          <p>Reciba un cordial saludo. Nos complace confirmar su inscripción al <strong>Hackathon UNETI IA 2026</strong>, a celebrarse los días <strong>13 y 14 de noviembre de 2026</strong> en Caracas.</p>
+          <p>Su modalidad de participación es <strong>[Presencial / Remota]</strong>. En los próximos días recibirá el instructivo correspondiente con los detalles de acceso y la agenda.</p>
+          <p>Le damos la bienvenida y quedamos a su disposición para cualquier consulta.</p>
+          <p>Atentamente,<br><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026<br>hackathon@uneti.edu.ve</p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions"><button type="button" class="btn" id="copyAgradecimiento">Copiar agradecimiento a patrocinadores</button><div class="form-status" id="agradecimientoStatus"></div></div>
+        <div id="agradecimientoText">
+          <p style="text-align:right; color:var(--ink-soft)">Caracas, ____ de noviembre de 2026</p>
+          <p><strong>Señores</strong><br>[Nombre del Patrocinador]<br>Presente.−</p>
+          <p><strong>Asunto: Agradecimiento por su patrocinio — Hackathon UNETI IA 2026</strong></p>
+          <p>Reciba un cordial saludo. En nombre del comité organizador del <strong>Hackathon UNETI IA 2026</strong>, queremos expresar nuestro más sincero agradecimiento por su valioso patrocinio.</p>
+          <p>Gracias a su apoyo, el evento pudo realizarse con éxito, beneficiando a estudiantes de todo el país. Su marca fue visibilizada en las distintas instancias del evento, según lo acordado.</p>
+          <p>Esperamos contar con su valiosa colaboración en futuras ediciones.</p>
+          <p>Atentamente,<br><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026<br>hackathon@uneti.edu.ve</p>
+        </div>
+      </div>
+
+      <div class="doc" style="margin-top:24px">
+        <div class="doc-actions"><button type="button" class="btn" id="copyCertificadoAliado">Copiar certificado de aliado</button><div class="form-status" id="aliadoStatus"></div></div>
+        <div id="certificadoAliadoText">
+          <p style="text-align:center; font-size:1.2rem"><strong>CERTIFICADO DE AGRADECIMIENTO</strong></p>
+          <p style="text-align:center; color:var(--ink-soft)">Hackathon UNETI IA 2026 · IA Ética y Ciberseguridad</p>
+          <p style="text-align:center">Se otorga el presente reconocimiento a:</p>
+          <p style="text-align:center; font-size:1.3rem"><strong>[Nombre del Aliado]</strong></p>
+          <p style="text-align:center">Por su valioso apoyo como aliado del <strong>Hackathon UNETI IA 2026</strong>, contribuyendo al desarrollo tecnológico de los estudiantes venezolanos.</p>
+          <p style="text-align:center">Caracas, ____ de noviembre de 2026</p>
+          <p style="text-align:center; margin-top:20px"><strong>Comité Organizador</strong><br>Hackathon UNETI IA 2026</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRESUPUESTO -->
+    <section class="panel" id="panel-presupuesto">
+      <div class="sec-head">
+        <span class="kicker">Finanzas</span>
+        <h2>Presupuesto del evento</h2>
+        <p>Seguimiento de ingresos (patrocinios) y egresos (costos).</p>
+      </div>
+      <div class="budget-totals">
+        <div class="budget-card ing"><span class="budget-num" id="bIngresos">0</span><span class="dash-label">Ingresos</span></div>
+        <div class="budget-card egr"><span class="budget-num" id="bEgresos">0</span><span class="dash-label">Egresos</span></div>
+        <div class="budget-card bal"><span class="budget-num" id="bBalance">0</span><span class="dash-label">Balance</span></div>
+      </div>
+      <div class="form-card" style="margin-top:0">
+        <h3>➕ Agregar movimiento</h3>
+        <form id="presupuestoForm">
+          <div class="frow">
+            <div class="field"><label>Concepto *</label><input type="text" id="pConcepto" required></div>
+            <div class="field"><label>Tipo *</label><select id="pTipo" required><option value="ingreso">Ingreso</option><option value="egreso">Egreso</option></select></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Monto *</label><input type="number" id="pMonto" step="0.01" required></div>
+            <div class="field"><label>Categoría</label><input type="text" id="pCategoria" placeholder="Ej.: catering, premios, sonido"></div>
+          </div>
+          <button type="submit" class="btn">Guardar</button>
+          <div class="form-status" id="presupuestoStatus"></div>
+        </form>
+      </div>
+      <div class="budget-list" id="presupuestoList"></div>
+    </section>
+
+    <!-- AUDITORÍA -->
+    <section class="panel" id="panel-auditoria">
+      <div class="sec-head">
+        <span class="kicker">Seguridad</span>
+        <h2>Registro de auditoría</h2>
+        <p>Acciones realizadas en el panel (últimas 200).</p>
+      </div>
+      <div class="audit-list" id="auditoriaList"></div>
+    </section>
+
+    <!-- COMUNICADOS -->
+    <section class="panel" id="panel-comunicados">
+      <div class="sec-head">
+        <span class="kicker">Comunicación</span>
+        <h2>Comunicados</h2>
+        <p>Publica anuncios que verán los participantes en la web.</p>
+      </div>
+      <div class="form-card" style="margin-top:0">
+        <form id="comunicadoForm">
+          <div class="field"><label>Título *</label><input type="text" id="cmTitulo" required></div>
+          <div class="field"><label>Contenido *</label><textarea id="cmContenido" rows="3" required></textarea></div>
+          <button type="submit" class="btn">Publicar</button>
+          <div class="form-status" id="comunicadoStatus"></div>
+        </form>
+      </div>
+      <div class="list" id="comunicadosAdminList"></div>
+    </section>
+
+    <!-- ENTREGAS -->
+    <section class="panel" id="panel-entregas">
+      <div class="sec-head">
+        <span class="kicker">Proyectos</span>
+        <h2>Entregas de proyectos</h2>
+        <p>Repositorios y demos enviados por los equipos.</p>
+      </div>
+      <div class="list" id="entregasList"></div>
+    </section>
+
+    <!-- CONSULTAS -->
+    <section class="panel" id="panel-consultas">
+      <div class="sec-head">
+        <span class="kicker">Mentoría</span>
+        <h2>Consultas</h2>
+        <p>Consultas enviadas por los participantes.</p>
+      </div>
+      <div class="list" id="consultasList"></div>
+    </section>
+
+    <!-- ASISTENCIA REMOTA -->
+    <section class="panel" id="panel-asistencia">
+      <div class="sec-head">
+        <span class="kicker">Asistencia</span>
+        <h2>Asistencia remota</h2>
+        <p>Participantes remotos que han registrado su asistencia.</p>
+      </div>
+      <div class="list" id="asistenciaList"></div>
+    </section>
+
+    <!-- PARTICIPANTES REMOTOS -->
+    <section class="panel" id="panel-remotos">
+      <div class="sec-head">
+        <span class="kicker">Participantes</span>
+        <h2>Participantes remotos</h2>
+        <p>Estatus, aporte (repositorio), consultas y asistencia de los remotos.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Participante / Grupo</th>
+              <th>Tipo</th>
+              <th>Aporte (repo)</th>
+              <th>Consultas</th>
+              <th>Asistencia</th>
+              <th>Última consulta</th>
+            </tr>
+          </thead>
+          <tbody id="remotosBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ERRORES -->
+    <section class="panel" id="panel-errores">
+      <div class="sec-head">
+        <span class="kicker">Diagnóstico</span>
+        <h2>Errores del sistema</h2>
+        <p>Errores registrados del backend (últimos 200).</p>
+      </div>
+      <div class="audit-list" id="erroresList"></div>
+    </section>
+
+    <!-- AGENTES IA -->
+    <section class="panel" id="panel-agentes">
+      <div class="sec-head">
+        <span class="kicker">Inteligencia Artificial</span>
+        <h2>Agentes administrativos</h2>
+        <p>Agentes de IA que apoyan la operación y logística del evento.</p>
+      </div>
+
+      <div class="agente-card">
+        <div class="agente-head"><h3>🕐 Recordatorios</h3><button type="button" class="btn" id="btnRecordatorios">Ejecutar</button></div>
+        <p>Envía un recordatorio por correo a los equipos que aún no entregan su proyecto.</p>
+        <div class="form-status" id="recordatoriosStatus"></div>
+      </div>
+
+      <div class="agente-card">
+        <div class="agente-head"><h3>📈 Monitoreo de repositorios</h3><button type="button" class="btn" id="btnGithub">Ejecutar</button></div>
+        <p>Revisa la actividad reciente de los repositorios GitHub entregados.</p>
+        <div class="agente-result" id="githubResult"></div>
+      </div>
+
+      <div class="agente-card">
+        <div class="agente-head"><h3>🔀 Triaje de consultas</h3><button type="button" class="btn" id="btnTriaje">Ejecutar</button></div>
+        <p>Clasifica las consultas pendientes en: logística, técnica o urgencia.</p>
+        <div class="agente-result" id="triajeResult"></div>
+      </div>
+
+      <div class="agente-card">
+        <div class="agente-head"><h3>📢 Resumen del evento</h3><button type="button" class="btn" id="btnResumen">Generar</button></div>
+        <p>Genera un resumen ejecutivo del estado actual del evento.</p>
+        <div class="agente-result" id="resumenResult"></div>
+      </div>
+    </section>
+
+    <!-- BIBLIOTECA DE PROYECTOS -->
+    <section class="panel" id="panel-biblioteca">
+      <div class="sec-head">
+        <span class="kicker">Documentación</span>
+        <h2>Biblioteca de proyectos (SDD)</h2>
+        <p>Los 40 documentos SDD con su especificación, pitch, impacto y guía de presentación.</p>
+      </div>
+      <input type="text" class="search-input" id="searchBiblioteca" placeholder="Buscar proyecto o eje...">
+      <div class="biblio-grid" id="bibliotecaList"></div>
+    </section>
+
+  </main>
+</div>
+
+<footer>Hackathon UNETI IA 2026 · Panel interno — No compartir públicamente.</footer>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-brand"><span class="dot"></span> Hackathon UNETI IA</div>
+    <h2>Panel de Administración</h2>
+    <p>Ingresa tus credenciales para continuar.</p>
+    <form id="loginForm">
+      <div class="field"><label>Usuario</label><input type="text" id="lUser" required autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="lPass" required autocomplete="current-password"></div>
+      <button type="submit" class="btn btn-block">Ingresar</button>
+      <div class="form-status" id="loginStatus"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function setStatus(id, msg, ok) {
+    const s = document.getElementById(id);
+    s.textContent = msg;
+    s.className = 'form-status ' + (ok ? 'ok' : 'err');
+  }
+
+  // Navegación por paneles
+  function showPanel(name) {
+    document.querySelectorAll('.menu-btn').forEach((b) => b.classList.toggle('active', b.dataset.panel === name));
+    document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === 'panel-' + name));
+  }
+  document.querySelectorAll('.menu-btn').forEach((btn) => {
+    btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+  });
+
+  // Submenús agrupados (toggle)
+  document.querySelectorAll('.menu-group-toggle').forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+      const g = toggle.dataset.group;
+      const items = document.querySelector(`.menu-group-items[data-group="${g}"]`);
+      if (items) {
+        const open = items.classList.toggle('open');
+        toggle.classList.toggle('open', open);
+      }
+    });
+  });
+
+  function refreshGroups() {
+    document.querySelectorAll('.menu-group').forEach((group) => {
+      let anyVisible = false;
+      group.querySelectorAll('.menu-btn').forEach((b) => {
+        if (b.style.display !== 'none') anyVisible = true;
+      });
+      group.style.display = anyVisible ? '' : 'none';
+    });
+  }
+
+  // Control de rol (administrador vs acreditación)
+  function applyRole(role) {
+    const allowed = {
+      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','itinerario','logistica','acreditacion','evaluacion','resultados','cartas','presupuesto','auditoria','errores','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      acreditacion: ['acreditacion'],
+      jurado: ['evaluaciones'],
+      logistica: ['logistica'],
+    };
+    const visible = allowed[role] || allowed.admin;
+    document.querySelectorAll('.menu-btn').forEach((btn) => {
+      btn.style.display = visible.includes(btn.dataset.panel) ? '' : 'none';
+    });
+    refreshGroups();
+    const first = visible[0];
+    document.querySelectorAll('.menu-group-items').forEach((items) => {
+      const has = [...items.querySelectorAll('.menu-btn')].some((b) => b.dataset.panel === first);
+      if (has) {
+        items.classList.add('open');
+        const t = document.querySelector(`.menu-group-toggle[data-group="${items.dataset.group}"]`);
+        if (t) t.classList.add('open');
+      }
+    });
+    showPanel(first);
+  }
+
+  // ===== Equipos =====
+  function teamCard(t) {
+    const el = document.createElement('div');
+    el.className = 'team';
+    const ejeTag = t.eje === 'Ciberseguridad' ? 'seg' : 'etica';
+    const miembros = (t.integrantes || []).map((n) => `<li>${esc(n)}</li>`).join('');
+    el.innerHTML = `
+      <div class="team-top"><h3>${esc(t.nombre)}</h3><span class="tag ${ejeTag}">${esc(t.eje)}</span></div>
+      <div class="codigo">Grupo Nº ${t.id} · Código: <strong>${esc(t.codigo || '—')}</strong></div>
+      ${t.proyecto ? `<p class="proyecto">Proyecto: ${esc(t.proyecto)}</p>` : ''}
+      <div class="mentor">Mentor/a: ${esc(t.mentor)}</div>
+      <ol>${miembros || '<li style="color:#999">Sin integrantes</li>'}</ol>`;
+    return el;
+  }
+
+  async function loadTeams() {
+    const grid = document.getElementById('teamsGrid');
+    const empty = document.getElementById('teamsEmpty');
+    grid.innerHTML = '';
+    try {
+      const res = await fetch('/api/admin/teams');
+      const data = await res.json();
+      const teams = data.teams || [];
+      document.getElementById('cntEquipos').textContent = teams.length;
+      if (teams.length === 0) { empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      teams.forEach((t) => grid.appendChild(teamCard(t)));
+    } catch (e) {
+      empty.textContent = 'Error al cargar los equipos.';
+      empty.style.display = 'block';
+    }
+  }
+
+  document.getElementById('teamForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const integrantes = document.getElementById('fIntegrantes').value.split('\n').map((s) => s.trim()).filter(Boolean);
+    const payload = {
+      nombre: document.getElementById('fNombre').value.trim(),
+      mentor: document.getElementById('fMentor').value.trim(),
+      eje: document.getElementById('fEje').value,
+      proyecto: document.getElementById('fProyecto').value.trim(),
+      contacto_email: document.getElementById('fContacto').value.trim(),
+      integrantes,
+    };
+    const res = await fetch('/api/admin/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('teamForm').reset();
+      setStatus('teamStatus', 'Equipo agregado.', true);
+      loadTeams();
+    } else {
+      setStatus('teamStatus', data.error || 'Error.', false);
+    }
+  });
+
+  // ===== Jurados =====
+  const CRITERIOS = [
+    { key: 'viabilidad', label: 'Viabilidad técnica / MVP', peso: 25 },
+    { key: 'impacto', label: 'Impacto y relevancia', peso: 20 },
+    { key: 'innovacion', label: 'Innovación y uso de IA', peso: 20 },
+    { key: 'pitch', label: 'Calidad del pitch', peso: 15 },
+    { key: 'etica', label: 'Ética y responsabilidad', peso: 10 },
+    { key: 'escalabilidad', label: 'Escalabilidad / sostenibilidad', peso: 10 },
+  ];
+
+  async function loadJudges() {
+    const list = document.getElementById('judgesList');
+    try {
+      const res = await fetch('/api/admin/judges');
+      const data = await res.json();
+      list.innerHTML = '';
+      const judges = data.judges || [];
+      document.getElementById('judgeCount').textContent = judges.length + ' / 10 jurados';
+      document.getElementById('cntJurados').textContent = judges.length;
+      judges.forEach((j) => {
+        const el = document.createElement('div');
+        el.className = 'judge-item';
+        el.innerHTML = `<div class="info"><strong>${esc(j.nombre)}</strong><span>${esc(j.organizacion || '')}${j.correo ? ' · ' + esc(j.correo) : ''}</span></div><button class="del" data-id="${j.id}" aria-label="Eliminar jurado">×</button>`;
+        list.appendChild(el);
+      });
+      const sel = document.getElementById('sJudge');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">Selecciona…</option>' + judges.map((j) => `<option value="${j.id}">${esc(j.nombre)}</option>`).join('');
+      sel.value = cur;
+    } catch (e) {
+      document.getElementById('judgeCount').textContent = 'Error al cargar jurados.';
+    }
+  }
+
+  document.getElementById('judgesList').addEventListener('click', async (e) => {
+    if (e.target.classList.contains('del')) {
+      await fetch('/api/admin/judges?id=' + e.target.dataset.id, { method: 'DELETE' });
+      loadJudges();
+    }
+  });
+
+  document.getElementById('judgeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      nombre: document.getElementById('jNombre').value.trim(),
+      organizacion: document.getElementById('jOrg').value.trim(),
+      correo: document.getElementById('jCorreo').value.trim(),
+    };
+    const res = await fetch('/api/admin/judges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('judgeForm').reset();
+      setStatus('judgeStatus', 'Jurado agregado.', true);
+      loadJudges();
+    } else {
+      setStatus('judgeStatus', data.error || 'Error.', false);
+    }
+  });
+
+  // ===== Evaluaciones =====
+  CRITERIOS.forEach((c) => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `<label>${c.label}</label><input type="number" name="score_${c.key}" min="1" max="5" value="3" required><span class="peso">${c.peso}%</span>`;
+    document.getElementById('scoreGrid').appendChild(row);
+  });
+
+  async function loadTeamsForScore() {
+    try {
+      const res = await fetch('/api/admin/teams');
+      const data = await res.json();
+      const sel = document.getElementById('sTeam');
+      sel.innerHTML = '<option value="">Selecciona…</option>' + (data.teams || []).map((t) => `<option value="${t.id}">${esc(t.nombre)}</option>`).join('');
+    } catch (e) {}
+  }
+
+  document.getElementById('scoreForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const judge_id = Number(document.getElementById('sJudge').value);
+    const team_id = Number(document.getElementById('sTeam').value);
+    if (!judge_id || !team_id) { setStatus('scoreStatus', 'Selecciona jurado y equipo.', false); return; }
+    const scores = CRITERIOS.map((c) => ({ criterio: c.key, puntaje: Number(document.querySelector(`input[name="score_${c.key}"]`).value) }));
+    const res = await fetch('/api/admin/scores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ judge_id, team_id, scores }) });
+    const data = await res.json();
+    setStatus('scoreStatus', data.ok ? 'Evaluación guardada.' : (data.error || 'Error.'), data.ok);
+  });
+
+  // ===== Patrocinadores =====
+  async function loadSponsors() {
+    const list = document.getElementById('sponsorsList');
+    try {
+      const res = await fetch('/api/admin/sponsors');
+      const data = await res.json();
+      list.innerHTML = '';
+      const sponsors = data.sponsors || [];
+      document.getElementById('cntPatrocinadores').textContent = sponsors.length;
+      if (sponsors.length === 0) { list.innerHTML = '<div class="empty">No hay patrocinadores registrados aún.</div>'; return; }
+      sponsors.forEach((s) => {
+        const el = document.createElement('div');
+        el.className = 'sponsor-item';
+        const tipos = (s.tipo || []).map((t) => `<span class="tipo-tag">${esc(t)}</span>`).join('');
+        el.innerHTML = `
+          <div class="sp-top"><strong>${esc(s.empresa)}</strong><div class="tipo-tags">${tipos}</div></div>
+          <div class="sp-rows">
+            <div><b>Contacto:</b> ${esc(s.contacto)}</div>
+            <div><b>Correo:</b> ${esc(s.correo)}</div>
+            ${s.telefono ? `<div><b>Teléfono:</b> ${esc(s.telefono)}</div>` : ''}
+            ${s.detalle ? `<div><b>Detalle:</b> ${esc(s.detalle)}</div>` : ''}
+          </div>`;
+        list.appendChild(el);
+      });
+    } catch (e) {
+      list.innerHTML = '<div class="empty">Error al cargar patrocinadores.</div>';
+    }
+  }
+
+  // ===== Participantes =====
+  async function loadRegistrations() {
+    const list = document.getElementById('registrationsList');
+    try {
+      const res = await fetch('/api/admin/registrations');
+      const data = await res.json();
+      list.innerHTML = '';
+      const regs = data.registrations || [];
+      document.getElementById('cntParticipantes').textContent = regs.length;
+      if (regs.length === 0) { list.innerHTML = '<div class="empty">No hay participantes inscritos aún.</div>'; return; }
+
+      // Separar individuales de grupales
+      const individuales = regs.filter((r) => !r.group_id);
+      const grupos = new Map();
+      regs.filter((r) => r.group_id).forEach((r) => {
+        if (!grupos.has(r.group_id)) grupos.set(r.group_id, []);
+        grupos.get(r.group_id).push(r);
+      });
+
+      // Individuales (participación remota)
+      individuales.forEach((r) => {
+        const el = document.createElement('div');
+        el.className = 'sponsor-item';
+        el.innerHTML = `
+          <div class="sp-top"><strong>${esc(r.nombre)} ${esc(r.apellido)}</strong><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="tipo-tag">${esc(r.anio || '')}</span><span class="tipo-tag" style="background:rgba(230,57,102,.12);color:var(--rose)">Remoto</span><span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">Código: ${esc(r.codigo || '—')}</span></span></div>
+          <div class="sp-rows">
+            <div><b>Correo:</b> ${esc(r.correo)}</div>
+            <div><b>Nacimiento:</b> ${esc(r.nacimiento || '—')}</div>
+          </div>`;
+        list.appendChild(el);
+      });
+
+      // Grupos
+      let gn = 1;
+      grupos.forEach((miembros, gid) => {
+        const g = document.createElement('div');
+        g.className = 'group-block';
+        const propuesta = (miembros.find((m) => m.propuesta) || {}).propuesta || '';
+        const modalidad = miembros[0].modalidad || '';
+        const miembrosHTML = miembros.map((m) => `
+          <div class="sp-rows" style="margin-top:8px; padding:8px 0 8px 12px; border-left:3px solid var(--cyan); background:#F7FAFC; border-radius:0 6px 6px 0;">
+            <div><b>${esc(m.nombre)} ${esc(m.apellido)}</b> — ${esc(m.correo)}</div>
+            <div style="font-size:.8rem; color:var(--ink-soft)">Nacimiento: ${esc(m.nacimiento || '—')} · Año: ${esc(m.anio || '—')}</div>
+          </div>`).join('');
+        g.innerHTML = `
+          <div class="sp-top"><strong>👥 Grupo ${gn}</strong><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="tipo-tag">Grupal · ${miembros.length} integrantes</span><span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">Código: ${esc(miembros[0].codigo || '—')}</span></span></div>
+          ${propuesta ? `<div class="propuesta"><b>Propuesta de desarrollo:</b> ${esc(propuesta)}</div>` : ''}
+          <div class="modalidad-row">
+            <label>Modalidad:</label>
+            <select class="sel-modalidad" data-group="${esc(gid)}">
+              <option value="" ${modalidad === '' ? 'selected' : ''}>Pendiente</option>
+              <option value="presencial" ${modalidad === 'presencial' ? 'selected' : ''}>Presencial (UNETI)</option>
+              <option value="remoto" ${modalidad === 'remoto' ? 'selected' : ''}>Remoto</option>
+            </select>
+          </div>
+          ${miembrosHTML}`;
+        list.appendChild(g);
+        gn++;
+      });
+    } catch (e) {
+      list.innerHTML = '<div class="empty">Error al cargar inscritos.</div>';
+    }
+  }
+
+  document.getElementById('registrationsList').addEventListener('change', async (e) => {
+    if (e.target.classList.contains('sel-modalidad')) {
+      const group_id = e.target.dataset.group;
+      const modalidad = e.target.value;
+      try {
+        await fetch('/api/admin/registrations', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ group_id, modalidad }),
+        });
+      } catch (err) {}
+    }
+  });
+
+  // ===== Logística =====
+  function logisticaCard(g) {
+    const el = document.createElement('div');
+    el.className = 'grupo-log';
+    el.innerHTML = `
+      <h4>${esc(g.grupo)}</h4>
+      <div class="field"><label>Responsables (nombre y teléfono, uno por línea)</label><textarea class="resp-ta" rows="3" placeholder="Nombre Apellido — 0412-1234567">${esc(g.responsables || '')}</textarea></div>
+      <div class="field"><label>Insumos (uno por línea)</label><textarea class="insumos-ta" rows="4">${esc(g.insumos || '')}</textarea></div>
+      <div class="field"><label>Actividades detalladas (uno por línea)</label><textarea class="actividades-ta" rows="5">${esc(g.actividades || '')}</textarea></div>
+      <div class="save-row"><button type="button" class="btn save-log" data-grupo="${esc(g.grupo)}">Guardar</button><div class="form-status"></div></div>`;
+    return el;
+  }
+
+  async function loadLogistica() {
+    const cont = document.getElementById('logisticaList');
+    try {
+      const res = await fetch('/api/admin/logistica');
+      const data = await res.json();
+      cont.innerHTML = '';
+      (data.grupos || []).forEach((g) => cont.appendChild(logisticaCard(g)));
+    } catch (e) {
+      cont.innerHTML = '<div class="empty">Error al cargar logística.</div>';
+    }
+  }
+
+  document.getElementById('logisticaList').addEventListener('click', async (e) => {
+    if (e.target.classList.contains('save-log')) {
+      const card = e.target.closest('.grupo-log');
+      const status = card.querySelector('.form-status');
+      const grupo = e.target.dataset.grupo;
+      const responsables = card.querySelector('.resp-ta').value;
+      const insumos = card.querySelector('.insumos-ta').value;
+      const actividades = card.querySelector('.actividades-ta').value;
+      try {
+        const res = await fetch('/api/admin/logistica', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ grupo, responsables, insumos, actividades }),
+        });
+        const data = await res.json();
+        status.className = 'form-status ' + (data.ok ? 'ok' : 'err');
+        status.textContent = data.ok ? 'Guardado.' : (data.error || 'Error.');
+      } catch (err) {
+        status.className = 'form-status err';
+        status.textContent = 'Error de conexión.';
+      }
+    }
+  });
+
+  // ===== Acreditación =====
+  async function loadAccreditation() {
+    const cont = document.getElementById('acreditacionList');
+    try {
+      const res = await fetch('/api/admin/registrations');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const regs = data.registrations || [];
+      const presenciales = regs.filter((r) => r.modalidad === 'presencial' && r.group_id);
+      const grupos = new Map();
+      presenciales.forEach((r) => {
+        if (!grupos.has(r.group_id)) grupos.set(r.group_id, []);
+        grupos.get(r.group_id).push(r);
+      });
+      if (grupos.size === 0) { cont.innerHTML = '<div class="empty">No hay grupos presenciales seleccionados aún.</div>'; return; }
+      let gn = 1;
+      grupos.forEach((miembros) => {
+        const g = document.createElement('div');
+        g.className = 'group-block';
+        const acreditados = miembros.filter((m) => m.acreditado).length;
+        const miembrosHTML = miembros.map((m) => `
+          <div class="acred-row">
+            <label><input type="checkbox" class="acred-check" data-id="${m.id}" ${m.acreditado ? 'checked' : ''}> <strong>${esc(m.nombre)} ${esc(m.apellido)}</strong> <small>${esc(m.correo)}</small></label>
+          </div>`).join('');
+        g.innerHTML = `
+          <div class="sp-top"><strong>👥 Grupo ${gn}</strong><span class="tipo-tag" style="background:rgba(6,167,125,.12);color:var(--green)">${acreditados}/${miembros.length} acreditados</span></div>
+          ${miembrosHTML}`;
+        cont.appendChild(g);
+        gn++;
+      });
+    } catch (e) {
+      cont.innerHTML = '<div class="empty">Error al cargar acreditación.</div>';
+    }
+  }
+
+  document.getElementById('acreditacionList').addEventListener('change', async (e) => {
+    if (e.target.classList.contains('acred-check')) {
+      const card = e.target.closest('.group-block');
+      const id = e.target.dataset.id;
+      const acreditado = e.target.checked;
+      try {
+        await fetch('/api/admin/acreditar', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, acreditado }),
+        });
+        const checks = card.querySelectorAll('.acred-check');
+        const acred = [...checks].filter((c) => c.checked).length;
+        card.querySelector('.tipo-tag').textContent = `${acred}/${checks.length} acreditados`;
+      } catch (err) {}
+    }
+  });
+
+  // ===== Motor de Evaluación =====
+  async function loadEvaluador() {
+    const prompt = document.getElementById('evalPrompt');
+    const list = document.getElementById('evalsList');
+    try {
+      const res = await fetch('/api/admin/evaluador');
+      const data = await res.json();
+      prompt.value = data.prompt || '';
+      list.innerHTML = '';
+      const evals = data.evaluaciones || [];
+      const presel = evals.filter((e) => e.estado === 'preseleccionado').length;
+      const finales = evals.filter((e) => e.estado === 'final').length;
+      document.getElementById('cntPreseleccionados').textContent = `${presel}/20 preseleccionados`;
+      document.getElementById('cntFinales').textContent = `${finales}/10 finales`;
+      if (evals.length === 0) {
+        list.innerHTML = '<div class="empty">Aún no hay evaluaciones. Haz clic en "Evaluar propuestas con IA".</div>';
+        return;
+      }
+      evals.forEach((e, i) => list.appendChild(evalCard(e, i)));
+    } catch (e) {
+      list.innerHTML = '<div class="empty">Error al cargar evaluaciones.</div>';
+    }
+  }
+
+  function evalCard(e, i) {
+    const el = document.createElement('div');
+    el.className = 'eval-item';
+    const prop = (e.propuesta || '').slice(0, 90);
+    el.innerHTML = `
+      <div class="eval-top">
+        <strong>#${i + 1} · ${esc(prop)}${(e.propuesta || '').length > 90 ? '…' : ''}</strong>
+        <span class="eval-score">${Math.round(e.puntaje || 0)}</span>
+      </div>
+      <div class="eval-just">${esc(e.justificacion || '')}</div>
+      <div class="eval-estado">
+        <label>Estado:</label>
+        <select class="sel-estado" data-group="${esc(e.group_id)}">
+          <option value="pendiente" ${e.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+          <option value="preseleccionado" ${e.estado === 'preseleccionado' ? 'selected' : ''}>Preseleccionado (20)</option>
+          <option value="final" ${e.estado === 'final' ? 'selected' : ''}>Final (10)</option>
+        </select>
+      </div>`;
+    return el;
+  }
+
+  document.getElementById('savePrompt').addEventListener('click', async () => {
+    const prompt = document.getElementById('evalPrompt').value;
+    const res = await fetch('/api/admin/evaluador', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
+    const data = await res.json();
+    setStatus('evalStatus', data.ok ? 'Prompt guardado.' : (data.error || 'Error.'), data.ok);
+  });
+
+  document.getElementById('runEval').addEventListener('click', async () => {
+    const btn = document.getElementById('runEval');
+    setStatus('evalStatus', 'Evaluando propuestas con IA…', false);
+    const s = document.getElementById('evalStatus');
+    s.className = 'form-status';
+    s.textContent = 'Evaluando propuestas con IA…';
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/admin/evaluar', { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus('evalStatus', `Evaluación completada (${data.evaluadas} propuestas).`, true);
+        loadEvaluador();
+      } else {
+        setStatus('evalStatus', data.error || 'Error.', false);
+      }
+    } catch (e) {
+      setStatus('evalStatus', 'Error de conexión.', false);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('evalsList').addEventListener('change', async (e) => {
+    if (e.target.classList.contains('sel-estado')) {
+      const group_id = e.target.dataset.group;
+      const estado = e.target.value;
+      try {
+        await fetch('/api/admin/seleccion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ group_id, estado }) });
+        const selects = [...document.querySelectorAll('.sel-estado')];
+        const presel = selects.filter((s) => s.value === 'preseleccionado').length;
+        const finales = selects.filter((s) => s.value === 'final').length;
+        document.getElementById('cntPreseleccionados').textContent = `${presel}/20 preseleccionados`;
+        document.getElementById('cntFinales').textContent = `${finales}/10 finales`;
+      } catch (err) {}
+    }
+  });
+
+  // ===== Resultados =====
+  function resultadoCard(r, i) {
+    const el = document.createElement('div');
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+    el.className = 'res-item' + (i < 3 ? ' top' : '');
+    el.innerHTML = `
+      <div class="res-rank">${medal}</div>
+      <div class="res-name">${esc(r.nombre)}</div>
+      <div class="res-meta">${r.evaluaciones} puntajes</div>
+      <div class="res-score">${r.puntaje.toFixed(2)} / 5.0</div>`;
+    return el;
+  }
+
+  async function loadResultados() {
+    const cont = document.getElementById('resultadosList');
+    try {
+      const resp = await fetch('/api/admin/resultados');
+      const data = await resp.json();
+      cont.innerHTML = '';
+      const rs = data.resultados || [];
+      if (rs.length === 0) {
+        cont.innerHTML = '<div class="empty">Aún no hay evaluaciones del jurado.</div>';
+        return;
+      }
+      rs.forEach((r, i) => cont.appendChild(resultadoCard(r, i)));
+    } catch (e) {
+      cont.innerHTML = '<div class="empty">Error al cargar resultados.</div>';
+    }
+  }
+
+  // ===== Dashboard =====
+  async function loadResumen() {
+    try {
+      const res = await fetch('/api/admin/resumen');
+      const data = await res.json();
+      document.getElementById('dInscritos').textContent = data.inscritos || 0;
+      document.getElementById('dIndividuales').textContent = data.individuales || 0;
+      document.getElementById('dGrupos').textContent = data.grupos || 0;
+      document.getElementById('dEquipos').textContent = data.equipos || 0;
+      document.getElementById('dJurados').textContent = data.jurados || 0;
+      document.getElementById('dPatrocinadores').textContent = data.patrocinadores || 0;
+      document.getElementById('dEvaluaciones').textContent = data.evaluaciones || 0;
+      document.getElementById('dPreseleccionados').textContent = data.preseleccionados || 0;
+      document.getElementById('dFinales').textContent = data.finales || 0;
+    } catch (e) {}
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try { await fetch('/api/admin/logout'); } catch (e) {}
+    localStorage.removeItem('role');
+    location.reload();
+  });
+
+  // ===== Presupuesto =====
+  async function loadPresupuesto() {
+    const list = document.getElementById('presupuestoList');
+    try {
+      const res = await fetch('/api/admin/presupuesto');
+      const data = await res.json();
+      document.getElementById('bIngresos').textContent = (data.totalIngresos || 0).toLocaleString();
+      document.getElementById('bEgresos').textContent = (data.totalEgresos || 0).toLocaleString();
+      document.getElementById('bBalance').textContent = (data.balance || 0).toLocaleString();
+      list.innerHTML = '';
+      const items = data.items || [];
+      if (items.length === 0) { list.innerHTML = '<div class="empty">Sin movimientos registrados.</div>'; return; }
+      items.forEach((i) => {
+        const el = document.createElement('div');
+        el.className = 'budget-item';
+        const signo = i.tipo === 'ingreso' ? '+' : '−';
+        el.innerHTML = `<div class="budget-item-main"><strong>${esc(i.concepto)}</strong><span class="budget-item-cat">${esc(i.categoria || '')}</span></div><div class="budget-item-monto ${esc(i.tipo)}">${signo}${(Number(i.monto) || 0).toLocaleString()}</div>`;
+        list.appendChild(el);
+      });
+    } catch (e) {
+      list.innerHTML = '<div class="empty">Error al cargar presupuesto.</div>';
+    }
+  }
+
+  document.getElementById('presupuestoForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      concepto: document.getElementById('pConcepto').value.trim(),
+      tipo: document.getElementById('pTipo').value,
+      monto: Number(document.getElementById('pMonto').value),
+      categoria: document.getElementById('pCategoria').value.trim(),
+    };
+    const res = await fetch('/api/admin/presupuesto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('presupuestoForm').reset();
+      setStatus('presupuestoStatus', 'Movimiento guardado.', true);
+      loadPresupuesto();
+    } else {
+      setStatus('presupuestoStatus', data.error || 'Error.', false);
+    }
+  });
+
+  function setupSearch(inputId, listId) {
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId);
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase();
+      [...list.children].forEach((el) => {
+        if (el.classList.contains('empty')) return;
+        el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+  }
+  setupSearch('searchParticipantes', 'registrationsList');
+  setupSearch('searchPatrocinadores', 'sponsorsList');
+
+  // ===== Auditoría =====
+  async function loadAuditoria() {
+    const cont = document.getElementById('auditoriaList');
+    try {
+      const res = await fetch('/api/admin/auditoria');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const regs = data.registros || [];
+      if (regs.length === 0) { cont.innerHTML = '<div class="empty">Sin registros de auditoría.</div>'; return; }
+      regs.forEach((r) => {
+        const el = document.createElement('div');
+        el.className = 'audit-item';
+        el.innerHTML = `<span class="audit-rol">${esc(r.rol)}</span><span class="audit-meta">${esc(r.metodo)} ${esc(r.ruta)}</span><span class="audit-time">${esc((r.created_at || '').replace('T', ' ').slice(0, 16))}</span>`;
+        cont.appendChild(el);
+      });
+    } catch (e) {
+      cont.innerHTML = '<div class="empty">Error al cargar auditoría.</div>';
+    }
+  }
+
+  // ===== Comunicados (admin) =====
+  async function loadComunicadosAdmin() {
+    const cont = document.getElementById('comunicadosAdminList');
+    try {
+      const res = await fetch('/api/admin/comunicados');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const cs = data.comunicados || [];
+      if (cs.length === 0) { cont.innerHTML = '<div class="empty">Sin comunicados.</div>'; return; }
+      cs.forEach((c) => {
+        const el = document.createElement('div');
+        el.className = 'audit-item';
+        el.innerHTML = `<div class="audit-meta"><strong>${esc(c.titulo)}</strong><br><span>${esc(c.contenido)}</span></div><button type="button" class="btn" onclick="delComunicado(${c.id})">Eliminar</button>`;
+        cont.appendChild(el);
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+  async function delComunicado(id) {
+    await fetch('/api/admin/comunicados?id=' + id, { method: 'DELETE' });
+    loadComunicadosAdmin();
+  }
+  document.getElementById('comunicadoForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const res = await fetch('/api/admin/comunicados', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: document.getElementById('cmTitulo').value.trim(), contenido: document.getElementById('cmContenido').value.trim() }) });
+    const data = await res.json();
+    if (data.ok) { document.getElementById('comunicadoForm').reset(); setStatus('comunicadoStatus', 'Comunicado publicado.', true); loadComunicadosAdmin(); }
+    else setStatus('comunicadoStatus', data.error || 'Error.', false);
+  });
+
+  // ===== Entregas =====
+  async function loadEntregas() {
+    const cont = document.getElementById('entregasList');
+    try {
+      const res = await fetch('/api/admin/entregas');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const items = data.entregas || [];
+      if (items.length === 0) { cont.innerHTML = '<div class="empty">Aún no hay entregas.</div>'; return; }
+      items.forEach((e) => {
+        const el = document.createElement('div');
+        el.className = 'audit-item';
+        el.innerHTML = `<div class="audit-meta"><strong>${esc(e.participante || 'Participante')}</strong> (código ${esc(e.codigo || '—')})<br><span>Repo: <a href="${esc(e.repositorio)}" target="_blank" rel="noopener">${esc(e.repositorio)}</a>${e.demo ? ' · Demo: ' + esc(e.demo) : ''}${e.proyecto ? ' · ' + esc(e.proyecto) : ''}</span></div>`;
+        cont.appendChild(el);
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+
+  // ===== Consultas =====
+  async function loadConsultas() {
+    const cont = document.getElementById('consultasList');
+    try {
+      const res = await fetch('/api/admin/consultas');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const items = data.consultas || [];
+      if (items.length === 0) { cont.innerHTML = '<div class="empty">Sin consultas.</div>'; return; }
+      items.forEach((c) => {
+        const el = document.createElement('div');
+        el.className = 'audit-item';
+        el.innerHTML = `<div class="audit-meta"><strong>${esc(c.nombre || 'Anónimo')}${c.team_id ? ' · Grupo ' + c.team_id : ''}</strong><br><span>${esc(c.consulta)}</span></div><span class="pill-s">${esc(c.estado)}</span>${c.estado === 'pendiente' ? `<button type="button" class="btn" onclick="responderConsulta(${c.id})">Respondida</button>` : ''}`;
+        cont.appendChild(el);
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+  async function responderConsulta(id) {
+    await fetch('/api/admin/consultas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, estado: 'respondida' }) });
+    loadConsultas();
+  }
+
+  // ===== Asistencia remota =====
+  async function loadAsistencia() {
+    const cont = document.getElementById('asistenciaList');
+    try {
+      const res = await fetch('/api/admin/asistencia');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const items = data.asistencias || [];
+      if (items.length === 0) { cont.innerHTML = '<div class="empty">Aún no hay asistencias remotas.</div>'; return; }
+      items.forEach((a) => {
+        const el = document.createElement('div');
+        el.className = 'audit-item';
+        el.innerHTML = `<div class="audit-meta"><strong>${esc(a.nombre)} ${esc(a.apellido)}</strong><br><span>${esc(a.correo)}</span></div><span class="audit-time">${esc((a.created_at || '').replace('T', ' ').slice(0, 16))}</span>`;
+        cont.appendChild(el);
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+
+  document.getElementById('enviarCodigosBtn').addEventListener('click', async () => {
+    if (!confirm('¿Enviar el código e instrucciones a TODOS los inscritos por correo?')) return;
+    const btn = document.getElementById('enviarCodigosBtn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+    try {
+      const res = await fetch('/api/admin/enviar-codigos', { method: 'POST' });
+      const data = await res.json();
+      setStatus('enviarCodigosStatus', data.message || data.error || 'Listo.', data.ok);
+    } catch (e) {
+      setStatus('enviarCodigosStatus', 'Error de red.', false);
+    }
+    btn.disabled = false;
+    btn.textContent = '📧 Enviar códigos por correo';
+  });
+
+  // ===== Participantes remotos =====
+  async function loadRemotos() {
+    const tbody = document.getElementById('remotosBody');
+    try {
+      const res = await fetch('/api/admin/remotos');
+      const data = await res.json();
+      tbody.innerHTML = '';
+      const items = data.remotos || [];
+      if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin participantes remotos.</td></tr>'; return; }
+      items.forEach((r) => {
+        const tr = document.createElement('tr');
+        const consultasHtml = `<span>${r.consultas}</span>${r.consultas_pendientes > 0 ? ` <span class="badge-pend">${r.consultas_pendientes} pend.</span>` : ''}`;
+        const ultima = r.ultima_consulta ? `<span class="k">${esc(r.ultima_consulta)}</span> <span class="st-${esc(r.ultima_consulta_estado)}">${esc(r.ultima_consulta_estado)}</span>` : '—';
+        const repo = r.entrega ? `<a href="${esc(r.entrega)}" target="_blank" rel="noopener">${esc(r.entrega)}</a>${r.demo ? ' · <a href="' + esc(r.demo) + '" target="_blank" rel="noopener">demo</a>' : ''}` : '—';
+        tr.innerHTML = `<td><strong>${esc(r.codigo)}</strong>${r.legacy ? ' <span class="legacy-tag">sin código</span>' : ''}</td><td>${esc(r.nombre)}<br><span class="k">${r.integrantes} integrante(s)</span></td><td>${esc(r.tipo)}</td><td>${repo}</td><td>${consultasHtml}</td><td>${r.asistencia > 0 ? '✅ ' + r.asistencia : '—'}</td><td>${ultima}</td>`;
+        tbody.appendChild(tr);
+      });
+    } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Error.</td></tr>'; }
+  }
+
+  // ===== Errores =====
+  async function loadErrores() {
+    const cont = document.getElementById('erroresList');
+    try {
+      const res = await fetch('/api/admin/errores');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const items = data.errores || [];
+      if (items.length === 0) { cont.innerHTML = '<div class="empty">Sin errores registrados.</div>'; return; }
+      items.forEach((e) => {
+        const el = document.createElement('div');
+        el.className = 'audit-item';
+        el.innerHTML = `<span class="audit-rol">${esc(e.endpoint)}</span><span class="audit-meta">${esc(e.mensaje)}</span><span class="audit-time">${esc((e.created_at || '').replace('T', ' ').slice(0, 16))}</span>`;
+        cont.appendChild(el);
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+
+  // ===== Agentes IA =====
+  document.getElementById('btnRecordatorios').addEventListener('click', async () => {
+    if (!confirm('¿Enviar recordatorios a quienes no han entregado su proyecto?')) return;
+    const btn = document.getElementById('btnRecordatorios');
+    btn.disabled = true; btn.textContent = 'Enviando…';
+    try {
+      const res = await fetch('/api/admin/agente-recordatorios', { method: 'POST' });
+      const data = await res.json();
+      setStatus('recordatoriosStatus', data.message || data.error || 'Listo.', data.ok);
+    } catch (e) { setStatus('recordatoriosStatus', 'Error de red.', false); }
+    btn.disabled = false; btn.textContent = 'Ejecutar';
+  });
+
+  document.getElementById('btnGithub').addEventListener('click', async () => {
+    const cont = document.getElementById('githubResult');
+    cont.innerHTML = '<span class="k">Revisando repositorios…</span>';
+    try {
+      const res = await fetch('/api/admin/agente-github', { method: 'POST' });
+      const data = await res.json();
+      const items = data.report || [];
+      if (items.length === 0) { cont.innerHTML = '<span class="empty">No hay repositorios entregados.</span>'; return; }
+      cont.innerHTML = items.map((i) => {
+        const estadoTag = i.estado === 'activo' ? '✅ activo' : i.estado === 'sin-commits' ? '⚠️ sin commits' : '🔒 ' + esc(i.estado);
+        return `<div class="ar-item"><strong>${esc(i.codigo)}</strong> · <a href="${esc(i.repo)}" target="_blank" rel="noopener">${esc(i.repo)}</a><br><span class="k">${estadoTag}${i.last_commit ? ' · último commit: ' + esc(i.last_commit.slice(0, 10)) : ''}</span></div>`;
+      }).join('');
+    } catch (e) { cont.innerHTML = '<span class="empty">Error.</span>'; }
+  });
+
+  document.getElementById('btnTriaje').addEventListener('click', async () => {
+    const cont = document.getElementById('triajeResult');
+    cont.innerHTML = '<span class="k">Clasificando consultas…</span>';
+    try {
+      const res = await fetch('/api/admin/agente-triaje', { method: 'POST' });
+      const data = await res.json();
+      const items = data.classified || [];
+      if (items.length === 0) { cont.innerHTML = '<span class="empty">No hay consultas pendientes.</span>'; return; }
+      cont.innerHTML = items.map((i) => `<div class="ar-item"><span class="pill-s">${esc(i.categoria)}</span> <span>${esc(i.consulta)}</span> <span class="k">(${esc(i.codigo)})</span></div>`).join('');
+    } catch (e) { cont.innerHTML = '<span class="empty">Error.</span>'; }
+  });
+
+  document.getElementById('btnResumen').addEventListener('click', async () => {
+    const cont = document.getElementById('resumenResult');
+    cont.innerHTML = '<span class="k">Generando resumen…</span>';
+    try {
+      const res = await fetch('/api/admin/agente-resumen', { method: 'POST' });
+      const data = await res.json();
+      cont.innerHTML = `<div class="ar-item"><strong>📊 Datos:</strong> ${esc(data.datos)}</div><div class="ar-item">${esc(data.resumen || 'No se pudo generar el resumen.')}</div>`;
+    } catch (e) { cont.innerHTML = '<span class="empty">Error.</span>'; }
+  });
+
+  // ===== Biblioteca de proyectos =====
+  const PROYECTOS = [
+    ['01-auditoria-algoritmica.md','Plataforma nacional de auditoría algorítmica','IA Ética'],
+    ['02-registro-modelos-ia.md','Registro soberano de modelos de IA del Estado','IA Ética'],
+    ['03-fichas-modelo.md','Generador de fichas de modelo (model cards)','IA Ética'],
+    ['04-equidad-programas-sociales.md','Motor de equidad para programas sociales y becas','IA Ética'],
+    ['05-explicabilidad-decisiones.md','Sistema de explicabilidad de decisiones administrativas','IA Ética'],
+    ['06-anonimizacion-datos-abiertos.md','Anonimización de datos para datos abiertos','IA Ética'],
+    ['07-privacidad-diferencial.md','Plataforma de privacidad diferencial','IA Ética'],
+    ['08-consentimiento-datos.md','Gestión de consentimiento y derechos del titular','IA Ética'],
+    ['09-anti-desinformacion.md','Detector de desinformación para la esfera pública','IA Ética'],
+    ['10-verificacion-identidad.md','Verificación de identidad documental con detección de fraude','IA Ética'],
+    ['11-asistente-ciudadano.md','Asistente ciudadano estatal con IA explicable','IA Ética'],
+    ['12-dpia-algoritmico.md','Evaluación de impacto algorítmico (DPIA)','IA Ética'],
+    ['13-observatorio-transparencia.md','Observatorio de transparencia algorítmica','IA Ética'],
+    ['14-ia-salud-publica.md','IA explicable de apoyo al diagnóstico en salud pública','IA Ética'],
+    ['15-datos-sinteticos.md','Plataforma de datos sintéticos con privacidad','IA Ética'],
+    ['16-detector-deepfakes.md','Detector de deepfakes para comunicados oficiales','IA Ética'],
+    ['17-trazabilidad-decisiones.md','Trazabilidad de decisiones automatizadas (ledger)','IA Ética'],
+    ['18-guardian-llm.md','Guardián de integridad de LLMs en servicios públicos','IA Ética'],
+    ['19-sesgo-contratacion.md','Detector de sesgo en contratación pública','IA Ética'],
+    ['20-certificacion-ia-etica.md','Plataforma de certificación en IA ética','IA Ética'],
+    ['21-soc-nacional.md','SOC nacional asistido por IA','Ciberseguridad'],
+    ['22-cti-infraestructura.md','Plataforma de inteligencia de amenazas (CTI)','Ciberseguridad'],
+    ['23-ids-ips.md','IDS/IPS para redes gubernamentales','Ciberseguridad'],
+    ['24-anti-phishing.md','Detección de phishing dirigido a funcionarios','Ciberseguridad'],
+    ['25-scada-iot.md','Protección de sistemas SCADA/IoT industrial','Ciberseguridad'],
+    ['26-iam-riesgo.md','Gestión de identidad y acceso con riesgo adaptativo','Ciberseguridad'],
+    ['27-identidad-digital-firma.md','Identidad digital ciudadana y firma electrónica','Ciberseguridad'],
+    ['28-csirt-playbooks.md','CSIRT con triaje y playbooks automatizados','Ciberseguridad'],
+    ['29-analizador-malware.md','Analizador de malware a escala nacional','Ciberseguridad'],
+    ['30-escaner-vulnerabilidades.md','Escáner de vulnerabilidades de aplicaciones del Estado','Ciberseguridad'],
+    ['31-dlp.md','Prevención de fuga de datos (DLP)','Ciberseguridad'],
+    ['32-attack-surface.md','Gestión de superficie de ataque','Ciberseguridad'],
+    ['33-anti-fraude-subsidios.md','Detección de fraude en programas sociales','Ciberseguridad'],
+    ['34-anti-bots-tramites.md','Anti-bots y anti-fraude en trámites en línea','Ciberseguridad'],
+    ['35-integridad-electoral.md','Integridad y auditoría de procesos electorales','Ciberseguridad'],
+    ['36-coordinacion-incidentes.md','Coordinación de incidentes entre entes','Ciberseguridad'],
+    ['37-osint-nlp.md','OSINT de amenazas con NLP','Ciberseguridad'],
+    ['38-ciber-resiliencia.md','Ciber-resiliencia y continuidad de servicios públicos','Ciberseguridad'],
+    ['39-datos-biometricos.md','Protección de datos biométricos del Estado','Ciberseguridad'],
+    ['40-observatorio-ciberseguridad.md','Observatorio nacional de ciberseguridad','Ciberseguridad']
+  ];
+
+  function renderBiblioteca(filter = '') {
+    const cont = document.getElementById('bibliotecaList');
+    const q = filter.toLowerCase();
+    const items = PROYECTOS.filter((p) => p[1].toLowerCase().includes(q) || p[2].toLowerCase().includes(q));
+    if (items.length === 0) { cont.innerHTML = '<div class="empty" style="grid-column:1/-1">Sin resultados.</div>'; return; }
+    cont.innerHTML = items.map((p) => `<a class="biblio-card" href="/sdd/${p[0]}" target="_blank" rel="noopener"><span class="biblio-num">${esc(p[0].split('-')[0])}</span><span class="biblio-titulo">${esc(p[1])}</span><span class="biblio-eje">${esc(p[2])}</span></a>`).join('');
+  }
+  renderBiblioteca();
+  document.getElementById('searchBiblioteca').addEventListener('input', (e) => renderBiblioteca(e.target.value));
+
+  function loadAll() {
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
+  }
+
+  // ===== Login =====
+  async function checkAuth() {
+    const overlay = document.getElementById('loginOverlay');
+    try {
+      const res = await fetch('/api/admin/teams');
+      if (res.status === 401) { overlay.classList.remove('hidden'); }
+      else {
+        overlay.classList.add('hidden');
+        applyRole(localStorage.getItem('role') || 'admin');
+      }
+    } catch (e) {
+      overlay.classList.remove('hidden');
+    }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('lUser').value.trim();
+    const password = document.getElementById('lPass').value;
+    setStatus('loginStatus', '', false);
+    const s = document.getElementById('loginStatus');
+    s.className = 'form-status';
+    try {
+      const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+      const data = await res.json();
+      if (data.ok) {
+        localStorage.setItem('role', data.role || 'admin');
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('loginForm').reset();
+        loadAll();
+        applyRole(data.role || 'admin');
+      } else {
+        s.className = 'form-status err';
+        s.textContent = data.error || 'Credenciales incorrectas.';
+      }
+    } catch (e) {
+      s.className = 'form-status err';
+      s.textContent = 'Error de conexión.';
+    }
+  });
+
+  document.getElementById('copyInstructivo').addEventListener('click', () => {
+    const text = document.getElementById('instructivoText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      setStatus('copyStatus', 'Instructivo copiado al portapapeles.', true);
+    }).catch(() => {
+      setStatus('copyStatus', 'No se pudo copiar.', false);
+    });
+  });
+
+  document.getElementById('copyCartaPatrocinio').addEventListener('click', () => {
+    const text = document.getElementById('cartaPatrocinioText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      setStatus('cartaStatus', 'Carta copiada al portapapeles.', true);
+    }).catch(() => {
+      setStatus('cartaStatus', 'No se pudo copiar.', false);
+    });
+  });
+
+  document.getElementById('copyPropuestaPatrocinio').addEventListener('click', () => {
+    const text = document.getElementById('propuestaPatrocinioText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      setStatus('propuestaStatus', 'Propuesta copiada al portapapeles.', true);
+    }).catch(() => {
+      setStatus('propuestaStatus', 'No se pudo copiar.', false);
+    });
+  });
+
+  document.getElementById('copyCartaJurado').addEventListener('click', () => {
+    const text = document.getElementById('cartaJuradoText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      setStatus('juradoStatus', 'Carta copiada al portapapeles.', true);
+    }).catch(() => {
+      setStatus('juradoStatus', 'No se pudo copiar.', false);
+    });
+  });
+
+  document.getElementById('copyCartaAutoridades').addEventListener('click', () => {
+    const text = document.getElementById('cartaAutoridadesText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      setStatus('autoridadesStatus', 'Carta copiada al portapapeles.', true);
+    }).catch(() => {
+      setStatus('autoridadesStatus', 'No se pudo copiar.', false);
+    });
+  });
+
+  const copias = [
+    ['copyCartaMentores', 'cartaMentoresText', 'mentoresStatus'],
+    ['copyConvocatoria', 'convocatoriaText', 'convocatoriaStatus'],
+    ['copyCartaAceptacion', 'cartaAceptacionText', 'aceptacionStatus'],
+    ['copyAgradecimiento', 'agradecimientoText', 'agradecimientoStatus'],
+    ['copyCertificadoAliado', 'certificadoAliadoText', 'aliadoStatus'],
+  ];
+  copias.forEach(([btnId, targetId, statusId]) => {
+    document.getElementById(btnId).addEventListener('click', () => {
+      const text = document.getElementById(targetId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        setStatus(statusId, 'Copiado al portapapeles.', true);
+      }).catch(() => {
+        setStatus(statusId, 'No se pudo copiar.', false);
+      });
+    });
+  });
+
+  loadAll();
+  checkAuth();
+</script>
+</body>
+</html>

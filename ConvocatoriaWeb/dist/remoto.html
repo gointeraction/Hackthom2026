@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Remoto · Hackathon UNETI IA 2026</title>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+  :root { --navy: #0B1F3A; --cyan: #00B4D8; --ink: #10243E; --soft: #5B6B7C; --line: #E4EAF1; --bg: #F5F8FB; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  .top { background: var(--navy); color: #fff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .top h1 { font-size: 1.1rem; font-weight: 700; }
+  .top a { color: #9BD9EE; text-decoration: none; font-size: .85rem; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 22px 16px 40px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(16,36,62,.06); }
+  .card h2 { font-size: 1rem; margin-bottom: 12px; color: var(--navy); }
+  label { display: block; font-size: .85rem; font-weight: 600; color: var(--soft); margin-bottom: 6px; }
+  input, textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 1rem; font-family: inherit; }
+  textarea { resize: vertical; }
+  input[readonly] { background: #F0F4F9; color: var(--soft); }
+  .btn { display: inline-block; background: linear-gradient(135deg,#0B1F3A,#12345F); color: #fff; border: 0; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: .95rem; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .msg { margin-top: 12px; font-size: .9rem; }
+  .msg.err { color: #d64545; }
+  .msg.ok { color: #1a9e5c; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+  .badge.pendiente { background: #FFF3D6; color: #9a6a00; }
+  .badge.respondida { background: #DFF5E8; color: #1a9e5c; }
+  ul { list-style: none; }
+  li { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+  li:last-child { border-bottom: 0; }
+  .k { color: var(--soft); font-size: .8rem; }
+  .commit { display: flex; flex-direction: column; gap: 3px; }
+  .commit .m { font-weight: 600; }
+  .commit .meta { font-size: .78rem; color: var(--soft); }
+  .empty { color: var(--soft); font-size: .9rem; }
+  a.repo { color: var(--cyan); font-weight: 600; text-decoration: none; word-break: break-all; }
+  .field { margin-bottom: 12px; }
+  .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .frow { grid-template-columns: 1fr; } }
+  .msg-bubble { padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; font-size: .9rem; max-width: 92%; white-space: pre-wrap; }
+  .msg-bubble.user { background: var(--navy); color: #fff; margin-left: auto; }
+  .msg-bubble.assistant { background: #F0F4F9; color: var(--ink); }
+  .msg-bubble.typing { display: flex; gap: 4px; align-items: center; }
+  .msg-bubble.typing .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: typing-bounce 1.2s infinite ease-in-out; }
+  .msg-bubble.typing .dot:nth-child(2) { animation-delay: .15s; }
+  .msg-bubble.typing .dot:nth-child(3) { animation-delay: .3s; }
+  @keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .35; } 30% { transform: translateY(-5px); opacity: 1; } }
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>📶 Panel Remoto · Hackathon UNETI IA 2026</h1>
+    <a href="/">← Volver al sitio</a>
+  </header>
+
+  <div class="wrap">
+    <form class="card" id="codigoForm" novalidate>
+      <h2>Ingresa tu código</h2>
+      <label for="codigo">Código de participante o grupo</label>
+      <input type="text" id="codigo" placeholder="Ej: AB12CD34" autocomplete="off">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="panel" style="margin:10px 0"></div>
+      <div style="margin-top:14px"><button type="submit" class="btn" id="btnVer">Ver mi panel</button></div>
+      <div class="msg" id="msg"></div>
+    </form>
+
+    <!-- FORMULARIOS (se autocompletan con tu código) -->
+    <form class="card" id="entregaForm" style="display:none" novalidate>
+      <h2>📦 Entrega de proyecto</h2>
+      <div class="field"><label>Código</label><input type="text" id="feCodigo" readonly></div>
+      <div class="field"><label>Repositorio GitHub/GitLab <span style="color:#d64545">*</span></label><input type="url" id="feRepo" placeholder="https://github.com/usuario/repo" required></div>
+      <div class="frow">
+        <div class="field"><label>Nombre del proyecto (opcional)</label><input type="text" id="feProyecto"></div>
+        <div class="field"><label>Enlace de demo (opcional)</label><input type="url" id="feDemo"></div>
+      </div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="entrega" style="margin:10px 0"></div>
+      <button type="submit" class="btn">Enviar entrega</button>
+      <div class="msg" id="entregaMsg"></div>
+    </form>
+
+    <form class="card" id="consultaForm" style="display:none" novalidate>
+      <h2>💬 Consulta a mentores</h2>
+      <div class="field"><label>Código</label><input type="text" id="fcCodigo" readonly></div>
+      <div class="field"><label>Consulta <span style="color:#d64545">*</span></label><textarea id="fcConsulta" rows="3" required></textarea></div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="consulta" style="margin:10px 0"></div>
+      <button type="submit" class="btn">Enviar consulta</button>
+      <div class="msg" id="consultaMsg"></div>
+    </form>
+
+    <form class="card" id="asistenciaForm" style="display:none" novalidate>
+      <h2>✅ Registro de asistencia remota</h2>
+      <div class="field"><label>Correo de inscripción</label><input type="email" id="faCorreo" readonly></div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="asistencia" style="margin:10px 0"></div>
+      <button type="submit" class="btn">Registrar asistencia</button>
+      <div class="msg" id="asistenciaMsg"></div>
+    </form>
+
+    <div class="card" id="mentorCard" style="display:none">
+      <h2>🤖 Mentor Virtual</h2>
+      <p class="k" style="margin-bottom:10px">Hazme preguntas sobre el evento, la logística o tu proyecto.</p>
+      <div id="mentorChat" style="max-height:300px; overflow-y:auto; margin-bottom:12px"></div>
+      <form id="mentorForm" style="display:flex; gap:8px">
+        <input type="text" id="mentorInput" placeholder="Escribe tu consulta..." style="flex:1" autocomplete="off">
+        <button type="submit" class="btn">Enviar</button>
+      </form>
+    </div>
+
+    <div id="panel" style="display:none"></div>
+  </div>
+
+<script>
+  let currentCodigo = '';
+  let panelData = null;
+
+  function getTurnstileToken(form) {
+    const input = form.querySelector('[name="cf-turnstile-response"]');
+    return (input && input.value) ? input.value : '';
+  }
+  function esc(s) { return String(s == null ? '' : s); }
+  function setMsg(id, text, ok) {
+    const el = document.getElementById(id);
+    el.className = 'msg ' + (ok ? 'ok' : 'err');
+    el.textContent = text;
+  }
+  function setFormsVisible(v) {
+    ['entregaForm', 'consultaForm', 'asistenciaForm', 'mentorCard'].forEach((id) => {
+      document.getElementById(id).style.display = v ? '' : 'none';
+    });
+  }
+
+  async function loadPanel(codigo, turnstile) {
+    const msg = document.getElementById('msg');
+    const panel = document.getElementById('panel');
+    msg.className = 'msg';
+    msg.textContent = 'Cargando…';
+    try {
+      const res = await fetch('/api/panel-remoto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo, turnstile }),
+      });
+      const data = await res.json();
+      if (!data.ok) { msg.className = 'msg err'; msg.textContent = data.error || 'Error.'; panel.style.display = 'none'; setFormsVisible(false); return; }
+      currentCodigo = codigo;
+      panelData = data;
+      msg.textContent = '';
+      document.getElementById('feCodigo').value = codigo;
+      document.getElementById('fcCodigo').value = codigo;
+      document.getElementById('faCorreo').value = data.registro.correo || '';
+      panel.style.display = '';
+      setFormsVisible(true);
+      render();
+    } catch (e) {
+      msg.className = 'msg err'; msg.textContent = 'Error de red.'; panel.style.display = 'none'; setFormsVisible(false);
+    }
+  }
+
+  function render() {
+    const data = panelData;
+    if (!data) return;
+    const r = data.registro;
+    const panel = document.getElementById('panel');
+
+    let info = `<div class="card"><h2>👤 Mi información</h2>
+      <p style="font-size:.95rem"><strong>${esc(r.nombre)} ${esc(r.apellido)}</strong><br>
+      <span class="k">Código:</span> <strong>${esc(r.codigo)}</strong> · <span class="k">Modalidad:</span> ${esc(r.modalidad || '—')}</p></div>`;
+
+    let entregaHtml = '';
+    if (data.entrega) {
+      entregaHtml = `<div class="card"><h2>📦 Mi repositorio actual</h2>
+        <p><a class="repo" href="${esc(data.entrega.repositorio)}" target="_blank" rel="noopener">${esc(data.entrega.repositorio)}</a></p>
+        ${data.entrega.proyecto ? `<p class="k">Proyecto: ${esc(data.entrega.proyecto)}</p>` : ''}
+        ${data.entrega.demo ? `<p class="k">Demo: ${esc(data.entrega.demo)}</p>` : ''}</div>`;
+    }
+
+    let commitsHtml = '';
+    if (data.commits && data.commits.length > 0) {
+      const items = data.commits.map((c) => `<li><div class="commit"><span class="m">${esc(c.message)}</span><span class="meta">${esc(c.sha)} · ${esc(c.author)} · ${esc((c.date||'').slice(0,10))}</span></div></li>`).join('');
+      commitsHtml = `<div class="card"><h2>🚀 Progreso en GitHub (últimos commits)</h2><ul>${items}</ul></div>`;
+    } else if (data.entrega) {
+      commitsHtml = `<div class="card"><h2>🚀 Progreso en GitHub</h2><p class="empty">No se pudieron obtener commits (repositorio privado o vacío).</p></div>`;
+    }
+
+    let consultasHtml = '';
+    if (data.consultas && data.consultas.length > 0) {
+      const items = data.consultas.map((c) => `<li><span class="badge ${esc(c.estado)}">${esc(c.estado)}</span> <span>${esc(c.consulta)}</span><br><span class="k">${esc((c.created_at||'').replace('T',' ').slice(0,16))}</span></li>`).join('');
+      consultasHtml = `<div class="card"><h2>💬 Mis consultas a mentores</h2><ul>${items}</ul></div>`;
+    }
+
+    panel.innerHTML = info + entregaHtml + commitsHtml + consultasHtml;
+  }
+
+  // Ingreso de código (protegido con Turnstile)
+  document.getElementById('codigoForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const c = document.getElementById('codigo').value.trim().toUpperCase();
+    const t = getTurnstileToken(e.currentTarget);
+    if (!c) { setMsg('msg', 'Ingresa tu código.', false); return; }
+    if (!t) { setMsg('msg', 'Completa la verificación de seguridad.', false); return; }
+    loadPanel(c, t);
+  });
+
+  // Entrega de proyecto
+  document.getElementById('entregaForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentCodigo) { setMsg('entregaMsg', 'Primero ingresa tu código.', false); return; }
+    const t = getTurnstileToken(e.currentTarget);
+    if (!t) { setMsg('entregaMsg', 'Completa la verificación de seguridad.', false); return; }
+    const payload = {
+      codigo: currentCodigo,
+      repositorio: document.getElementById('feRepo').value.trim(),
+      proyecto: document.getElementById('feProyecto').value.trim(),
+      demo: document.getElementById('feDemo').value.trim(),
+      turnstile: t,
+    };
+    const res = await fetch('/api/entrega', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      setMsg('entregaMsg', data.message || 'Entrega registrada.', true);
+      panelData.entrega = { repositorio: payload.repositorio, proyecto: payload.proyecto, demo: payload.demo };
+      panelData.commits = [];
+      render();
+    } else setMsg('entregaMsg', data.error || 'Error.', false);
+  });
+
+  // Consulta
+  document.getElementById('consultaForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentCodigo) { setMsg('consultaMsg', 'Primero ingresa tu código.', false); return; }
+    const t = getTurnstileToken(e.currentTarget);
+    if (!t) { setMsg('consultaMsg', 'Completa la verificación de seguridad.', false); return; }
+    const consulta = document.getElementById('fcConsulta').value.trim();
+    const payload = { codigo: currentCodigo, consulta, turnstile: t };
+    const res = await fetch('/api/consulta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      setMsg('consultaMsg', data.message || 'Consulta enviada.', true);
+      e.currentTarget.querySelector('textarea').value = '';
+      panelData.consultas = panelData.consultas || [];
+      panelData.consultas.unshift({ consulta, estado: 'pendiente', created_at: new Date().toISOString() });
+      render();
+    } else setMsg('consultaMsg', data.error || 'Error.', false);
+  });
+
+  // Asistencia remota
+  document.getElementById('asistenciaForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const correo = document.getElementById('faCorreo').value.trim();
+    if (!correo) { setMsg('asistenciaMsg', 'Primero ingresa tu código.', false); return; }
+    const t = getTurnstileToken(e.currentTarget);
+    if (!t) { setMsg('asistenciaMsg', 'Completa la verificación de seguridad.', false); return; }
+    const payload = { correo, turnstile: t };
+    const res = await fetch('/api/asistencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) setMsg('asistenciaMsg', data.message || 'Asistencia registrada.', true);
+    else setMsg('asistenciaMsg', data.error || 'Error.', false);
+  });
+
+  // Mentor Virtual (agente de apoyo)
+  let historial = [];
+  function addChat(role, text) {
+    const chat = document.getElementById('mentorChat');
+    const el = document.createElement('div');
+    el.className = 'msg-bubble ' + role;
+    el.textContent = text;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  document.getElementById('mentorForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('mentorInput');
+    const mensaje = input.value.trim();
+    if (!mensaje || !currentCodigo) return;
+    addChat('user', mensaje);
+    input.value = '';
+    const typing = addChat('assistant', '');
+    typing.classList.add('typing');
+    typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+    try {
+      const res = await fetch('/api/mentor-remoto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ codigo: currentCodigo, mensaje, historial }) });
+      const data = await res.json();
+      typing.remove();
+      if (data.ok) {
+        addChat('assistant', data.reply || '...');
+        historial.push({ role: 'user', content: mensaje });
+        historial.push({ role: 'assistant', content: data.reply || '' });
+        historial = historial.slice(-8);
+      } else {
+        addChat('assistant', data.error || 'Error.');
+      }
+    } catch (err) {
+      typing.remove();
+      addChat('assistant', 'Error de red.');
+    }
+  });
+</script>
+</body>
+</html>

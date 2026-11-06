@@ -1,0 +1,17 @@
+# Dependencias
+**/node_modules/
+
+# Estado local de Wrangler
+**/.wrangler/
+
+# Secrets locales (nunca subir)
+.dev.vars
+**/.dev.vars
+
+# Cache de npm
+.npm-cache/
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log

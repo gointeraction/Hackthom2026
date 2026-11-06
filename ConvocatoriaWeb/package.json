@@ -1,0 +1,13 @@
+{
+  "name": "hackathon-uneti-ia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Página de convocatoria del Hackathon UNETI IA 2026 (Cloudflare Pages + Pages Functions + D1)",
+  "scripts": {
+    "dev": "wrangler pages dev ./dist",
+    "deploy": "wrangler pages deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.156.0"
+  }
+}
