@@ -53,7 +53,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root {
@@ -486,6 +486,61 @@ html { scroll-behavior: smooth; scroll-padding-top: 92px; }
 /* Partículas del hero */
 .hero-particles { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 
+/* ===== Acabado world-class ===== */
+/* Scrollbar premium */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(11,31,58,.06); }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#00B4D8,#06A77D); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg,#00C4E8,#08B98A); background-clip: padding-box; }
+
+/* Header glass premium */
+.site-header { background: rgba(11,31,58,.82); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); }
+
+/* Grano sutil de profundidad */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 9998; pointer-events: none; opacity: .028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Brillo que barre las tarjetas */
+.card, .mentor, .prize, .charla-card { position: relative; overflow: hidden; }
+.card::after, .mentor::after, .prize::after, .charla-card::after {
+  content: ""; position: absolute; top: -20%; left: -160%; width: 70%; height: 140%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.22), transparent);
+  transform: skewX(-18deg); transition: left .75s ease; pointer-events: none;
+}
+.card:hover::after, .mentor:hover::after, .prize:hover::after, .charla-card:hover::after { left: 160%; }
+
+/* Glow detrás del hero */
+.hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(45% 55% at 18% 25%, rgba(0,180,216,.22), transparent 70%),
+    radial-gradient(40% 50% at 82% 35%, rgba(6,167,125,.18), transparent 70%);
+}
+
+/* Tipografía refinada */
+.hero h1 { letter-spacing: -0.035em; }
+.sec-head h2 { letter-spacing: -0.03em; }
+
+/* UX: balance de líneas en títulos (UI UX Pro Max) */
+h1, h2 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+
+/* Bebas Neue en hero y stats */
+.hero h1 { font-family: "Bebas Neue", var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 6vw, 4.2rem); letter-spacing: 0.01em; line-height: 1.02; }
+.stat b { font-family: "Bebas Neue", var(--font-display); font-weight: 400; }
+
+/* Bento (Premios y Ejes) */
+.prizes.bento { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }
+.prizes.bento .win-1 { grid-row: 1 / span 2; display: flex; flex-direction: column; justify-content: center; }
+.grid-2.bento { grid-template-columns: 1.25fr 1fr; }
+@media (max-width: 760px) {
+  .prizes.bento { grid-template-columns: 1fr; }
+  .prizes.bento .win-1 { grid-row: auto; }
+  .grid-2.bento { grid-template-columns: 1fr; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -604,10 +659,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 92px; }
 /* Ubicación y galería */
 .map-card { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); min-height: 320px; }
 .map-card iframe { width: 100%; height: 100%; min-height: 320px; border: 0; display: block; }
-.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
-.gallery-item { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.gallery { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; margin-bottom: 20px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.gallery-item { flex: 0 0 min(340px, 82vw); scroll-snap-align: start; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
 .gallery-item img { width: 100%; height: 220px; object-fit: cover; display: block; }
-@media (max-width: 760px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 760px) { .gallery-item { flex: 0 0 min(280px, 86vw); } }
 </style>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "860ad444891b4c4cbfd7166b6be7a379"}'></script><!-- End Cloudflare Web Analytics -->
@@ -734,7 +789,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 92px; }
         <h2>Dos desafíos, un mismo propósito</h2>
         <p>Elige un eje y desarrolla una solución con impacto real en el sector público.</p>
       </div>
-      <div class="grid-2">
+      <div class="grid-2 bento">
         <article class="card">
           <span class="tag etica">IA Ética y Responsable</span>
           <h3>Inteligencia Artificial confiable</h3>
@@ -973,7 +1028,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 92px; }
         <span class="sec-kicker">Reconocimiento</span>
         <h2>Premios</h2>
       </div>
-      <div class="prizes">
+      <div class="prizes bento">
         <div class="card prize win-1"><div class="rank">1º</div><h3>Primer lugar</h3><p>Representa a UNETI en Venezuela Innova 2026</p></div>
         <div class="card prize win-2"><div class="rank">2º</div><h3>Segundo lugar</h3><p>Representa a UNETI en Venezuela Innova 2026</p></div>
         <div class="card prize win-3"><div class="rank">3º</div><h3>Tercer lugar</h3><p>Representa a UNETI en Venezuela Innova 2026</p></div>
@@ -1938,6 +1993,19 @@ html { scroll-behavior: smooth; scroll-padding-top: 92px; }
     } else {
       els.forEach(animate);
     }
+  })();
+
+  (function initMagnetic() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.querySelectorAll('.hero .btn').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width / 2;
+        const y = e.clientY - r.top - r.height / 2;
+        btn.style.transform = 'translate(' + (x * 0.12).toFixed(1) + 'px,' + (y * 0.12).toFixed(1) + 'px)';
+      });
+      btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+    });
   })();
 </script>
 </body>
