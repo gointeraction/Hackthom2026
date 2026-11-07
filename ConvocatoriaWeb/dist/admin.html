@@ -174,6 +174,7 @@
   /* Búsqueda */
   .search-input { width: 100%; max-width: 360px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: .92rem; margin-bottom: 14px; }
   .search-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+  .search-count { font-size: .8rem; color: var(--ink-soft); white-space: nowrap; }
 
   /* Auditoría */
   .audit-list { display: grid; gap: 8px; }
@@ -213,6 +214,13 @@
   .biblio-titulo { flex: 1; font-weight: 600; font-size: .9rem; }
   .biblio-eje { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(0,180,216,.1); color: var(--cyan); white-space: nowrap; }
   @media (max-width: 760px) { .biblio-grid { grid-template-columns: 1fr; } }
+
+  /* Galería admin */
+  .galeria-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  .foto-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .foto-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+  .foto-meta { padding: 10px 12px; font-size: .85rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  @media (max-width: 760px) { .galeria-grid { grid-template-columns: repeat(2, 1fr); } }
   .tipo-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 
   .judges { display: grid; gap: 10px; margin-bottom: 22px; }
@@ -307,6 +315,7 @@
           <button class="menu-btn" data-panel="evaluaciones"><span class="ic">⭐</span> Evaluaciones</button>
           <button class="menu-btn" data-panel="evaluacion"><span class="ic">🎯</span> Evaluación IA</button>
           <button class="menu-btn" data-panel="resultados"><span class="ic">🏆</span> Resultados</button>
+          <button class="menu-btn" data-panel="triajeproyectos"><span class="ic">🔀</span> Triaje proyectos</button>
         </div>
       </div>
 
@@ -330,6 +339,8 @@
           <button class="menu-btn" data-panel="cartas"><span class="ic">📨</span> Cartas</button>
           <button class="menu-btn" data-panel="instructivo"><span class="ic">📄</span> Instructivo Remoto</button>
           <button class="menu-btn" data-panel="metodologia"><span class="ic">📘</span> Metodología</button>
+          <button class="menu-btn" data-panel="charlas"><span class="ic">🎤</span> Charlas</button>
+          <button class="menu-btn" data-panel="galeria"><span class="ic">🖼️</span> Galería</button>
         </div>
       </div>
 
@@ -454,7 +465,10 @@
         <h2>Participantes inscritos</h2>
         <p>Personas que han completado el formulario de inscripción.</p>
       </div>
-      <input type="text" class="search-input" id="searchParticipantes" placeholder="Buscar por nombre o correo...">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px">
+        <input type="text" class="search-input" id="searchParticipantes" placeholder="🔍 Buscar por nombre, correo o código..." style="margin-bottom:0">
+        <span class="search-count" id="searchParticipantesCount"></span>
+      </div>
       <div style="margin-bottom:12px">
         <button type="button" class="btn" id="enviarCodigosBtn">📧 Enviar códigos por correo</button>
         <div class="form-status" id="enviarCodigosStatus"></div>
@@ -478,7 +492,10 @@
             <div class="field"><label>Nombre completo *</label><input type="text" id="jNombre" required></div>
             <div class="field"><label>Organización</label><input type="text" id="jOrg"></div>
           </div>
-          <div class="field"><label>Correo</label><input type="email" id="jCorreo"></div>
+          <div class="frow">
+            <div class="field"><label>Correo</label><input type="email" id="jCorreo"></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="jTelefono" placeholder="0412-1234567"></div>
+          </div>
           <button type="submit" class="btn">Guardar jurado</button>
           <div class="form-status" id="judgeStatus"></div>
         </form>
@@ -564,9 +581,12 @@
             <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
             <tbody>
               <tr><td>9:00 – 9:30</td><td>Apertura y bienvenida (videoconferencia)</td></tr>
-              <tr><td>9:30 – 10:30</td><td>Charla técnica 1</td></tr>
+              <tr><td>9:30 – 10:00</td><td>Charla: DeepSeek Harness</td></tr>
+              <tr><td>10:00 – 10:30</td><td>Charla: Antigravity</td></tr>
               <tr><td>10:30 – 11:00</td><td>Receso</td></tr>
-              <tr><td>11:00 – 12:30</td><td>Charla técnica 2</td></tr>
+              <tr><td>11:00 – 11:35</td><td>Charla: Cloudflare</td></tr>
+              <tr><td>11:35 – 12:10</td><td>Charla: Ciberseguridad</td></tr>
+              <tr><td>12:10 – 12:30</td><td>Q&A / transición</td></tr>
               <tr><td>12:30 – 13:30</td><td>Receso (almuerzo)</td></tr>
               <tr><td>13:30 – 18:00</td><td>Desarrollo del proyecto + mentoría virtual</td></tr>
             </tbody>
@@ -575,7 +595,10 @@
           <table>
             <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
             <tbody>
-              <tr><td>9:00 – 13:00</td><td>Desarrollo del proyecto + mentoría virtual</td></tr>
+              <tr><td>9:00 – 9:30</td><td>Bienvenida y repaso (videoconferencia)</td></tr>
+              <tr><td>9:30 – 10:05</td><td>Charla: Creación y gestión de Agentes IA</td></tr>
+              <tr><td>10:05 – 10:40</td><td>Charla: Ciberseguridad</td></tr>
+              <tr><td>10:40 – 13:00</td><td>Desarrollo del proyecto + mentoría virtual</td></tr>
               <tr><td>13:00 – 14:00</td><td>Receso (almuerzo)</td></tr>
               <tr><td>14:00 – 15:30</td><td>Preparación del pitch</td></tr>
               <tr><td>15:30 – 17:30</td><td>Presentaciones virtuales ante el jurado</td></tr>
@@ -628,7 +651,7 @@
       <div class="sec-head">
         <span class="kicker">Operación</span>
         <h2>Itinerario interno por grupo logístico</h2>
-        <p>Viernes 13 y sábado 14 de noviembre · 9:00 am – 6:00 pm.</p>
+        <p>Viernes 13 y sábado 14 de noviembre · desarrollo continuo con pernocta en Parque Tecnológico + Más Ciencia (IVIC) · traslado desde la sede Mincyt.</p>
       </div>
       <div class="itinerario">
         <h3>Agenda general — Día 1 (viernes 13)</h3>
@@ -636,16 +659,21 @@
           <table>
             <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
             <tbody>
+              <tr><td>7:00 – 8:00</td><td>Salida desde Mincyt → Parque Tecnológico + Más Ciencia (IVIC)</td></tr>
               <tr><td>7:30 – 8:30</td><td>Montaje y preparación (grupos logísticos)</td></tr>
               <tr><td>8:00 – 9:00</td><td>Acreditación de participantes</td></tr>
               <tr><td>9:00 – 9:30</td><td>Acto de apertura</td></tr>
-              <tr><td>9:30 – 10:30</td><td>Charla técnica 1</td></tr>
+              <tr><td>9:30 – 10:00</td><td>Charla: DeepSeek Harness</td></tr>
+              <tr><td>10:00 – 10:30</td><td>Charla: Antigravity</td></tr>
               <tr><td>10:30 – 11:00</td><td>Refrigerio</td></tr>
-              <tr><td>11:00 – 12:30</td><td>Charla técnica 2</td></tr>
+              <tr><td>11:00 – 11:35</td><td>Charla: Cloudflare</td></tr>
+              <tr><td>11:35 – 12:10</td><td>Charla: Ciberseguridad</td></tr>
+              <tr><td>12:10 – 12:30</td><td>Q&A / transición</td></tr>
               <tr><td>12:30 – 13:30</td><td>Almuerzo</td></tr>
               <tr><td>13:30 – 14:00</td><td>Conformación de equipos</td></tr>
               <tr><td>14:00 – 18:00</td><td>Desarrollo + mentoría</td></tr>
-              <tr><td>18:00</td><td>Cierre Día 1</td></tr>
+              <tr><td>18:00 – 19:00</td><td>Cena</td></tr>
+              <tr><td>19:00 – 7:00</td><td>Desarrollo continuo de la solución — pernocta en Parque Tecnológico + Más Ciencia (IVIC)</td></tr>
             </tbody>
           </table>
         </div>
@@ -655,15 +683,19 @@
           <table>
             <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
             <tbody>
+              <tr><td>7:00 – 8:30</td><td>Desayuno</td></tr>
+              <tr><td>8:30 – 9:00</td><td>Preparación de estaciones</td></tr>
               <tr><td>9:00 – 9:30</td><td>Bienvenida y repaso</td></tr>
-              <tr><td>9:30 – 11:00</td><td>Desarrollo + mentoría</td></tr>
+              <tr><td>9:30 – 10:05</td><td>Charla: Creación y gestión de Agentes IA</td></tr>
+              <tr><td>10:05 – 10:40</td><td>Charla: Ciberseguridad</td></tr>
+              <tr><td>10:40 – 11:00</td><td>Q&A / repaso</td></tr>
               <tr><td>11:00 – 11:30</td><td>Refrigerio</td></tr>
               <tr><td>11:30 – 13:00</td><td>Desarrollo final</td></tr>
               <tr><td>13:00 – 14:00</td><td>Almuerzo</td></tr>
               <tr><td>14:00 – 15:30</td><td>Preparación de pitch</td></tr>
               <tr><td>15:30 – 17:30</td><td>Presentaciones ante el jurado</td></tr>
-              <tr><td>17:30 – 18:00</td><td>Deliberación del jurado</td></tr>
-              <tr><td>18:00</td><td>Premiación y cierre</td></tr>
+              <tr><td>17:30 – 18:00</td><td>Premiación y clausura</td></tr>
+              <tr><td>18:00</td><td>Fin del evento · traslado de regreso IVIC → Mincyt (salida)</td></tr>
             </tbody>
           </table>
         </div>
@@ -672,13 +704,14 @@
         <div class="grupo-log"><h4>1. Coordinación General</h4><ul><li>Pre-evento: supervisar plan maestro, permisos MPPCT y reuniones de seguimiento.</li><li>Día 1 · 7:30: apertura de sede y coordinación de grupos.</li><li>Días 1 y 2: supervisión general y resolución de incidencias.</li><li>Día 2 · 18:00: cierre y evaluación post-evento.</li></ul></div>
         <div class="grupo-log"><h4>2. Registro y Acreditación</h4><ul><li>Día 1 · 8:00–9:00: acreditación (verificar inscritos y gafetes).</li><li>Validar lista de preseleccionados (presencial) y remotos.</li><li>Días 1 y 2: control de asistencia.</li></ul></div>
         <div class="grupo-log"><h4>3. Tecnología y Servidores</h4><ul><li>Día 1 · 7:30–8:30: montaje de red, video beam, servidores y estaciones.</li><li>Días 1 y 2: soporte técnico continuo.</li><li>Día 2 · 15:00: prueba de audio/video para pitches.</li><li>Día 2 · 18:30: desmontaje.</li></ul></div>
-        <div class="grupo-log"><h4>4. Salas y Espacios</h4><ul><li>Día 1 · 7:30: mesas, sillas, señalización y distribución.</li><li>Días 1 y 2: control de aforo y orden.</li><li>Día 2 · 18:00: desmontaje y limpieza.</li></ul></div>
-        <div class="grupo-log"><h4>5. Catering y Alimentación</h4><ul><li>Día 1: refrigerio 10:30 y almuerzo 12:30.</li><li>Día 2: refrigerio 11:00 y almuerzo 13:00.</li><li>Coordinar proveedor, distribución y dietas especiales.</li></ul></div>
+        <div class="grupo-log"><h4>4. Salas y Espacios</h4><ul><li>Día 1 · 7:30: mesas, sillas, señalización y distribución.</li><li>Noche: acondicionar zona de pernocta en Parque Tecnológico + Más Ciencia (IVIC) — colchonetas/sillas, puntos de carga, hidratación.</li><li>Días 1 y 2: control de aforo y orden.</li><li>Día 2 · 18:00: desmontaje y limpieza.</li></ul></div>
+        <div class="grupo-log"><h4>5. Catering y Alimentación</h4><ul><li>Día 1: refrigerio 10:30, almuerzo 12:30 y cena 18:00.</li><li>Pernocta (IVIC): refrigerio nocturno y café/bebidas calientes de madrugada.</li><li>Día 2: desayuno 7:00, refrigerio 11:00 y almuerzo 13:00.</li><li>Coordinar proveedor, distribución y dietas especiales.</li></ul></div>
         <div class="grupo-log"><h4>6. Comunicaciones y Difusión</h4><ul><li>Pre-evento: convocatoria y redes sociales.</li><li>Días 1 y 2: cobertura (fotos/videos) y redes en vivo.</li><li>Enviar instructivo a remotos.</li><li>Día 2 · 18:00: comunicado de resultados.</li></ul></div>
         <div class="grupo-log"><h4>7. Protocolo y Charlas</h4><ul><li>Día 1 · 9:00: acto de apertura (autoridades).</li><li>Coordinar charlistas y agenda técnica.</li><li>Día 2 · 18:00: acto de premiación.</li></ul></div>
         <div class="grupo-log"><h4>8. Jurados y Evaluación</h4><ul><li>Día 1: entrega de rúbrica y materiales.</li><li>Día 2 · 15:30–17:30: evaluación de pitches.</li><li>Día 2 · 17:30: deliberación y resultados.</li></ul></div>
-        <div class="grupo-log"><h4>9. Voluntariado y Soporte</h4><ul><li>Días 1 y 2: apoyo general y orientación de participantes.</li><li>Tareas puntuales asignadas por Coordinación General.</li></ul></div>
-        <div class="grupo-log"><h4>10. Seguridad y Accesos</h4><ul><li>Día 1 · 7:30: coordinar accesos con MPPCT.</li><li>Días 1 y 2: control de ingreso y listas.</li><li>Día 2 · 18:00: salida ordenada.</li></ul></div>
+        <div class="grupo-log"><h4>9. Voluntariado y Soporte</h4><ul><li>Días 1 y 2: apoyo general y orientación de participantes.</li><li>Noche: turno de voluntarios para acompañar la pernocta.</li><li>Tareas puntuales asignadas por Coordinación General.</li></ul></div>
+        <div class="grupo-log"><h4>10. Seguridad y Accesos</h4><ul><li>Día 1 · 7:30: coordinar accesos con MPPCT.</li><li>Días 1 y 2: control de ingreso y listas.</li><li>Noche: vigilancia y control de acceso durante la pernocta.</li><li>Día 2 · 18:00: salida ordenada.</li></ul></div>
+        <div class="grupo-log"><h4>11. Transporte y Traslado</h4><ul><li>Día 1 · 7:00 am: salida de participantes desde sede Mincyt a Parque Tecnológico + Más Ciencia (IVIC).</li><li>Día 2 · 18:00: traslado de regreso Parque Tecnológico + Más Ciencia (IVIC) → Mincyt, tras la preparación de pitch y la presentación al jurado.</li><li>Coordinar unidades, horarios, listas de pasajeros y puntos de encuentro.</li></ul></div>
       </div>
     </section>
 
@@ -1100,8 +1133,8 @@
     <section class="panel" id="panel-agentes">
       <div class="sec-head">
         <span class="kicker">Inteligencia Artificial</span>
-        <h2>Agentes administrativos</h2>
-        <p>Agentes de IA que apoyan la operación y logística del evento.</p>
+        <h2>Unitron · Agentes administrativos</h2>
+        <p>Unitron: agentes de IA que apoyan la operación y logística del evento.</p>
       </div>
 
       <div class="agente-card">
@@ -1216,6 +1249,73 @@
       </div>
     </section>
 
+    <!-- GALERÍA -->
+    <section class="panel" id="panel-galeria">
+      <div class="sec-head">
+        <span class="kicker">Contenido</span>
+        <h2>Galería del evento</h2>
+        <p>Sube las fotos que se publicarán en la galería pública.</p>
+      </div>
+      <div class="form-card" style="margin-top:0">
+        <form id="fotoForm">
+          <div class="field"><label>Imagen (JPG, PNG, WebP, GIF) *</label><input type="file" id="fotoFile" accept="image/*" required></div>
+          <div class="field"><label>Descripción (opcional)</label><input type="text" id="fotoCaption" placeholder="Ej: Apertura del evento"></div>
+          <button type="submit" class="btn">Subir foto</button>
+          <div class="form-status" id="fotoStatus"></div>
+        </form>
+      </div>
+      <div class="galeria-grid" id="fotosList"></div>
+    </section>
+
+    <!-- CHARLAS -->
+    <section class="panel" id="panel-charlas">
+      <div class="sec-head">
+        <span class="kicker">Formación</span>
+        <h2>Ciclo de charlas y ponentes</h2>
+        <p>Gestiona las ponencias del evento: título, ponente y datos de contacto.</p>
+      </div>
+      <div class="form-card" style="margin-top:0">
+        <h3 id="charlaFormTitle">➕ Agregar charla</h3>
+        <form id="charlaForm">
+          <input type="hidden" id="charlaId">
+          <div class="frow">
+            <div class="field"><label>Título *</label><input type="text" id="charlaTitulo" required></div>
+            <div class="field"><label>Ponente</label><input type="text" id="charlaPonente"></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Contacto (correo / teléfono)</label><input type="text" id="charlaContacto"></div>
+            <div class="field"><label>Día *</label>
+              <select id="charlaDia">
+                <option value="1">Día 1 · viernes 13</option>
+                <option value="2">Día 2 · sábado 14</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Hora inicio</label><input type="text" id="charlaInicio" placeholder="09:30"></div>
+            <div class="field"><label>Hora fin</label><input type="text" id="charlaFin" placeholder="10:05"></div>
+          </div>
+          <div class="field"><label>Breve currículum del ponente</label><textarea id="charlaCurriculum" rows="3" placeholder="Formación, trayectoria y especialidad del ponente…"></textarea></div>
+          <button type="submit" class="btn" id="charlaSaveBtn">Guardar charla</button>
+          <button type="button" class="btn" id="charlaCancelBtn" style="display:none">Cancelar</button>
+          <div class="form-status" id="charlaStatus"></div>
+        </form>
+      </div>
+      <div id="charlasList"></div>
+    </section>
+
+    <!-- TRIAJE DE PROYECTOS -->
+    <section class="panel" id="panel-triajeproyectos">
+      <div class="sec-head">
+        <span class="kicker">Evaluación</span>
+        <h2>Triaje de proyectos</h2>
+        <p>Clasifica las entregas (completas / incompletas / inválidas), valida el repositorio en GitHub y cruza el puntaje de la Evaluación IA.</p>
+      </div>
+      <button type="button" class="btn" id="triajeProyectosBtn">🔀 Ejecutar triaje</button>
+      <div id="triajeProyectosResumen"></div>
+      <div id="triajeProyectosList"></div>
+    </section>
+
   </main>
 </div>
 
@@ -1280,7 +1380,7 @@
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','metodologia','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -1379,7 +1479,7 @@
       judges.forEach((j) => {
         const el = document.createElement('div');
         el.className = 'judge-item';
-        el.innerHTML = `<div class="info"><strong>${esc(j.nombre)}</strong><span>${esc(j.organizacion || '')}${j.correo ? ' · ' + esc(j.correo) : ''}</span></div><button class="del" data-id="${j.id}" aria-label="Eliminar jurado">×</button>`;
+        el.innerHTML = `<div class="info"><strong>${esc(j.nombre)}</strong><span>${esc(j.organizacion || '')}${j.correo ? ' · ' + esc(j.correo) : ''}${j.telefono ? ' · 📞 ' + esc(j.telefono) : ''}</span></div><button class="del" data-id="${j.id}" aria-label="Eliminar jurado">×</button>`;
         list.appendChild(el);
       });
       const sel = document.getElementById('sJudge');
@@ -1404,6 +1504,7 @@
       nombre: document.getElementById('jNombre').value.trim(),
       organizacion: document.getElementById('jOrg').value.trim(),
       correo: document.getElementById('jCorreo').value.trim(),
+      telefono: document.getElementById('jTelefono').value.trim(),
     };
     const res = await fetch('/api/admin/judges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const data = await res.json();
@@ -1836,18 +1937,29 @@
     }
   });
 
-  function setupSearch(inputId, listId) {
+  function setupSearch(inputId, listId, countId) {
     const input = document.getElementById(inputId);
     const list = document.getElementById(listId);
-    input.addEventListener('input', () => {
-      const q = input.value.toLowerCase();
+    const countEl = countId ? document.getElementById(countId) : null;
+
+    function apply() {
+      const q = input.value.toLowerCase().trim();
+      let visible = 0, total = 0;
       [...list.children].forEach((el) => {
         if (el.classList.contains('empty')) return;
-        el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
+        total++;
+        const match = el.innerText.toLowerCase().includes(q);
+        el.style.display = match ? '' : 'none';
+        if (match) visible++;
       });
-    });
+      if (countEl) countEl.textContent = q ? `${visible} de ${total}` : '';
+    }
+
+    input.addEventListener('input', apply);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Escape') { input.value = ''; apply(); } });
+    return apply;
   }
-  setupSearch('searchParticipantes', 'registrationsList');
+  setupSearch('searchParticipantes', 'registrationsList', 'searchParticipantesCount');
   setupSearch('searchPatrocinadores', 'sponsorsList');
 
   // ===== Auditoría =====
@@ -2172,8 +2284,161 @@
     } catch (e) { tbody.innerHTML = '<tr><td colspan="3" class="empty">Error.</td></tr>'; }
   }
 
+  // ===== Galería =====
+  async function loadFotos() {
+    const cont = document.getElementById('fotosList');
+    try {
+      const res = await fetch('/api/admin/fotos');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const items = data.fotos || [];
+      if (items.length === 0) { cont.innerHTML = '<div class="empty">Aún no hay fotos.</div>'; return; }
+      items.forEach((f) => {
+        const el = document.createElement('div');
+        el.className = 'foto-card';
+        el.innerHTML = `<img src="/api/foto?key=${esc(f.key)}" alt="${esc(f.caption || '')}"><div class="foto-meta"><span>${esc(f.caption || 'Sin descripción')}</span><button type="button" class="btn" onclick="delFoto(${f.id})">Eliminar</button></div>`;
+        cont.appendChild(el);
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+  async function delFoto(id) {
+    if (!confirm('¿Eliminar esta foto?')) return;
+    await fetch('/api/admin/fotos?id=' + id, { method: 'DELETE' });
+    loadFotos();
+  }
+  document.getElementById('fotoForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById('fotoFile');
+    const file = fileInput.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('caption', document.getElementById('fotoCaption').value);
+    const res = await fetch('/api/admin/fotos', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.ok) { document.getElementById('fotoForm').reset(); setStatus('fotoStatus', 'Foto subida.', true); loadFotos(); }
+    else setStatus('fotoStatus', data.error || 'Error.', false);
+  });
+
+  // ===== Charlas =====
+  async function loadCharlas() {
+    const cont = document.getElementById('charlasList');
+    try {
+      const res = await fetch('/api/admin/charlas');
+      const data = await res.json();
+      cont.innerHTML = '';
+      const items = data.charlas || [];
+      if (items.length === 0) { cont.innerHTML = '<div class="empty">Sin charlas registradas.</div>'; return; }
+      [1, 2].forEach((dia) => {
+        const delDia = items.filter((c) => c.dia === dia);
+        if (delDia.length === 0) return;
+        const h = document.createElement('h4');
+        h.style.cssText = 'margin:22px 0 10px; color:var(--navy-900)';
+        h.textContent = 'Día ' + dia + (dia === 1 ? ' · viernes 13' : ' · sábado 14');
+        cont.appendChild(h);
+        delDia.forEach((c) => {
+          const el = document.createElement('div');
+          el.className = 'audit-item';
+          const meta = `<strong>${esc(c.hora_inicio || '--')} – ${esc(c.hora_fin || '--')}</strong> · ${esc(c.titulo)}${c.ponente ? '<br>👤 ' + esc(c.ponente) : ''}${c.contacto ? ' · 📞 ' + esc(c.contacto) : ''}${c.curriculum ? '<br><small>📄 ' + esc(c.curriculum).slice(0, 120) + (c.curriculum.length > 120 ? '…' : '') + '</small>' : ''}`;
+          el.innerHTML = `<div class="audit-meta">${meta}</div><div style="display:flex;gap:6px"><button type="button" class="btn" onclick="editCharla(${c.id})">Editar</button><button type="button" class="btn" onclick="delCharla(${c.id})">Eliminar</button></div>`;
+          cont.appendChild(el);
+        });
+      });
+    } catch (e) { cont.innerHTML = '<div class="empty">Error.</div>'; }
+  }
+  async function editCharla(id) {
+    const res = await fetch('/api/admin/charlas');
+    const data = await res.json();
+    const c = (data.charlas || []).find((x) => x.id === id);
+    if (!c) return;
+    document.getElementById('charlaId').value = c.id;
+    document.getElementById('charlaTitulo').value = c.titulo || '';
+    document.getElementById('charlaPonente').value = c.ponente || '';
+    document.getElementById('charlaContacto').value = c.contacto || '';
+    document.getElementById('charlaCurriculum').value = c.curriculum || '';
+    document.getElementById('charlaDia').value = c.dia;
+    document.getElementById('charlaInicio').value = c.hora_inicio || '';
+    document.getElementById('charlaFin').value = c.hora_fin || '';
+    document.getElementById('charlaFormTitle').textContent = '✏️ Editar charla';
+    document.getElementById('charlaCancelBtn').style.display = '';
+  }
+  async function delCharla(id) {
+    if (!confirm('¿Eliminar esta charla?')) return;
+    await fetch('/api/admin/charlas?id=' + id, { method: 'DELETE' });
+    loadCharlas();
+  }
+  function resetCharlaForm() {
+    document.getElementById('charlaForm').reset();
+    document.getElementById('charlaId').value = '';
+    document.getElementById('charlaFormTitle').textContent = '➕ Agregar charla';
+    document.getElementById('charlaCancelBtn').style.display = 'none';
+  }
+  document.getElementById('charlaForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      id: document.getElementById('charlaId').value,
+      titulo: document.getElementById('charlaTitulo').value.trim(),
+      ponente: document.getElementById('charlaPonente').value.trim(),
+      contacto: document.getElementById('charlaContacto').value.trim(),
+      curriculum: document.getElementById('charlaCurriculum').value.trim(),
+      dia: parseInt(document.getElementById('charlaDia').value),
+      hora_inicio: document.getElementById('charlaInicio').value.trim(),
+      hora_fin: document.getElementById('charlaFin').value.trim(),
+    };
+    const res = await fetch('/api/admin/charlas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) { resetCharlaForm(); setStatus('charlaStatus', 'Charla guardada.', true); loadCharlas(); }
+    else setStatus('charlaStatus', data.error || 'Error.', false);
+  });
+  document.getElementById('charlaCancelBtn').addEventListener('click', resetCharlaForm);
+
+  // ===== Triaje de proyectos =====
+  (function initTriajeProyectos() {
+    const btn = document.getElementById('triajeProyectosBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const resumenEl = document.getElementById('triajeProyectosResumen');
+      const listEl = document.getElementById('triajeProyectosList');
+      btn.disabled = true;
+      btn.textContent = 'Analizando…';
+      resumenEl.innerHTML = '';
+      listEl.innerHTML = '';
+      try {
+        const res = await fetch('/api/admin/agente-triaje-proyectos', { method: 'POST' });
+        const data = await res.json();
+        if (!data.ok) { resumenEl.innerHTML = '<div class="empty">Error al ejecutar el triaje.</div>'; return; }
+        const r = data.resumen || {};
+        resumenEl.innerHTML = '<div class="chips" style="margin:14px 0">' +
+          '<span class="chip">Total: ' + (r.total || 0) + '</span>' +
+          '<span class="chip">✅ Completos: ' + (r.completos || 0) + '</span>' +
+          '<span class="chip">⚠️ Incompletos: ' + (r.incompletos || 0) + '</span>' +
+          '<span class="chip">🔍 Revisar: ' + (r.revisar || 0) + '</span>' +
+          '<span class="chip">❌ Inválidos: ' + (r.invalidos || 0) + '</span>' +
+          '</div>';
+        const items = data.resultados || [];
+        if (items.length === 0) { listEl.innerHTML = '<div class="empty">No hay entregas registradas.</div>'; return; }
+        listEl.innerHTML = '<div class="table-wrap"><table class="data-table"><thead><tr><th>Código</th><th>Proyecto</th><th>Participante</th><th>Estado</th><th>Recomendación</th><th>Puntaje IA</th><th>GitHub</th></tr></thead><tbody>' +
+          items.map((x) => {
+            let gh = '—';
+            if (x.github) {
+              if (x.github.existe === false) gh = '❌ No existe';
+              else if (x.github.privado) gh = '🔒 Privado';
+              else gh = '✅ ' + esc(x.github.lenguaje || 'OK');
+            }
+            return '<tr><td>' + esc(x.codigo) + '</td><td>' + esc(x.proyecto) + '</td><td>' + esc(x.participante) + '</td><td>' + esc(x.estado) + '</td><td>' + esc(x.recomendacion) + '</td><td>' + (x.puntajeIA != null ? esc(String(x.puntajeIA)) : '—') + '</td><td>' + gh + '</td></tr>';
+          }).join('') +
+          '</tbody></table></div>';
+      } catch (e) {
+        resumenEl.innerHTML = '<div class="empty">Error de conexión.</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔀 Ejecutar triaje';
+      }
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
   }
 
   // ===== Login =====

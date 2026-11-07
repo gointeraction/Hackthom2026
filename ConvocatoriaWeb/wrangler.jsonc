@@ -11,5 +11,8 @@
       "database_id": "932b724f-854a-4a37-b161-f541ee34ba93",
       "migrations_dir": "migrations"
     }
+  ],
+  "r2_buckets": [
+    { "binding": "FOTOS", "bucket_name": "hackathon-fotos" }
   ]
 }

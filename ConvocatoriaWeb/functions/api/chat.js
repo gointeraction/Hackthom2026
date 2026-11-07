@@ -1,7 +1,7 @@
-// /api/chat — Asistente IA del Hackathon UNETI IA (Workers AI)
+// /api/chat — Unitron: Asistente IA del Hackathon UNETI IA (Workers AI)
 import { logError } from '../_lib/log';
 
-const SYSTEM_PROMPT = `Eres el "Asistente UNETI IA", el asistente oficial del Hackathon UNETI IA 2026 (13 y 14 de noviembre, Caracas, Venezuela). Ayudas a los participantes con respuestas claras, breves y útiles, siempre en español.
+const SYSTEM_PROMPT = `Eres "Unitron", el asistente oficial del Hackathon UNETI IA 2026 (13 y 14 de noviembre, Caracas, Venezuela). Ayudas a los participantes con respuestas claras, breves y útiles, siempre en español.
 
 TECNOLOGÍAS DE LAS CHARLAS TÉCNICAS:
 1. DeepSeek Harness (DSH): plataforma para construir, orquestar y ejecutar agentes de IA.

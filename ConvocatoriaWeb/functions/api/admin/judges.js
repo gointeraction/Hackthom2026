@@ -15,6 +15,7 @@ export async function onRequestPost({ request, env }) {
   const nombre = String(data.nombre || '').trim();
   const organizacion = String(data.organizacion || '').trim();
   const correo = String(data.correo || '').trim().toLowerCase();
+  const telefono = String(data.telefono || '').trim();
 
   if (!nombre) {
     return Response.json({ ok: false, error: 'El nombre es obligatorio.' }, { status: 400 });
@@ -27,8 +28,8 @@ export async function onRequestPost({ request, env }) {
 
   try {
     await env.DB.prepare(
-      'INSERT INTO judges (nombre, organizacion, correo) VALUES (?, ?, ?)'
-    ).bind(nombre, organizacion, correo).run();
+      'INSERT INTO judges (nombre, organizacion, correo, telefono) VALUES (?, ?, ?, ?)'
+    ).bind(nombre, organizacion, correo, telefono).run();
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json({ ok: false, error: 'Error al guardar el jurado.' }, { status: 500 });
