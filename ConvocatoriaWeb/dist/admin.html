@@ -316,6 +316,7 @@
           <button class="menu-btn" data-panel="evaluacion"><span class="ic">🎯</span> Evaluación IA</button>
           <button class="menu-btn" data-panel="resultados"><span class="ic">🏆</span> Resultados</button>
           <button class="menu-btn" data-panel="triajeproyectos"><span class="ic">🔀</span> Triaje proyectos</button>
+          <button class="menu-btn" data-panel="encuestas"><span class="ic">📝</span> Encuestas</button>
         </div>
       </div>
 
@@ -1316,6 +1317,17 @@
       <div id="triajeProyectosList"></div>
     </section>
 
+    <!-- ENCUESTAS -->
+    <section class="panel" id="panel-encuestas">
+      <div class="sec-head">
+        <span class="kicker">Evaluación</span>
+        <h2>Encuestas de feedback</h2>
+        <p>Resultados de la encuesta de satisfacción (NPS) del evento.</p>
+      </div>
+      <div id="encuestasResumen"></div>
+      <div id="encuestasList"></div>
+    </section>
+
   </main>
 </div>
 
@@ -1380,7 +1392,7 @@
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -2437,8 +2449,30 @@
     });
   })();
 
+  async function loadEncuestas() {
+    const resumenEl = document.getElementById('encuestasResumen');
+    const listEl = document.getElementById('encuestasList');
+    if (!resumenEl || !listEl) return;
+    try {
+      const res = await fetch('/api/admin/encuestas');
+      const data = await res.json();
+      if (!data.ok) { resumenEl.innerHTML = '<div class="empty">Error al cargar encuestas.</div>'; return; }
+      resumenEl.innerHTML = '<div class="chips" style="margin:14px 0">' +
+        '<span class="chip">Respuestas: ' + (data.total || 0) + '</span>' +
+        '<span class="chip">Promedio NPS: ' + (data.promedio || 0) + ' / 10</span>' +
+        '</div>';
+      const items = data.encuestas || [];
+      if (items.length === 0) { listEl.innerHTML = '<div class="empty">Aún no hay respuestas.</div>'; return; }
+      listEl.innerHTML = '<div class="table-wrap"><table class="data-table"><thead><tr><th>#</th><th>Código</th><th>Puntaje</th><th>Comentario</th><th>Fecha</th></tr></thead><tbody>' +
+        items.map((x) => '<tr><td>' + esc(String(x.id)) + '</td><td>' + esc(x.codigo || '—') + '</td><td>' + esc(String(x.puntaje)) + '</td><td>' + esc(x.comentario || '—') + '</td><td>' + esc((x.created_at || '').replace('T', ' ').slice(0, 16)) + '</td></tr>').join('') +
+        '</tbody></table></div>';
+    } catch (e) {
+      resumenEl.innerHTML = '<div class="empty">Error de conexión.</div>';
+    }
+  }
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas();
   }
 
   // ===== Login =====

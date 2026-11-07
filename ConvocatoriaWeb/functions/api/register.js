@@ -38,6 +38,14 @@ export async function onRequestPost({ request, env }) {
 
   const tipo = data.tipo === 'grupal' ? 'grupal' : 'individual';
   const propuesta = tipo === 'grupal' ? String(data.propuesta || '').trim() : '';
+  const conducta = data.conducta === true || data.conducta === 'on' ? 1 : 0;
+  const imagen = data.imagen === true || data.imagen === 'on' ? 1 : 0;
+  if (!conducta) {
+    return Response.json({ ok: false, error: 'Debes aceptar el Código de Conducta.' }, { status: 400 });
+  }
+  if (!imagen) {
+    return Response.json({ ok: false, error: 'Debes autorizar el uso de tu imagen.' }, { status: 400 });
+  }
 
   let miembros = [];
   if (tipo === 'grupal') {
@@ -92,8 +100,8 @@ export async function onRequestPost({ request, env }) {
       const token = crypto.randomUUID();
       const prop = (tipo === 'grupal' && i === 0) ? propuesta : null;
       await env.DB.prepare(
-        'INSERT INTO registrations (nombre, apellido, correo, nacimiento, anio, group_id, validated, validation_token, propuesta, modalidad, codigo) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)'
-      ).bind(m.nombre, m.apellido, m.correo, m.nacimiento, m.anio, group_id, token, prop, mod, codigo).run();
+        'INSERT INTO registrations (nombre, apellido, correo, nacimiento, anio, group_id, validated, validation_token, propuesta, modalidad, codigo, conducta, imagen) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?)'
+      ).bind(m.nombre, m.apellido, m.correo, m.nacimiento, m.anio, group_id, token, prop, mod, codigo, conducta, imagen).run();
     }
     // Enviar correos de confirmación (best-effort)
     try {

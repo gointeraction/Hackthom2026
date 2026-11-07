@@ -30,6 +30,10 @@ export async function onRequestPost({ request, env }) {
   const repositorio = String(data.repositorio || '').trim();
   const proyecto = String(data.proyecto || '').trim();
   const demo = String(data.demo || '').trim();
+  const video = String(data.video || '').trim();
+  const deck = String(data.deck || '').trim();
+  const tags = String(data.tags || '').trim();
+  const descripcion = String(data.descripcion || '').trim();
 
   if (!codigo || !repositorio) {
     return Response.json({ ok: false, error: 'Código y repositorio son obligatorios.' }, { status: 400 });
@@ -45,8 +49,8 @@ export async function onRequestPost({ request, env }) {
 
   try {
     await env.DB.prepare(
-      'INSERT INTO entregas (codigo, repositorio, proyecto, demo) VALUES (?, ?, ?, ?) ON CONFLICT(codigo) DO UPDATE SET repositorio=excluded.repositorio, proyecto=excluded.proyecto, demo=excluded.demo, updated_at=CURRENT_TIMESTAMP'
-    ).bind(codigo, repositorio, proyecto, demo).run();
+      'INSERT INTO entregas (codigo, repositorio, proyecto, demo, video, deck, tags, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(codigo) DO UPDATE SET repositorio=excluded.repositorio, proyecto=excluded.proyecto, demo=excluded.demo, video=excluded.video, deck=excluded.deck, tags=excluded.tags, descripcion=excluded.descripcion, updated_at=CURRENT_TIMESTAMP'
+    ).bind(codigo, repositorio, proyecto, demo, video, deck, tags, descripcion).run();
 
     try {
       await sendEmail(env, {

@@ -74,6 +74,12 @@
         <div class="field"><label>Nombre del proyecto (opcional)</label><input type="text" id="feProyecto"></div>
         <div class="field"><label>Enlace de demo (opcional)</label><input type="url" id="feDemo"></div>
       </div>
+      <div class="frow">
+        <div class="field"><label>Video demo (opcional)</label><input type="url" id="feVideo" placeholder="https://youtube.com/..."></div>
+        <div class="field"><label>Presentación / deck (opcional)</label><input type="url" id="feDeck" placeholder="https://..."></div>
+      </div>
+      <div class="field"><label>Tecnologías usadas (separadas por coma)</label><input type="text" id="feTags" placeholder="React, Cloudflare, Python"></div>
+      <div class="field"><label>Descripción breve</label><textarea id="feDescripcion" rows="2" placeholder="¿Qué problema resuelve tu proyecto?"></textarea></div>
       <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="entrega" style="margin:10px 0"></div>
       <button type="submit" class="btn">Enviar entrega</button>
       <div class="msg" id="entregaMsg"></div>
@@ -212,13 +218,17 @@
       repositorio: document.getElementById('feRepo').value.trim(),
       proyecto: document.getElementById('feProyecto').value.trim(),
       demo: document.getElementById('feDemo').value.trim(),
+      video: document.getElementById('feVideo').value.trim(),
+      deck: document.getElementById('feDeck').value.trim(),
+      tags: document.getElementById('feTags').value.trim(),
+      descripcion: document.getElementById('feDescripcion').value.trim(),
       turnstile: t,
     };
     const res = await fetch('/api/entrega', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const data = await res.json();
     if (data.ok) {
       setMsg('entregaMsg', data.message || 'Entrega registrada.', true);
-      panelData.entrega = { repositorio: payload.repositorio, proyecto: payload.proyecto, demo: payload.demo };
+      panelData.entrega = { repositorio: payload.repositorio, proyecto: payload.proyecto, demo: payload.demo, video: payload.video, deck: payload.deck, tags: payload.tags, descripcion: payload.descripcion };
       panelData.commits = [];
       render();
     } else setMsg('entregaMsg', data.error || 'Error.', false);

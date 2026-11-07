@@ -1,0 +1,2 @@
+ALTER TABLE registrations ADD COLUMN conducta INTEGER DEFAULT 0;
+ALTER TABLE registrations ADD COLUMN imagen INTEGER DEFAULT 0;
