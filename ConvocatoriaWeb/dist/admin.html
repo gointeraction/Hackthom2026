@@ -355,6 +355,7 @@
 
       <button class="menu-btn" data-panel="auditoria"><span class="ic">🕒</span> Auditoría</button>
       <button class="menu-btn" data-panel="errores"><span class="ic">🛠️</span> Errores</button>
+      <button class="menu-btn" data-panel="backups"><span class="ic">💾</span> Backups</button>
       <button class="menu-btn" data-panel="accesos"><span class="ic">🔐</span> Accesos</button>
       <button class="menu-btn" data-panel="agentes"><span class="ic">🤖</span> Agentes</button>
       <button class="menu-btn" data-panel="biblioteca"><span class="ic">📚</span> Biblioteca</button>
@@ -1328,6 +1329,17 @@
       <div id="encuestasList"></div>
     </section>
 
+    <!-- BACKUPS -->
+    <section class="panel" id="panel-backups">
+      <div class="sec-head">
+        <span class="kicker">Sistema</span>
+        <h2>Respaldos de la base de datos</h2>
+        <p>Copias guardadas en R2 (se generan automáticamente cada día).</p>
+      </div>
+      <button type="button" class="btn" id="backupNowBtn">💾 Generar respaldo ahora</button>
+      <div id="backupsList"></div>
+    </section>
+
   </main>
 </div>
 
@@ -1392,7 +1404,7 @@
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -2471,8 +2483,39 @@
     }
   }
 
+  async function loadBackups() {
+    const el = document.getElementById('backupsList');
+    if (!el) return;
+    try {
+      const res = await fetch('/api/admin/backups');
+      const data = await res.json();
+      const items = data.backups || [];
+      if (items.length === 0) { el.innerHTML = '<div class="empty">Aún no hay respaldos. Genera uno ahora.</div>'; return; }
+      el.innerHTML = '<div class="table-wrap"><table class="data-table"><thead><tr><th>Archivo</th><th>Tamaño</th><th>Fecha</th></tr></thead><tbody>' +
+        items.map((b) => '<tr><td>' + esc(b.key) + '</td><td>' + esc((b.size / 1024).toFixed(1) + ' KB') + '</td><td>' + esc(new Date(b.uploaded || Date.now()).toLocaleString()) + '</td></tr>').join('') +
+        '</tbody></table></div>';
+    } catch (e) {
+      el.innerHTML = '<div class="empty">Error al cargar respaldos.</div>';
+    }
+  }
+
+  (function initBackupNow() {
+    const btn = document.getElementById('backupNowBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Generando…';
+      try {
+        const res = await fetch('/api/admin/backup-now', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) { loadBackups(); } else { alert(data.error || 'Error'); }
+      } catch (e) { alert('Error de conexión.'); }
+      finally { btn.disabled = false; btn.textContent = '💾 Generar respaldo ahora'; }
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas();
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups();
   }
 
   // ===== Login =====

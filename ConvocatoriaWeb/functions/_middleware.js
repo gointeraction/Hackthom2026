@@ -1,8 +1,22 @@
 // _middleware.js — protege los endpoints admin y registra auditoría.
 import { verifyToken } from './_lib/auth';
+import { checkRateLimit } from './_lib/ratelimit';
 
 export async function onRequest(ctx) {
   const path = new URL(ctx.request.url).pathname;
+
+  // Rate limiting para escrituras públicas (anti-abuso)
+  const publicWrites = ['/api/register', '/api/entrega', '/api/consulta', '/api/chat', '/api/encuesta', '/api/sponsors', '/api/asistencia', '/api/mentor-remoto'];
+  if (publicWrites.includes(path) && ctx.request.method === 'POST') {
+    const ip = ctx.request.headers.get('CF-Connecting-IP') || 'unknown';
+    const allowed = await checkRateLimit(ctx.env, ip, path, 20, 60);
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Demasiadas solicitudes. Espera un minuto e inténtalo de nuevo.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+      );
+    }
+  }
 
   const isLogin = path === '/api/admin/login';
   const isProtectedApi = path.startsWith('/api/admin/') && !isLogin;
