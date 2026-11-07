@@ -315,6 +315,7 @@
         <div class="menu-group-items" data-group="operacion">
           <button class="menu-btn" data-panel="itinerario"><span class="ic">🗓️</span> Itinerario</button>
           <button class="menu-btn" data-panel="logistica"><span class="ic">🧰</span> Logística</button>
+          <button class="menu-btn" data-panel="insumos"><span class="ic">📦</span> Insumos</button>
           <button class="menu-btn" data-panel="acreditacion"><span class="ic">✅</span> Acreditación</button>
           <button class="menu-btn" data-panel="asistencia"><span class="ic">📶</span> Asistencia remota</button>
           <button class="menu-btn" data-panel="entregas"><span class="ic">📦</span> Entregas</button>
@@ -328,6 +329,7 @@
           <button class="menu-btn" data-panel="comunicados"><span class="ic">📣</span> Comunicados</button>
           <button class="menu-btn" data-panel="cartas"><span class="ic">📨</span> Cartas</button>
           <button class="menu-btn" data-panel="instructivo"><span class="ic">📄</span> Instructivo Remoto</button>
+          <button class="menu-btn" data-panel="metodologia"><span class="ic">📘</span> Metodología</button>
         </div>
       </div>
 
@@ -1138,6 +1140,82 @@
       <div class="biblio-grid" id="bibliotecaList"></div>
     </section>
 
+    <!-- INSUMOS POR EQUIPO -->
+    <section class="panel" id="panel-insumos">
+      <div class="sec-head">
+        <span class="kicker">Logística</span>
+        <h2>Insumos por equipo logístico</h2>
+        <p>Lista consolidada de todos los insumos asignados a cada equipo.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Equipo logístico</th><th>Responsables</th><th>Insumos</th></tr>
+          </thead>
+          <tbody id="insumosBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- METODOLOGÍA -->
+    <section class="panel" id="panel-metodologia">
+      <div class="sec-head">
+        <span class="kicker">Metodología</span>
+        <h2>Metodología del Hackathon</h2>
+        <p>Guía para mentores y proceso de entrega de soluciones.</p>
+      </div>
+      <div class="doc">
+        <h3>1. Rol del mentor</h3>
+        <p>El mentor es un <strong>guía técnico y estratégico</strong>. Su función es orientar al equipo, no resolver el proyecto por ellos. Debe asegurar que el equipo avance, entienda el problema y llegue a una solución presentable.</p>
+        <ul>
+          <li>Acompaña a <strong>un equipo asignado</strong> durante los dos días.</li>
+          <li>Resuelve dudas técnicas y de enfoque.</li>
+          <li>Revisa el repositorio y da retroalimentación.</li>
+          <li>Ayuda a preparar el pitch y la demo.</li>
+          <li>Reporta el progreso al comité organizador.</li>
+        </ul>
+
+        <h3>2. Cómo apoyar a los participantes</h3>
+        <ul>
+          <li><strong>Viernes 13:</strong> durante el desarrollo, visita a tu equipo en bloques programados (mañana y tarde) y responde sus consultas.</li>
+          <li><strong>Sábado 14:</strong> enfócate en pulir el MVP, el pitch y la demo; valida que el repositorio esté completo.</li>
+          <li>Responde las <strong>consultas</strong> que lleguen por la sección "Consultas" del panel (márcalas como "respondida" cuando las atiendas).</li>
+          <li><strong>No hagas el trabajo por el equipo:</strong> guía con preguntas y sugerencias; no escribas el código por ellos.</li>
+          <li>Fomenta el <strong>uso responsable de la IA</strong> y la ética en la solución.</li>
+        </ul>
+
+        <h3>3. Entrega de la solución (sábado 14)</h3>
+        <p>Cada equipo debe entregar su solución a través del formulario <strong>"Entrega de proyecto"</strong> (en su panel remoto o la zona de participantes), usando su <strong>código de grupo</strong>.</p>
+        <ul>
+          <li><strong>Repositorio GitHub/GitLab</strong> obligatorio (código + README + documentación).</li>
+          <li><strong>Enlace de demo</strong> (opcional, si la solución está desplegada).</li>
+          <li><strong>Nombre del proyecto</strong>.</li>
+          <li><strong>Plazo:</strong> antes de las <strong>15:00</strong> del sábado (antes de las presentaciones).</li>
+        </ul>
+
+        <h3>4. Presentación ante el jurado (sábado 14)</h3>
+        <ul>
+          <li>Horario: <strong>15:30 – 17:30</strong>.</li>
+          <li>Pitch de <strong>5 a 7 minutos</strong> por equipo (problema → solución → demo → impacto).</li>
+          <li>Luego, ronda de <strong>preguntas del jurado</strong>.</li>
+          <li>Los equipos remotos presentan por videoconferencia.</li>
+        </ul>
+
+        <h3>5. Criterios de evaluación</h3>
+        <table>
+          <thead><tr><th>Criterio</th><th>Peso</th></tr></thead>
+          <tbody>
+            <tr><td>Viabilidad técnica / calidad del MVP</td><td>25%</td></tr>
+            <tr><td>Impacto y relevancia del problema</td><td>20%</td></tr>
+            <tr><td>Innovación y uso de IA</td><td>20%</td></tr>
+            <tr><td>Calidad del pitch</td><td>15%</td></tr>
+            <tr><td>Ética y responsabilidad de la IA</td><td>10%</td></tr>
+            <tr><td>Escalabilidad / sostenibilidad</td><td>10%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -1202,9 +1280,9 @@
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','itinerario','logistica','acreditacion','evaluacion','resultados','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','metodologia','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','cartas','presupuesto','auditoria','errores','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
-      jurado: ['evaluaciones'],
+      jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
     };
     const visible = allowed[role] || allowed.admin;
@@ -2075,8 +2153,27 @@
     else setStatus('usuarioStatus', data.error || 'Error.', false);
   });
 
+  // ===== Insumos por equipo =====
+  async function loadInsumos() {
+    const tbody = document.getElementById('insumosBody');
+    try {
+      const res = await fetch('/api/admin/insumos');
+      const data = await res.json();
+      tbody.innerHTML = '';
+      const equipos = data.equipos || [];
+      if (equipos.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="empty">Sin equipos logísticos.</td></tr>'; return; }
+      equipos.forEach((e) => {
+        const tr = document.createElement('tr');
+        const insumosHtml = e.insumos.length ? e.insumos.map((i) => `<div>• ${esc(i)}</div>`).join('') : '—';
+        const respHtml = e.responsables.length ? e.responsables.map((r) => esc(r)).join('<br>') : '—';
+        tr.innerHTML = `<td><strong>${esc(e.grupo)}</strong></td><td>${respHtml}</td><td>${insumosHtml}</td>`;
+        tbody.appendChild(tr);
+      });
+    } catch (e) { tbody.innerHTML = '<tr><td colspan="3" class="empty">Error.</td></tr>'; }
+  }
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos();
   }
 
   // ===== Login =====
