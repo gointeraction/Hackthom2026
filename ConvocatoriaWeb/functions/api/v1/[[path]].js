@@ -67,7 +67,10 @@ export async function onRequestGet({ request, env, params }) {
       const regs = await env.DB.prepare(
         "SELECT modalidad, COUNT(*) AS c FROM registrations GROUP BY modalidad"
       ).all().catch(() => ({ results: [] }));
-      return json({ ok: true, counts, por_modalidad: regs.results || [] });
+      const conRepo = await env.DB.prepare(
+        "SELECT COUNT(*) AS c FROM entregas WHERE repositorio IS NOT NULL AND repositorio <> ''"
+      ).first().catch(() => null);
+      return json({ ok: true, counts, entregas_con_repositorio: conRepo ? conRepo.c : 0, por_modalidad: regs.results || [] });
     }
 
     if (!TABLES.includes(path)) {
@@ -82,20 +85,31 @@ export async function onRequestGet({ request, env, params }) {
 
       const codes = [...new Set((results || []).map((e) => e.codigo).filter(Boolean))];
       const regMap = {};
+      const teamMap = {};
       if (codes.length) {
         const ph = codes.map(() => '?').join(',');
         const { results: regs } = await env.DB.prepare(
           'SELECT codigo, nombre, apellido, modalidad FROM registrations WHERE codigo IN (' + ph + ')'
         ).bind(...codes).all();
         (regs || []).forEach((r) => { if (r.codigo && !regMap[r.codigo]) regMap[r.codigo] = r; });
+
+        try {
+          const { results: teams } = await env.DB.prepare(
+            'SELECT codigo, nombre, eje FROM teams WHERE codigo IN (' + ph + ')'
+          ).bind(...codes).all();
+          (teams || []).forEach((t) => { if (t.codigo) teamMap[t.codigo] = t; });
+        } catch (e) {}
       }
 
       const data = (results || []).map((e) => {
         const r = regMap[e.codigo] || {};
+        const t = teamMap[e.codigo] || {};
         return {
           ...e,
           participante: ((r.nombre || '') + ' ' + (r.apellido || '')).trim(),
           modalidad: r.modalidad || '',
+          equipo: t.nombre || '',
+          eje: t.eje || '',
         };
       });
 

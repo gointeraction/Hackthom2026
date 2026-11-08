@@ -126,7 +126,8 @@ print(r.json())
   "por_modalidad": [
     { "modalidad": null, "c": 14 },
     { "modalidad": "remoto", "c": 29 }
-  ]
+  ],
+  "entregas_con_repositorio": 0
 }
 ```
 
@@ -187,6 +188,8 @@ Cada entrega incluye el **participante** y su modalidad, cruzados automáticamen
       "tags": "Python, Cloudflare, Workers AI",
       "participante": "Mayra Inca",
       "modalidad": "remoto",
+      "equipo": "Equipo Alpha",
+      "eje": "Ciberseguridad",
       "created_at": "2026-11-14 16:00:00",
       "updated_at": "2026-11-14 16:00:00"
     }
