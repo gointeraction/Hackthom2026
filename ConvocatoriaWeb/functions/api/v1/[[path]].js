@@ -74,6 +74,35 @@ export async function onRequestGet({ request, env, params }) {
       return json({ ok: false, error: 'Recurso no encontrado.', disponibles: ['stats', ...TABLES] }, 404);
     }
 
+    // Entregas: incluye el participante (cruce por código)
+    if (path === 'entregas') {
+      const { results } = await env.DB.prepare(
+        'SELECT * FROM entregas ORDER BY id DESC LIMIT ? OFFSET ?'
+      ).bind(limit, offset).all();
+
+      const codes = [...new Set((results || []).map((e) => e.codigo).filter(Boolean))];
+      const regMap = {};
+      if (codes.length) {
+        const ph = codes.map(() => '?').join(',');
+        const { results: regs } = await env.DB.prepare(
+          'SELECT codigo, nombre, apellido, modalidad FROM registrations WHERE codigo IN (' + ph + ')'
+        ).bind(...codes).all();
+        (regs || []).forEach((r) => { if (r.codigo && !regMap[r.codigo]) regMap[r.codigo] = r; });
+      }
+
+      const data = (results || []).map((e) => {
+        const r = regMap[e.codigo] || {};
+        return {
+          ...e,
+          participante: ((r.nombre || '') + ' ' + (r.apellido || '')).trim(),
+          modalidad: r.modalidad || '',
+        };
+      });
+
+      const total = await env.DB.prepare('SELECT COUNT(*) AS c FROM entregas').first();
+      return json({ ok: true, recurso: 'entregas', total: total ? total.c : null, limit, offset, data: sanitize(data) });
+    }
+
     const { results } = await env.DB.prepare(
       'SELECT * FROM ' + path + ' ORDER BY id DESC LIMIT ? OFFSET ?'
     ).bind(limit, offset).all();

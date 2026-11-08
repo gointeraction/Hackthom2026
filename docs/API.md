@@ -35,7 +35,7 @@ Las claves se almacenan **hasheadas (SHA-256)**; nunca se guarda la clave en cla
 | `GET` | `/api/v1/stats` | Conteos por tabla y por modalidad. |
 | `GET` | `/api/v1/registrations` | Inscripciones (emails enmascarados). |
 | `GET` | `/api/v1/teams` | Equipos. |
-| `GET` | `/api/v1/entregas` | Entregas de proyecto. |
+| `GET` | `/api/v1/entregas` | Entregas de proyecto (incluye `participante`). |
 | `GET` | `/api/v1/charlas` | Charlas y ponentes. |
 | `GET` | `/api/v1/comunicados` | Comunicados. |
 | `GET` | `/api/v1/evaluaciones` | Evaluaciones IA. |
@@ -160,6 +160,41 @@ print(r.json())
   ]
 }
 ```
+
+---
+
+### 5.3 `GET /api/v1/entregas`
+
+Cada entrega incluye el **participante** y su modalidad, cruzados automáticamente por `codigo`.
+
+```json
+{
+  "ok": true,
+  "recurso": "entregas",
+  "total": 1,
+  "limit": 100,
+  "offset": 0,
+  "data": [
+    {
+      "id": 1,
+      "codigo": "ABC123",
+      "proyecto": "Mi Proyecto",
+      "descripcion": "Detector de deepfakes para comunicados oficiales",
+      "repositorio": "https://github.com/usuario/repo",
+      "demo": "https://demo.ejemplo.com",
+      "video": "https://youtube.com/watch?v=...",
+      "deck": "https://docs.google.com/...",
+      "tags": "Python, Cloudflare, Workers AI",
+      "participante": "Mayra Inca",
+      "modalidad": "remoto",
+      "created_at": "2026-11-14 16:00:00",
+      "updated_at": "2026-11-14 16:00:00"
+    }
+  ]
+}
+```
+
+> 💡 El campo **`repositorio`** es la URL de GitHub/GitLab del participante.
 
 ---
 
