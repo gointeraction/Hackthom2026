@@ -357,6 +357,7 @@
       <button class="menu-btn" data-panel="auditoria"><span class="ic">🕒</span> Auditoría</button>
       <button class="menu-btn" data-panel="errores"><span class="ic">🛠️</span> Errores</button>
       <button class="menu-btn" data-panel="backups"><span class="ic">💾</span> Backups</button>
+      <button class="menu-btn" data-panel="api-keys"><span class="ic">🔑</span> API agentes</button>
       <button class="menu-btn" data-panel="accesos"><span class="ic">🔐</span> Accesos</button>
       <button class="menu-btn" data-panel="agentes"><span class="ic">🤖</span> Agentes</button>
       <button class="menu-btn" data-panel="biblioteca"><span class="ic">📚</span> Biblioteca</button>
@@ -1430,6 +1431,28 @@
       <div id="backupsList"></div>
     </section>
 
+    <!-- API PARA AGENTES -->
+    <section class="panel" id="panel-api-keys">
+      <div class="sec-head">
+        <span class="kicker">Sistema</span>
+        <h2>API para agentes externos</h2>
+        <p>Claves de solo lectura para conectar un agente a la base de datos de forma segura (Bearer + rate limit 120/min).</p>
+      </div>
+      <div class="form-card">
+        <h3>➕ Crear API key</h3>
+        <form id="apiKeyForm">
+          <div class="field"><label>Nombre del agente *</label><input type="text" id="apiKeyNombre" placeholder="Agente de análisis" required></div>
+          <button type="submit" class="btn">Generar clave</button>
+          <div class="form-status" id="apiKeyStatus"></div>
+        </form>
+        <div id="apiKeyNueva" style="display:none; margin-top:14px">
+          <p style="font-size:.85rem;color:var(--ink-soft)">Copia esta clave ahora (no se volverá a mostrar):</p>
+          <input type="text" id="apiKeyValor" readonly style="width:100%;font-family:monospace">
+        </div>
+      </div>
+      <div id="apiKeysList"></div>
+    </section>
+
   </main>
 </div>
 
@@ -1494,7 +1517,7 @@
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -2604,8 +2627,52 @@
     });
   })();
 
+  async function loadApiKeys() {
+    const el = document.getElementById('apiKeysList');
+    if (!el) return;
+    try {
+      const res = await fetch('/api/admin/api-keys');
+      const data = await res.json();
+      const items = data.keys || [];
+      if (items.length === 0) { el.innerHTML = '<div class="empty">Aún no hay API keys.</div>'; return; }
+      el.innerHTML = '<div class="table-wrap"><table class="data-table"><thead><tr><th>Nombre</th><th>Permisos</th><th>Creada</th><th>Último uso</th><th></th></tr></thead><tbody>' +
+        items.map((k) => '<tr><td>' + esc(k.nombre) + '</td><td>' + esc(k.permisos) + '</td><td>' + esc((k.created_at || '').replace('T', ' ').slice(0, 16)) + '</td><td>' + esc(k.last_used_at || '—') + '</td><td><button class="del" data-key-id="' + k.id + '" aria-label="Revocar">×</button></td></tr>').join('') +
+        '</tbody></table></div>';
+    } catch (e) {
+      el.innerHTML = '<div class="empty">Error al cargar API keys.</div>';
+    }
+  }
+
+  (function initApiKeys() {
+    const form = document.getElementById('apiKeyForm');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('apiKeyNombre').value.trim();
+      if (!nombre) return;
+      const res = await fetch('/api/admin/api-keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre }) });
+      const data = await res.json();
+      if (data.ok && data.key) {
+        document.getElementById('apiKeyValor').value = data.key;
+        document.getElementById('apiKeyNueva').style.display = 'block';
+        setStatus('apiKeyStatus', 'Clave creada. Cópiala ahora.', true);
+        form.reset();
+        loadApiKeys();
+      } else {
+        setStatus('apiKeyStatus', data.error || 'Error.', false);
+      }
+    });
+    document.getElementById('apiKeysList').addEventListener('click', async (e) => {
+      const id = e.target.dataset.keyId;
+      if (!id) return;
+      if (!confirm('¿Revocar esta API key?')) return;
+      await fetch('/api/admin/api-keys?id=' + id, { method: 'DELETE' });
+      loadApiKeys();
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups();
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups(); loadApiKeys();
   }
 
   // ===== Login =====
