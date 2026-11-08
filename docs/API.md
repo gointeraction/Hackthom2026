@@ -326,3 +326,5 @@ if hmac.compare_digest(expected, request.headers['X-Webhook-Signature']):
 | Versión | Fecha | Cambios |
 |---|---|---|
 | `v1` | 2026-11-08 | Versión inicial: solo lectura, API keys con hash, rate limit 120/min. |
+| `v1.1` | 2026-11-08 | `/entregas` incluye `participante`, `equipo`, `eje`; `/stats` incluye `entregas_con_repositorio`. |
+| `v1.2` | 2026-11-08 | Webhooks firmados (`entrega.nueva`) con HMAC-SHA256. |

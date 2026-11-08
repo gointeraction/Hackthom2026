@@ -1490,7 +1490,7 @@
             <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr></thead>
             <tbody>
               <tr><td>GET</td><td>/api/v1/health</td><td>Verificación de conexión.</td></tr>
-              <tr><td>GET</td><td>/api/v1/stats</td><td>Conteos por tabla y por modalidad.</td></tr>
+              <tr><td>GET</td><td>/api/v1/stats</td><td>Conteos por tabla, por modalidad y <code>entregas_con_repositorio</code>.</td></tr>
               <tr><td>GET</td><td>/api/v1/registrations</td><td>Inscripciones (emails enmascarados).</td></tr>
               <tr><td>GET</td><td>/api/v1/teams</td><td>Equipos.</td></tr>
               <tr><td>GET</td><td>/api/v1/entregas</td><td>Entregas (incluye <code>participante</code>, <code>equipo</code>, <code>eje</code> y <code>repositorio</code>).</td></tr>
@@ -1534,6 +1534,70 @@ print(r.json())</code></pre>
             <li>Los correos se devuelven enmascarados (<code>m***@gmail.com</code>).</li>
             <li>No se exponen usuarios, auditoría, errores ni claves.</li>
           </ul>
+
+          <h3>Respuesta — /stats</h3>
+          <pre><code>{
+  "ok": true,
+  "counts": { "registrations": 43, "charlas": 6, ... },
+  "entregas_con_repositorio": 1,
+  "por_modalidad": [ { "modalidad": "remoto", "c": 29 } ]
+}</code></pre>
+
+          <h3>Respuesta — /entregas</h3>
+          <pre><code>{
+  "ok": true,
+  "recurso": "entregas",
+  "total": 1,
+  "data": [{
+    "codigo": "ABC123",
+    "repositorio": "https://github.com/usuario/repo",
+    "proyecto": "Mi Proyecto",
+    "participante": "Mayra Inca",
+    "equipo": "Equipo Alpha",
+    "eje": "Ciberseguridad",
+    "modalidad": "remoto"
+  }]
+}</code></pre>
+
+          <h3>Gestión de claves (admin)</h3>
+          <table>
+            <thead><tr><th>Acción</th><th>Endpoint</th><th>Método</th></tr></thead>
+            <tbody>
+              <tr><td>Listar</td><td>/api/admin/api-keys</td><td>GET</td></tr>
+              <tr><td>Crear</td><td>/api/admin/api-keys</td><td>POST { "nombre": "Agente" }</td></tr>
+              <tr><td>Revocar</td><td>/api/admin/api-keys?id=N</td><td>DELETE</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Webhooks (notificaciones al agente)</h3>
+          <p>Cuando un participante registra o actualiza su entrega, se envía un <strong>POST firmado</strong> a tu endpoint.</p>
+          <pre><code>POST https://tu-agente.com/webhook
+Content-Type: application/json
+X-Webhook-Event: entrega.nueva
+X-Webhook-Signature: &lt;hmac-sha256&gt;</code></pre>
+          <pre><code>{
+  "evento": "entrega.nueva",
+  "enviado_en": "2026-11-14T16:00:00.000Z",
+  "data": {
+    "codigo": "ABC123",
+    "repositorio": "https://github.com/usuario/repo",
+    "proyecto": "Mi Proyecto",
+    "demo": "...",
+    "video": "...",
+    "deck": "...",
+    "tags": "...",
+    "descripcion": "..."
+  }
+}</code></pre>
+          <p><strong>Verificación de la firma (Node.js):</strong></p>
+          <pre><code>import crypto from 'node:crypto';
+const expected = crypto.createHmac('sha256', SECRETO).update(rawBody).digest('hex');
+crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers['x-webhook-signature']));</code></pre>
+          <p><strong>Verificación de la firma (Python):</strong></p>
+          <pre><code>import hmac, hashlib
+expected = hmac.new(b'SECRETO', raw_body, hashlib.sha256).hexdigest()
+hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pre>
+          <p>La firma se calcula sobre el <strong>cuerpo crudo</strong> del request.</p>
 
           <h3>Códigos de error</h3>
           <table>
