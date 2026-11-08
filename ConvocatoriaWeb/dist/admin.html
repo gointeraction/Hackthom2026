@@ -1451,6 +1451,83 @@
         </div>
       </div>
       <div id="apiKeysList"></div>
+
+      <!-- Documentación de la API -->
+      <div class="doc" style="margin-top:28px">
+        <div class="doc-actions">
+          <button type="button" class="btn" id="copyApiDocs">Copiar documentación</button>
+          <div class="form-status" id="copyApiDocsStatus"></div>
+        </div>
+        <div id="apiDocsText">
+          <h3>Base URL</h3>
+          <pre><code>https://hackathon-uneti-ia.pages.dev/api/v1</code></pre>
+
+          <h3>Autenticación</h3>
+          <p>Envía la clave en el encabezado <code>Authorization</code> con el prefijo <code>Bearer</code>:</p>
+          <pre><code>Authorization: Bearer hx_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code></pre>
+
+          <h3>Endpoints</h3>
+          <table>
+            <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr></thead>
+            <tbody>
+              <tr><td>GET</td><td>/api/v1/health</td><td>Verificación de conexión.</td></tr>
+              <tr><td>GET</td><td>/api/v1/stats</td><td>Conteos por tabla y por modalidad.</td></tr>
+              <tr><td>GET</td><td>/api/v1/registrations</td><td>Inscripciones (emails enmascarados).</td></tr>
+              <tr><td>GET</td><td>/api/v1/teams</td><td>Equipos.</td></tr>
+              <tr><td>GET</td><td>/api/v1/entregas</td><td>Entregas de proyecto.</td></tr>
+              <tr><td>GET</td><td>/api/v1/charlas</td><td>Charlas y ponentes.</td></tr>
+              <tr><td>GET</td><td>/api/v1/comunicados</td><td>Comunicados.</td></tr>
+              <tr><td>GET</td><td>/api/v1/evaluaciones</td><td>Evaluaciones IA.</td></tr>
+              <tr><td>GET</td><td>/api/v1/scores</td><td>Puntajes de jurados.</td></tr>
+              <tr><td>GET</td><td>/api/v1/encuestas</td><td>Encuestas de feedback.</td></tr>
+              <tr><td>GET</td><td>/api/v1/judges</td><td>Jurados.</td></tr>
+              <tr><td>GET</td><td>/api/v1/sponsors</td><td>Patrocinadores.</td></tr>
+              <tr><td>GET</td><td>/api/v1/logistica</td><td>Logística.</td></tr>
+              <tr><td>GET</td><td>/api/v1/presupuesto</td><td>Presupuesto.</td></tr>
+              <tr><td>GET</td><td>/api/v1/consultas</td><td>Consultas.</td></tr>
+              <tr><td>GET</td><td>/api/v1/asistencia_remota</td><td>Asistencia remota.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Paginación</h3>
+          <p>Cada listado acepta <code>?limit=</code> (1–500, por defecto 100) y <code>?offset=</code> (por defecto 0). La respuesta incluye <code>total</code>, <code>limit</code> y <code>offset</code>.</p>
+
+          <h3>Ejemplo (curl)</h3>
+          <pre><code>curl -H "Authorization: Bearer hx_sk_TU_CLAVE" \
+  https://hackathon-uneti-ia.pages.dev/api/v1/stats</code></pre>
+
+          <h3>Ejemplo (JavaScript)</h3>
+          <pre><code>const res = await fetch('https://hackathon-uneti-ia.pages.dev/api/v1/registrations?limit=50', {
+  headers: { Authorization: 'Bearer hx_sk_TU_CLAVE' },
+});
+const data = await res.json();</code></pre>
+
+          <h3>Ejemplo (Python)</h3>
+          <pre><code>import requests
+r = requests.get('https://hackathon-uneti-ia.pages.dev/api/v1/stats',
+                 headers={'Authorization': 'Bearer hx_sk_TU_CLAVE'})
+print(r.json())</code></pre>
+
+          <h3>Seguridad</h3>
+          <ul>
+            <li>Solo lectura: la API no permite modificar datos.</li>
+            <li>Límite: <strong>120 solicitudes por minuto</strong> por clave (responde 429).</li>
+            <li>Los correos se devuelven enmascarados (<code>m***@gmail.com</code>).</li>
+            <li>No se exponen usuarios, auditoría, errores ni claves.</li>
+          </ul>
+
+          <h3>Códigos de error</h3>
+          <table>
+            <thead><tr><th>Código</th><th>Significado</th></tr></thead>
+            <tbody>
+              <tr><td>401</td><td>API key ausente o inválida.</td></tr>
+              <tr><td>404</td><td>Recurso no encontrado.</td></tr>
+              <tr><td>429</td><td>Límite de solicitudes excedido.</td></tr>
+              <tr><td>500</td><td>Error interno.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -2731,6 +2808,15 @@
       setStatus('copyPresStatus', 'Instructivo copiado al portapapeles.', true);
     }).catch(() => {
       setStatus('copyPresStatus', 'No se pudo copiar.', false);
+    });
+  });
+
+  document.getElementById('copyApiDocs').addEventListener('click', () => {
+    const text = document.getElementById('apiDocsText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      setStatus('copyApiDocsStatus', 'Documentación copiada.', true);
+    }).catch(() => {
+      setStatus('copyApiDocsStatus', 'No se pudo copiar.', false);
     });
   });
 
