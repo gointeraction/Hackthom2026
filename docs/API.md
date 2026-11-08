@@ -245,7 +245,83 @@ Formato de error:
 
 ---
 
-## 9. Changelog
+## 9. Webhooks
+
+Además de consultar la API, tu agente puede **recibir notificaciones** cuando ocurre un evento.
+
+### 9.1 Configuración
+
+1. Panel admin → **Sistema → 🔑 API agentes → 🔔 Webhooks**.
+2. Ingresa el nombre y la **URL HTTPS** de tu endpoint.
+3. Copia el **secreto** (`whsec_…`) que se muestra una sola vez.
+
+### 9.2 Eventos
+
+| Evento | Cuándo se dispara |
+|---|---|
+| `entrega.nueva` | Cuando un participante registra o actualiza su entrega. |
+
+### 9.3 Formato del payload
+
+```http
+POST https://tu-agente.com/webhook
+Content-Type: application/json
+X-Webhook-Event: entrega.nueva
+X-Webhook-Signature: <hmac-sha256-hex>
+```
+
+```json
+{
+  "evento": "entrega.nueva",
+  "enviado_en": "2026-11-14T16:00:00.000Z",
+  "data": {
+    "codigo": "ABC123",
+    "repositorio": "https://github.com/usuario/repo",
+    "proyecto": "Mi Proyecto",
+    "demo": "https://demo.ejemplo.com",
+    "video": "https://youtube.com/watch?v=...",
+    "deck": "https://docs.google.com/...",
+    "tags": "Python, Cloudflare, Workers AI",
+    "descripcion": "Detector de deepfakes para comunicados oficiales"
+  }
+}
+```
+
+### 9.4 Verificación de la firma (Node.js)
+
+```js
+import crypto from 'node:crypto';
+
+const raw = req.rawBody; // body CRUDO, sin parsear
+const expected = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET)
+  .update(raw)
+  .digest('hex');
+
+if (crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers['x-webhook-signature']))) {
+  // firma válida
+}
+```
+
+### 9.5 Verificación de la firma (Python)
+
+```python
+import hmac, hashlib
+
+expected = hmac.new(
+    b'WEBHOOK_SECRET',
+    raw_body,
+    hashlib.sha256,
+).hexdigest()
+
+if hmac.compare_digest(expected, request.headers['X-Webhook-Signature']):
+    # firma válida
+```
+
+> ⚠️ La firma se calcula sobre el **cuerpo crudo** del request, no sobre el JSON re-serializado.
+
+---
+
+## 10. Changelog
 
 | Versión | Fecha | Cambios |
 |---|---|---|

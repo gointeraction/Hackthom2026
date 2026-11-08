@@ -1452,6 +1452,25 @@
       </div>
       <div id="apiKeysList"></div>
 
+      <!-- Webhooks -->
+      <div class="form-card" style="margin-top:28px">
+        <h3>🔔 Webhooks (notificaciones al agente)</h3>
+        <p style="font-size:.85rem;color:var(--ink-soft);margin-bottom:12px">Cuando un participante registra o actualiza su entrega, se envía un <strong>POST firmado (HMAC-SHA256)</strong> a tu endpoint.</p>
+        <form id="webhookForm">
+          <div class="frow">
+            <div class="field"><label>Nombre</label><input type="text" id="webhookNombre" placeholder="Agente de triaje"></div>
+            <div class="field"><label>URL HTTPS *</label><input type="url" id="webhookUrl" placeholder="https://tu-agente.com/webhook" required></div>
+          </div>
+          <button type="submit" class="btn">Agregar webhook</button>
+          <div class="form-status" id="webhookStatus"></div>
+        </form>
+        <div id="webhookNuevo" style="display:none;margin-top:12px">
+          <p style="font-size:.85rem;color:var(--ink-soft)">Secreto para verificar la firma (guárdalo):</p>
+          <input type="text" id="webhookSecretVal" readonly style="width:100%;font-family:monospace">
+        </div>
+      </div>
+      <div id="webhooksList"></div>
+
       <!-- Documentación de la API -->
       <div class="doc" style="margin-top:28px">
         <div class="doc-actions">
@@ -2748,8 +2767,53 @@ print(r.json())</code></pre>
     });
   })();
 
+  async function loadWebhooks() {
+    const el = document.getElementById('webhooksList');
+    if (!el) return;
+    try {
+      const res = await fetch('/api/admin/webhooks');
+      const data = await res.json();
+      const items = data.webhooks || [];
+      if (items.length === 0) { el.innerHTML = '<div class="empty">Aún no hay webhooks.</div>'; return; }
+      el.innerHTML = '<div class="table-wrap"><table class="data-table"><thead><tr><th>Nombre</th><th>URL</th><th>Eventos</th><th>Creado</th><th></th></tr></thead><tbody>' +
+        items.map((w) => '<tr><td>' + esc(w.nombre || '—') + '</td><td style="word-break:break-all">' + esc(w.url) + '</td><td>' + esc(w.eventos) + '</td><td>' + esc((w.created_at || '').replace('T', ' ').slice(0, 16)) + '</td><td><button class="del" data-webhook-id="' + w.id + '" aria-label="Eliminar">×</button></td></tr>').join('') +
+        '</tbody></table></div>';
+    } catch (e) {
+      el.innerHTML = '<div class="empty">Error al cargar webhooks.</div>';
+    }
+  }
+
+  (function initWebhooks() {
+    const form = document.getElementById('webhookForm');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('webhookUrl').value.trim();
+      const nombre = document.getElementById('webhookNombre').value.trim();
+      if (!url) return;
+      const res = await fetch('/api/admin/webhooks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, nombre }) });
+      const data = await res.json();
+      if (data.ok && data.secret) {
+        document.getElementById('webhookSecretVal').value = data.secret;
+        document.getElementById('webhookNuevo').style.display = 'block';
+        setStatus('webhookStatus', 'Webhook creado. Guarda el secreto.', true);
+        form.reset();
+        loadWebhooks();
+      } else {
+        setStatus('webhookStatus', data.error || 'Error.', false);
+      }
+    });
+    document.getElementById('webhooksList').addEventListener('click', async (e) => {
+      const id = e.target.dataset.webhookId;
+      if (!id) return;
+      if (!confirm('¿Eliminar este webhook?')) return;
+      await fetch('/api/admin/webhooks?id=' + id, { method: 'DELETE' });
+      loadWebhooks();
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups(); loadApiKeys();
+    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
   }
 
   // ===== Login =====

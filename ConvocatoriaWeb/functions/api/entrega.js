@@ -1,5 +1,6 @@
 // /api/entrega — entrega de proyecto (repositorio GitHub + código de participante/grupo).
 import { sendEmail } from '../_lib/mail';
+import { sendWebhooks } from '../_lib/webhook';
 
 async function verifyTurnstile(env, token, action, ip) {
   if (!token || !env.TURNSTILE_SECRET) return false;
@@ -16,7 +17,7 @@ async function verifyTurnstile(env, token, action, ip) {
   }
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const data = await request.json().catch(() => null);
   if (!data) return Response.json({ ok: false, error: 'Datos inválidos.' }, { status: 400 });
   if (data._gotcha) return Response.json({ ok: true });
@@ -51,6 +52,12 @@ export async function onRequestPost({ request, env }) {
     await env.DB.prepare(
       'INSERT INTO entregas (codigo, repositorio, proyecto, demo, video, deck, tags, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(codigo) DO UPDATE SET repositorio=excluded.repositorio, proyecto=excluded.proyecto, demo=excluded.demo, video=excluded.video, deck=excluded.deck, tags=excluded.tags, descripcion=excluded.descripcion, updated_at=CURRENT_TIMESTAMP'
     ).bind(codigo, repositorio, proyecto, demo, video, deck, tags, descripcion).run();
+
+    // Notificar a agentes externos (webhook firmado, best-effort)
+    const wh = sendWebhooks(env, 'entrega.nueva', {
+      codigo, repositorio, proyecto, demo, video, deck, tags, descripcion,
+    });
+    if (typeof waitUntil === 'function') waitUntil(wh); else wh.catch(() => {});
 
     try {
       await sendEmail(env, {
