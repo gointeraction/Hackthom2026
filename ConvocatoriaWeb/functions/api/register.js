@@ -38,6 +38,7 @@ export async function onRequestPost({ request, env }) {
 
   const tipo = data.tipo === 'grupal' ? 'grupal' : 'individual';
   const propuesta = tipo === 'grupal' ? String(data.propuesta || '').trim() : '';
+  const eje = tipo === 'grupal' ? String(data.eje || '').trim() : '';
   const conducta = data.conducta === true || data.conducta === 'on' ? 1 : 0;
   const imagen = data.imagen === true || data.imagen === 'on' ? 1 : 0;
   if (!conducta) {
@@ -103,6 +104,16 @@ export async function onRequestPost({ request, env }) {
         'INSERT INTO registrations (nombre, apellido, correo, nacimiento, anio, group_id, validated, validation_token, propuesta, modalidad, codigo, conducta, imagen) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?)'
       ).bind(m.nombre, m.apellido, m.correo, m.nacimiento, m.anio, group_id, token, prop, mod, codigo, conducta, imagen).run();
     }
+    // Crear el equipo del grupo automáticamente (para que aparezca en Equipos)
+    if (tipo === 'grupal') {
+      try {
+        const miembros = limpios.map((m) => `${m.nombre} ${m.apellido}`.trim());
+        await env.DB.prepare(
+          'INSERT INTO teams (nombre, mentor, eje, proyecto, integrantes, codigo, contacto_email, origen, modalidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        ).bind('Grupo ' + codigo, '', eje, propuesta, JSON.stringify(miembros), codigo, limpios[0].correo, 'registro', 'remoto').run();
+      } catch (e) {}
+    }
+
     // Enviar correos de confirmación (best-effort)
     try {
       const subject = 'Inscripción confirmada — Hackathon UNETI IA 2026 (modalidad remota)';

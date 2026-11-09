@@ -39,8 +39,8 @@ export async function onRequestPost({ request, env }) {
   try {
     const codigo = crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
     const result = await env.DB.prepare(
-      'INSERT INTO teams (nombre, mentor, eje, proyecto, integrantes, codigo, contacto_email) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).bind(nombre, mentor, eje, proyecto, JSON.stringify(integrantes), codigo, contacto_email).run();
+      'INSERT INTO teams (nombre, mentor, eje, proyecto, integrantes, codigo, contacto_email, origen, modalidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(nombre, mentor, eje, proyecto, JSON.stringify(integrantes), codigo, contacto_email, 'comite', 'presencial').run();
     const teamId = (result.meta && result.meta.last_row_id) ? result.meta.last_row_id : null;
 
     if (contacto_email) {

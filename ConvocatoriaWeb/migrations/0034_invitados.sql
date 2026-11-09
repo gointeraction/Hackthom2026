@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS invitados (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL,
+  organizacion TEXT,
+  correo TEXT,
+  telefono TEXT,
+  acreditado INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

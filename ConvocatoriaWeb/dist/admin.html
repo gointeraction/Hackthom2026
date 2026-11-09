@@ -305,7 +305,9 @@
           <button class="menu-btn" data-panel="participantes"><span class="ic">🧑‍🎓</span> Participantes <span class="cnt" id="cntParticipantes">0</span></button>
           <button class="menu-btn" data-panel="jurados"><span class="ic">⚖️</span> Jurados <span class="cnt" id="cntJurados">0</span></button>
           <button class="menu-btn" data-panel="mentores"><span class="ic">🤝</span> Mentores <span class="cnt" id="cntMentores">0</span></button>
-          <button class="menu-btn" data-panel="remotos"><span class="ic">🧑‍💻</span> Remotos</button>
+          <button class="menu-btn" data-panel="remotos"><span class="ic">🧑‍💻</span> Remotos <span class="cnt" id="cntRemotos">0</span></button>
+          <button class="menu-btn" data-panel="presenciales"><span class="ic">🏛️</span> Presenciales <span class="cnt" id="cntPresenciales">0</span></button>
+          <button class="menu-btn" data-panel="verificacion"><span class="ic">✅</span> Verificación</button>
         </div>
       </div>
 
@@ -328,6 +330,7 @@
           <button class="menu-btn" data-panel="logistica"><span class="ic">🧰</span> Logística</button>
           <button class="menu-btn" data-panel="insumos"><span class="ic">📦</span> Insumos</button>
           <button class="menu-btn" data-panel="acreditacion"><span class="ic">✅</span> Acreditación</button>
+          <button class="menu-btn" data-panel="acreditacion-personal"><span class="ic">🪪</span> Acred. personal</button>
           <button class="menu-btn" data-panel="asistencia"><span class="ic">📶</span> Asistencia remota</button>
           <button class="menu-btn" data-panel="entregas"><span class="ic">📦</span> Entregas</button>
           <button class="menu-btn" data-panel="consultas"><span class="ic">💬</span> Consultas</button>
@@ -376,7 +379,9 @@
       </div>
       <div class="dash-grid">
         <div class="dash-card"><span class="dash-num" id="dInscritos">0</span><span class="dash-label">Inscritos totales</span></div>
-        <div class="dash-card"><span class="dash-num" id="dIndividuales">0</span><span class="dash-label">Individuales (remotos)</span></div>
+        <div class="dash-card"><span class="dash-num" id="dIndividuales">0</span><span class="dash-label">Individuales</span></div>
+        <div class="dash-card"><span class="dash-num" id="dPresenciales">0</span><span class="dash-label">Presenciales</span></div>
+        <div class="dash-card"><span class="dash-num" id="dRemotos">0</span><span class="dash-label">Remotos</span></div>
         <div class="dash-card"><span class="dash-num" id="dGrupos">0</span><span class="dash-label">Grupos</span></div>
         <div class="dash-card"><span class="dash-num" id="dEquipos">0</span><span class="dash-label">Equipos</span></div>
         <div class="dash-card"><span class="dash-num" id="dJurados">0</span><span class="dash-label">Jurados</span></div>
@@ -430,6 +435,19 @@
         <h2>Conformación de equipos</h2>
         <p>Equipos con sus integrantes y mentor.</p>
       </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <select id="teamFilter" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px">
+          <option value="">Todos los orígenes</option>
+          <option value="comite">🏛️ Conformados por el comité</option>
+          <option value="registro">📝 Grupos registrados</option>
+        </select>
+        <select id="teamFilterMod" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px">
+          <option value="">Todas las modalidades</option>
+          <option value="presencial">🏛️ Presenciales</option>
+          <option value="remoto">💻 Remotos</option>
+        </select>
+        <span class="count" id="teamCount">0 equipos</span>
+      </div>
       <div class="teams" id="teamsGrid"></div>
       <div class="empty" id="teamsEmpty" style="display:none">No hay equipos conformados todavía.</div>
       <div class="form-card">
@@ -448,6 +466,15 @@
               </select>
             </div>
             <div class="field"><label>Proyecto (opcional)</label><input type="text" id="fProyecto"></div>
+          </div>
+          <div class="field">
+            <label>Seleccionar participantes presenciales <span id="fPartCount" style="color:var(--cyan);font-weight:600">0/5</span></label>
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <input type="text" id="fBuscarPart" placeholder="Buscar por nombre, correo o código…" style="flex:1">
+              <button type="button" class="btn" id="fPartClear" style="padding:8px 14px;font-size:.85rem">Limpiar</button>
+            </div>
+            <div id="fParticipantes" style="max-height:300px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; padding:8px; display:grid; gap:6px"></div>
+            <p style="font-size:.78rem;color:var(--ink-soft);margin-top:6px">Marca hasta 5 participantes. 🔒 = ya está en un equipo. Se cargan automáticamente en "Integrantes".</p>
           </div>
           <div class="field">
             <label>Integrantes (uno por línea) *</label>
@@ -867,10 +894,62 @@
     <section class="panel" id="panel-acreditacion">
       <div class="sec-head">
         <span class="kicker">Acreditación</span>
-        <h2>Verificación de grupos presenciales</h2>
-        <p>Marca a los integrantes que se presentaron físicamente en la sede.</p>
+        <h2>Acreditación en sede</h2>
+        <p>Marca a las personas que se presentaron físicamente. Diseñado para tablet y teléfono.</p>
       </div>
-      <div class="acreditacion" id="acreditacionList"></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <input type="text" id="acredSearch" placeholder="Buscar por nombre, correo o código…" style="flex:1;min-width:220px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;font-size:1rem">
+        <button type="button" class="btn" id="acredPrint">🖨️ Imprimir</button>
+        <span class="count" id="acredCount">0/0 acreditados</span>
+      </div>
+      <div style="height:10px;background:#E6EAF0;border-radius:99px;overflow:hidden;margin-bottom:18px">
+        <div id="acredBar" style="height:100%;width:0%;background:linear-gradient(90deg,#06A77D,#00B4D8);transition:width .3s"></div>
+      </div>
+      <div id="acreditacionList" style="display:grid;gap:16px"></div>
+    </section>
+
+    <!-- ACREDITACIÓN DE PERSONAL -->
+    <section class="panel" id="panel-acreditacion-personal">
+      <div class="sec-head">
+        <span class="kicker">Acreditación</span>
+        <h2>Acreditación de jurados y mentores</h2>
+        <p>Marca a los jurados y mentores que se presentaron en la sede.</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+        <input type="text" id="acredPersSearch" placeholder="Buscar por nombre, correo u organización…" style="flex:1;min-width:220px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;font-size:1rem">
+        <button type="button" class="btn" id="acredPersPrint">🖨️ Imprimir</button>
+        <span class="count" id="acredPersCount">0/0 acreditados</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+        <div>
+          <h3 style="margin:0 0 10px;display:flex;align-items:center;gap:8px">⚖️ Jurados <span class="tipo-tag" id="acredJudgesCount">0/0</span></h3>
+          <div id="acredJudgesList" style="display:grid;gap:8px"></div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 10px;display:flex;align-items:center;gap:8px">🤝 Mentores <span class="tipo-tag" id="acredMentoresCount">0/0</span></h3>
+          <div id="acredMentoresList" style="display:grid;gap:8px"></div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 10px;display:flex;align-items:center;gap:8px">🎟️ Invitados <span class="tipo-tag" id="acredInvitadosCount">0/0</span></h3>
+          <div id="acredInvitadosList" style="display:grid;gap:8px"></div>
+        </div>
+      </div>
+
+      <div class="form-card" style="margin-top:22px">
+        <h3>➕ Agregar invitado</h3>
+        <form id="invitadoForm">
+          <div class="frow">
+            <div class="field"><label>Nombre completo *</label><input type="text" id="iNombre" required></div>
+            <div class="field"><label>Organización</label><input type="text" id="iOrg"></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Correo</label><input type="email" id="iCorreo"></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="iTelefono" placeholder="0412-1234567"></div>
+          </div>
+          <button type="submit" class="btn">Guardar invitado</button>
+          <div class="form-status" id="invitadoStatus"></div>
+        </form>
+      </div>
     </section>
 
     <!-- EVALUACIÓN -->
@@ -1223,6 +1302,54 @@
           <tbody id="remotosBody"></tbody>
         </table>
       </div>
+    </section>
+
+    <!-- PRESENCIALES -->
+    <section class="panel" id="panel-presenciales">
+      <div class="sec-head">
+        <span class="kicker">Participantes</span>
+        <h2>Participantes presenciales</h2>
+        <p>Listado de los inscritos en modalidad presencial con su código de acceso.</p>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px">
+        <input type="text" id="presencialSearch" placeholder="Buscar por nombre, correo o código…" style="flex:1; min-width:220px; padding:10px 14px; border:1px solid var(--line); border-radius:8px">
+        <button type="button" class="btn" id="copyPresencialCodes">Copiar códigos</button>
+        <button type="button" class="btn" id="printPresenciales">🖨️ Imprimir</button>
+        <button type="button" class="btn" id="csvPresenciales">⬇️ CSV</button>
+        <span class="count" id="presencialCount">0 presenciales</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Participante</th>
+              <th>Tipo</th>
+              <th>Año</th>
+              <th>Notificado</th>
+              <th>Acreditado</th>
+            </tr>
+          </thead>
+          <tbody id="presencialesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VERIFICACIÓN PRESENCIAL -->
+    <section class="panel" id="panel-verificacion">
+      <div class="sec-head">
+        <span class="kicker">Verificación</span>
+        <h2>Verificación de grupos presenciales</h2>
+        <p>Listado completo por equipo para validar en sitio (incluye participantes sin equipo).</p>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px">
+        <input type="text" id="verifSearch" placeholder="Buscar por nombre, correo, código o equipo…" style="flex:1; min-width:220px; padding:10px 14px; border:1px solid var(--line); border-radius:8px">
+        <button type="button" class="btn" id="printVerificacion">🖨️ Imprimir</button>
+        <button type="button" class="btn" id="csvVerificacion">⬇️ CSV</button>
+        <span class="count" id="verifCount">0 personas</span>
+      </div>
+      <div id="verifSummary" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px"></div>
+      <div id="verifList"></div>
     </section>
 
     <!-- ERRORES -->
@@ -1722,7 +1849,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -1749,12 +1876,15 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     const el = document.createElement('div');
     el.className = 'team';
     const ejeTag = t.eje === 'Ciberseguridad' ? 'seg' : 'etica';
+    const ejeLabel = t.eje || 'Sin eje';
+    const esRegistro = t.origen === 'registro';
+    const esRemoto = t.modalidad === 'remoto';
     const miembros = (t.integrantes || []).map((n) => `<li>${esc(n)}</li>`).join('');
     el.innerHTML = `
-      <div class="team-top"><h3>${esc(t.nombre)}</h3><span class="tag ${ejeTag}">${esc(t.eje)}</span></div>
+      <div class="team-top"><h3>${esc(t.nombre)}</h3><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag ${ejeTag}">${esc(ejeLabel)}</span><span class="tipo-tag" style="background:${esRegistro ? 'rgba(230,57,102,.12)' : 'rgba(0,180,216,.12)'};color:${esRegistro ? 'var(--rose)' : 'var(--cyan)'}">${esRegistro ? '📝 Registrado' : '🏛️ Comité'}</span><span class="tipo-tag" style="background:${esRemoto ? 'rgba(230,57,102,.12)' : 'rgba(6,167,125,.12)'};color:${esRemoto ? 'var(--rose)' : 'var(--green)'}">${esRemoto ? '💻 Remoto' : '🏛️ Presencial'}</span></span></div>
       <div class="codigo">Grupo Nº ${t.id} · Código: <strong>${esc(t.codigo || '—')}</strong></div>
       ${t.proyecto ? `<p class="proyecto">Proyecto: ${esc(t.proyecto)}</p>` : ''}
-      <div class="mentor">Mentor/a: ${esc(t.mentor)}</div>
+      <div class="mentor">Mentor/a: ${esc(t.mentor || 'Sin asignar')}</div>
       <ol>${miembros || '<li style="color:#999">Sin integrantes</li>'}</ol>`;
     return el;
   }
@@ -1766,9 +1896,16 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     try {
       const res = await fetch('/api/admin/teams');
       const data = await res.json();
-      const teams = data.teams || [];
-      document.getElementById('cntEquipos').textContent = teams.length;
-      if (teams.length === 0) { empty.style.display = 'block'; return; }
+      const todos = data.teams || [];
+      const filtro = (document.getElementById('teamFilter')?.value || '');
+      const filtroMod = (document.getElementById('teamFilterMod')?.value || '');
+      let teams = todos;
+      if (filtro) teams = teams.filter((t) => (t.origen || 'comite') === filtro);
+      if (filtroMod) teams = teams.filter((t) => (t.modalidad || 'presencial') === filtroMod);
+      document.getElementById('cntEquipos').textContent = todos.length;
+      const tc = document.getElementById('teamCount');
+      if (tc) tc.textContent = teams.length + ' de ' + todos.length + ' equipos';
+      if (teams.length === 0) { empty.style.display = 'block'; empty.textContent = 'No hay equipos en esta categoría.'; return; }
       empty.style.display = 'none';
       teams.forEach((t) => grid.appendChild(teamCard(t)));
     } catch (e) {
@@ -1776,6 +1913,72 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       empty.style.display = 'block';
     }
   }
+
+  (function initTeamFilter() {
+    const s = document.getElementById('teamFilter');
+    if (s) s.addEventListener('change', loadTeams);
+    const m = document.getElementById('teamFilterMod');
+    if (m) m.addEventListener('change', loadTeams);
+  })();
+
+  // ===== Selección de presenciales para equipos =====
+  let presencialesEquipo = [];
+  async function loadParticipantesEquipo() {
+    const box = document.getElementById('fParticipantes');
+    if (!box) return;
+    try {
+      const res = await fetch('/api/admin/presenciales');
+      const data = await res.json();
+      presencialesEquipo = data.personas || [];
+      renderParticipantesEquipo();
+    } catch (e) {
+      box.innerHTML = '<span class="k">Error al cargar participantes.</span>';
+    }
+  }
+
+  function actualizarContadorPart() {
+    const cnt = document.getElementById('fPartCount');
+    if (cnt) cnt.textContent = document.querySelectorAll('.f-part:checked').length + '/5';
+  }
+
+  function renderParticipantesEquipo() {
+    const box = document.getElementById('fParticipantes');
+    if (!box) return;
+    const q = (document.getElementById('fBuscarPart')?.value || '').toLowerCase().trim();
+    const items = presencialesEquipo.filter((p) => !q || (p.nombre + ' ' + p.correo + ' ' + p.codigo).toLowerCase().includes(q));
+    if (items.length === 0) { box.innerHTML = '<span class="k">Sin participantes presenciales.</span>'; return; }
+    box.innerHTML = items.map((p) => {
+      const ocupado = !!p.equipo;
+      return '<label style="display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--line);border-radius:8px;cursor:' + (ocupado ? 'not-allowed' : 'pointer') + ';' + (ocupado ? 'opacity:.55' : '') + '">' +
+        '<input type="checkbox" class="f-part" value="' + esc(p.codigo) + '" data-nombre="' + esc(p.nombre) + '" data-correo="' + esc(p.correo) + '"' + (ocupado ? ' disabled' : '') + '>' +
+        '<span style="flex:1"><strong>' + esc(p.nombre) + '</strong>' + (ocupado ? ' <span class="tipo-tag" style="background:rgba(230,57,102,.12);color:var(--rose)">🔒 ' + esc(p.equipo) + '</span>' : '') +
+        '<br><span class="k">🎓 ' + esc(p.anio || '—') + ' · ' + esc(p.correo) + ' · ' + esc(p.codigo) + '</span></span></label>';
+    }).join('');
+    box.querySelectorAll('.f-part').forEach((cb) => cb.addEventListener('change', syncIntegrantesEquipo));
+    actualizarContadorPart();
+  }
+
+  function syncIntegrantesEquipo() {
+    const checked = [...document.querySelectorAll('.f-part:checked')];
+    if (checked.length > 5) { checked[checked.length - 1].checked = false; alert('Máximo 5 integrantes por equipo.'); return syncIntegrantesEquipo(); }
+    const nombres = checked.map((cb) => cb.dataset.nombre);
+    const correos = checked.map((cb) => cb.dataset.correo).filter(Boolean);
+    const ta = document.getElementById('fIntegrantes');
+    if (ta) ta.value = nombres.join('\n');
+    const co = document.getElementById('fContacto');
+    if (co && correos.length) co.value = correos[0];
+    actualizarContadorPart();
+  }
+
+  (function initParticipantesEquipo() {
+    const s = document.getElementById('fBuscarPart');
+    if (s) s.addEventListener('input', renderParticipantesEquipo);
+    const c = document.getElementById('fPartClear');
+    if (c) c.addEventListener('click', () => {
+      document.querySelectorAll('.f-part:checked').forEach((cb) => { cb.checked = false; });
+      syncIntegrantesEquipo();
+    });
+  })();
 
   document.getElementById('teamForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -2042,55 +2245,220 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   });
 
   // ===== Acreditación =====
+  // ===== Acreditación en sede =====
+  let acredData = [];
   async function loadAccreditation() {
     const cont = document.getElementById('acreditacionList');
+    if (!cont) return;
     try {
-      const res = await fetch('/api/admin/registrations');
+      const res = await fetch('/api/admin/presenciales');
       const data = await res.json();
-      cont.innerHTML = '';
-      const regs = data.registrations || [];
-      const presenciales = regs.filter((r) => r.modalidad === 'presencial' && r.group_id);
-      const grupos = new Map();
-      presenciales.forEach((r) => {
-        if (!grupos.has(r.group_id)) grupos.set(r.group_id, []);
-        grupos.get(r.group_id).push(r);
-      });
-      if (grupos.size === 0) { cont.innerHTML = '<div class="empty">No hay grupos presenciales seleccionados aún.</div>'; return; }
-      let gn = 1;
-      grupos.forEach((miembros) => {
-        const g = document.createElement('div');
-        g.className = 'group-block';
-        const acreditados = miembros.filter((m) => m.acreditado).length;
-        const miembrosHTML = miembros.map((m) => `
-          <div class="acred-row">
-            <label><input type="checkbox" class="acred-check" data-id="${m.id}" ${m.acreditado ? 'checked' : ''}> <strong>${esc(m.nombre)} ${esc(m.apellido)}</strong> <small>${esc(m.correo)}</small></label>
-          </div>`).join('');
-        g.innerHTML = `
-          <div class="sp-top"><strong>👥 Grupo ${gn}</strong><span class="tipo-tag" style="background:rgba(6,167,125,.12);color:var(--green)">${acreditados}/${miembros.length} acreditados</span></div>
-          ${miembrosHTML}`;
-        cont.appendChild(g);
-        gn++;
-      });
+      acredData = data.personas || [];
+      renderAccreditation();
     } catch (e) {
       cont.innerHTML = '<div class="empty">Error al cargar acreditación.</div>';
     }
   }
 
-  document.getElementById('acreditacionList').addEventListener('change', async (e) => {
-    if (e.target.classList.contains('acred-check')) {
-      const card = e.target.closest('.group-block');
-      const id = e.target.dataset.id;
-      const acreditado = e.target.checked;
-      try {
-        await fetch('/api/admin/acreditar', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, acreditado }),
-        });
-        const checks = card.querySelectorAll('.acred-check');
-        const acred = [...checks].filter((c) => c.checked).length;
-        card.querySelector('.tipo-tag').textContent = `${acred}/${checks.length} acreditados`;
-      } catch (err) {}
+  function acredProgreso() {
+    const total = acredData.length;
+    const done = acredData.filter((p) => p.acreditado).length;
+    const cnt = document.getElementById('acredCount');
+    if (cnt) cnt.textContent = done + '/' + total + ' acreditados';
+    const bar = document.getElementById('acredBar');
+    if (bar) bar.style.width = (total ? Math.round((done / total) * 100) : 0) + '%';
+  }
+
+  function renderAccreditation() {
+    const cont = document.getElementById('acreditacionList');
+    if (!cont) return;
+    const q = (document.getElementById('acredSearch')?.value || '').toLowerCase().trim();
+    const items = acredData.filter((p) => !q || (p.nombre + ' ' + p.correo + ' ' + p.codigo + ' ' + (p.equipo || '')).toLowerCase().includes(q));
+    acredProgreso();
+    if (items.length === 0) { cont.innerHTML = '<div class="empty">Sin resultados.</div>'; return; }
+    const grupos = new Map();
+    items.forEach((p) => {
+      const key = p.equipo || '(Sin equipo)';
+      if (!grupos.has(key)) grupos.set(key, []);
+      grupos.get(key).push(p);
+    });
+    let html = '';
+    for (const [equipo, miembros] of grupos.entries()) {
+      const code = miembros[0].codigo || '';
+      const nacr = miembros.filter((m) => m.acreditado).length;
+      const all = miembros.length > 0 && nacr === miembros.length;
+      html += '<div class="group-block">' +
+        '<div class="sp-top" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">' +
+        '<div><strong style="font-size:1.05rem">👥 ' + esc(equipo) + '</strong><br><span class="k">Código ' + esc(code) + ' · ' + miembros.length + ' integrante(s)</span></div>' +
+        '<div style="display:flex;gap:8px;align-items:center">' +
+        '<span class="tipo-tag" style="background:' + (all ? 'rgba(6,167,125,.12)' : 'rgba(0,180,216,.12)') + ';color:' + (all ? 'var(--green)' : 'var(--cyan)') + '">' + nacr + '/' + miembros.length + '</span>' +
+        '<button type="button" class="btn acred-all" data-codigo="' + esc(code) + '" data-next="' + (all ? '0' : '1') + '" style="padding:6px 12px;font-size:.8rem">' + (all ? 'Desmarcar' : 'Acreditar todos') + '</button>' +
+        '</div></div>' +
+        '<div style="display:grid;gap:8px;margin-top:10px">' +
+        miembros.map((m) => '<label class="acred-item" style="display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid ' + (m.acreditado ? 'var(--green)' : 'var(--line)') + ';border-radius:10px;background:' + (m.acreditado ? 'rgba(6,167,125,.06)' : '#fff') + ';cursor:pointer">' +
+          '<input type="checkbox" class="acred-check" data-id="' + m.id + '" ' + (m.acreditado ? 'checked' : '') + ' style="width:22px;height:22px;accent-color:#06A77D;flex-shrink:0">' +
+          '<span style="flex:1"><strong style="font-size:1rem">' + esc(m.nombre) + '</strong><br><span class="k">' + esc(m.correo) + ' · ' + esc(m.anio || '—') + '</span></span>' +
+          (m.acreditado ? '<span style="color:var(--green);font-weight:700;font-size:1.1rem">✓</span>' : '') +
+          '</label>').join('') +
+        '</div></div>';
     }
+    cont.innerHTML = html;
+  }
+
+  (function initAcreditacion() {
+    const s = document.getElementById('acredSearch');
+    if (s) s.addEventListener('input', renderAccreditation);
+    const pr = document.getElementById('acredPrint');
+    if (pr) pr.addEventListener('click', () => {
+      const filas = acredData.map((p, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(p.codigo) + '</td><td>' + esc(p.nombre) + '</td><td>' + esc(p.equipo || '—') + '</td><td>' + esc(p.anio || '—') + '</td><td style="border:1px solid #999;width:70px"></td></tr>').join('');
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Acreditación en sede</title><style>body{font-family:Arial,sans-serif;padding:14px}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{border:1px solid #999;padding:5px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}}</style></head><body><h1>Hackathon UNETI IA 2026 — Acreditación en sede</h1><h2>' + new Date().toLocaleString('es-VE') + ' · ' + acredData.length + ' persona(s) presenciales</h2><table><thead><tr><th>#</th><th>Código</th><th>Nombre</th><th>Equipo</th><th>Año</th><th>Acreditado</th></tr></thead><tbody>' + filas + '</tbody></table></body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+  })();
+
+  document.getElementById('acreditacionList').addEventListener('change', async (e) => {
+    if (!e.target.classList.contains('acred-check')) return;
+    const id = e.target.dataset.id;
+    const acreditado = e.target.checked;
+    const item = acredData.find((p) => String(p.id) === String(id));
+    if (item) item.acreditado = acreditado ? 1 : 0;
+    const y = window.scrollY;
+    renderAccreditation();
+    window.scrollTo(0, y);
+    fetch('/api/admin/acreditar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, acreditado }) }).catch(() => {});
+  });
+
+  document.getElementById('acreditacionList').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.acred-all');
+    if (!btn) return;
+    const code = btn.dataset.codigo;
+    const next = btn.dataset.next === '1';
+    const miembros = acredData.filter((p) => p.codigo === code);
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+    await Promise.all(miembros.map((m) =>
+      fetch('/api/admin/acreditar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: m.id, acreditado: next }) }).catch(() => {})
+    ));
+    miembros.forEach((m) => { m.acreditado = next ? 1 : 0; });
+    renderAccreditation();
+  });
+
+  // ===== Acreditación de personal (jurados, mentores e invitados) =====
+  let acredJudges = [];
+  let acredMentores = [];
+  let acredInvitados = [];
+  async function loadAcreditacionPersonal() {
+    try {
+      const [rj, rm, ri] = await Promise.all([
+        fetch('/api/admin/judges'),
+        fetch('/api/admin/mentores'),
+        fetch('/api/admin/invitados'),
+      ]);
+      const dj = await rj.json();
+      const dm = await rm.json();
+      const di = await ri.json();
+      acredJudges = dj.judges || [];
+      acredMentores = dm.mentores || [];
+      acredInvitados = di.invitados || [];
+      renderAcreditacionPersonal();
+    } catch (e) {}
+  }
+
+  function renderAcreditacionPersonal() {
+    const q = (document.getElementById('acredPersSearch')?.value || '').toLowerCase().trim();
+    const filtro = (arr) => arr.filter((p) => !q || ((p.nombre || '') + ' ' + (p.correo || '') + ' ' + (p.organizacion || '')).toLowerCase().includes(q));
+    const jueces = filtro(acredJudges);
+    const mentores = filtro(acredMentores);
+    const invitados = filtro(acredInvitados);
+    const jAcr = acredJudges.filter((p) => p.acreditado).length;
+    const mAcr = acredMentores.filter((p) => p.acreditado).length;
+    const iAcr = acredInvitados.filter((p) => p.acreditado).length;
+    const total = acredJudges.length + acredMentores.length + acredInvitados.length;
+    const done = jAcr + mAcr + iAcr;
+    const cnt = document.getElementById('acredPersCount');
+    if (cnt) cnt.textContent = done + '/' + total + ' acreditados';
+    const jc = document.getElementById('acredJudgesCount');
+    if (jc) jc.textContent = jAcr + '/' + acredJudges.length;
+    const mc = document.getElementById('acredMentoresCount');
+    if (mc) mc.textContent = mAcr + '/' + acredMentores.length;
+    const ic = document.getElementById('acredInvitadosCount');
+    if (ic) ic.textContent = iAcr + '/' + acredInvitados.length;
+
+    const fila = (p, tipo) => '<label class="acred-item" style="display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid ' + (p.acreditado ? 'var(--green)' : 'var(--line)') + ';border-radius:10px;background:' + (p.acreditado ? 'rgba(6,167,125,.06)' : '#fff') + ';cursor:pointer">' +
+      '<input type="checkbox" class="acred-pers" data-tipo="' + tipo + '" data-id="' + p.id + '" ' + (p.acreditado ? 'checked' : '') + ' style="width:22px;height:22px;accent-color:#06A77D;flex-shrink:0">' +
+      '<span style="flex:1"><strong style="font-size:1rem">' + esc(p.nombre) + '</strong><br><span class="k">' + esc(p.organizacion || '—') + (p.correo ? ' · ' + esc(p.correo) : '') + '</span></span>' +
+      (p.acreditado ? '<span style="color:var(--green);font-weight:700;font-size:1.1rem">✓</span>' : '') +
+      (tipo === 'invitado' ? '<button type="button" class="del" data-del-invitado="' + p.id + '" aria-label="Eliminar invitado">×</button>' : '') +
+      '</label>';
+
+    const jl = document.getElementById('acredJudgesList');
+    if (jl) jl.innerHTML = jueces.length ? jueces.map((p) => fila(p, 'jurado')).join('') : '<div class="empty">Sin jurados registrados.</div>';
+    const ml = document.getElementById('acredMentoresList');
+    if (ml) ml.innerHTML = mentores.length ? mentores.map((p) => fila(p, 'mentor')).join('') : '<div class="empty">Sin mentores registrados.</div>';
+    const il = document.getElementById('acredInvitadosList');
+    if (il) il.innerHTML = invitados.length ? invitados.map((p) => fila(p, 'invitado')).join('') : '<div class="empty">Sin invitados. Agrega uno abajo.</div>';
+  }
+
+  (function initAcreditacionPersonal() {
+    const s = document.getElementById('acredPersSearch');
+    if (s) s.addEventListener('input', renderAcreditacionPersonal);
+    const pr = document.getElementById('acredPersPrint');
+    if (pr) pr.addEventListener('click', () => {
+      const todos = [
+        ...acredJudges.map((p) => ({ ...p, rol: 'Jurado' })),
+        ...acredMentores.map((p) => ({ ...p, rol: 'Mentor' })),
+        ...acredInvitados.map((p) => ({ ...p, rol: 'Invitado' })),
+      ];
+      const filas = todos.map((p, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(p.rol) + '</td><td>' + esc(p.nombre) + '</td><td>' + esc(p.organizacion || '—') + '</td><td>' + esc(p.correo || '—') + '</td><td style="border:1px solid #999;width:70px"></td></tr>').join('');
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Acreditación de personal</title><style>body{font-family:Arial,sans-serif;padding:14px}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{border:1px solid #999;padding:5px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}}</style></head><body><h1>Hackathon UNETI IA 2026 — Acreditación de jurados, mentores e invitados</h1><h2>' + new Date().toLocaleString('es-VE') + ' · ' + todos.length + ' persona(s)</h2><table><thead><tr><th>#</th><th>Rol</th><th>Nombre</th><th>Organización</th><th>Correo</th><th>Acreditado</th></tr></thead><tbody>' + filas + '</tbody></table></body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+
+    const form = document.getElementById('invitadoForm');
+    if (form) form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        nombre: document.getElementById('iNombre').value.trim(),
+        organizacion: document.getElementById('iOrg').value.trim(),
+        correo: document.getElementById('iCorreo').value.trim(),
+        telefono: document.getElementById('iTelefono').value.trim(),
+      };
+      const res = await fetch('/api/admin/invitados', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus('invitadoStatus', 'Invitado agregado.', true);
+        form.reset();
+        loadAcreditacionPersonal();
+      } else {
+        setStatus('invitadoStatus', data.error || 'Error.', false);
+      }
+    });
+  })();
+
+  document.getElementById('panel-acreditacion-personal').addEventListener('change', async (e) => {
+    if (!e.target.classList.contains('acred-pers')) return;
+    const tipo = e.target.dataset.tipo;
+    const id = e.target.dataset.id;
+    const acreditado = e.target.checked;
+    const arr = tipo === 'jurado' ? acredJudges : tipo === 'mentor' ? acredMentores : acredInvitados;
+    const item = arr.find((p) => String(p.id) === String(id));
+    if (item) item.acreditado = acreditado ? 1 : 0;
+    const y = window.scrollY;
+    renderAcreditacionPersonal();
+    window.scrollTo(0, y);
+    fetch('/api/admin/acreditar-personal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo, id, acreditado }) }).catch(() => {});
+  });
+
+  document.getElementById('panel-acreditacion-personal').addEventListener('click', async (e) => {
+    const del = e.target.closest('[data-del-invitado]');
+    if (!del) return;
+    if (!confirm('¿Eliminar este invitado?')) return;
+    await fetch('/api/admin/invitados?id=' + del.dataset.delInvitado, { method: 'DELETE' });
+    loadAcreditacionPersonal();
   });
 
   // ===== Motor de Evaluación =====
@@ -2220,6 +2588,8 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const data = await res.json();
       document.getElementById('dInscritos').textContent = data.inscritos || 0;
       document.getElementById('dIndividuales').textContent = data.individuales || 0;
+      document.getElementById('dPresenciales').textContent = data.presenciales || 0;
+      document.getElementById('dRemotos').textContent = data.remotos || 0;
       document.getElementById('dGrupos').textContent = data.grupos || 0;
       document.getElementById('dEquipos').textContent = data.equipos || 0;
       document.getElementById('dJurados').textContent = data.jurados || 0;
@@ -2435,6 +2805,8 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const data = await res.json();
       tbody.innerHTML = '';
       const items = data.remotos || [];
+      const badge = document.getElementById('cntRemotos');
+      if (badge) badge.textContent = items.length;
       if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin participantes remotos.</td></tr>'; return; }
       items.forEach((r) => {
         const tr = document.createElement('tr');
@@ -2446,6 +2818,73 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       });
     } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Error.</td></tr>'; }
   }
+
+  // ===== Presenciales =====
+  let presencialesData = [];
+  async function loadPresenciales() {
+    const tbody = document.getElementById('presencialesBody');
+    if (!tbody) return;
+    try {
+      const res = await fetch('/api/admin/presenciales');
+      const data = await res.json();
+      presencialesData = data.personas || [];
+      renderPresenciales();
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">Error al cargar presenciales.</td></tr>';
+    }
+  }
+
+  function renderPresenciales() {
+    const tbody = document.getElementById('presencialesBody');
+    if (!tbody) return;
+    const q = (document.getElementById('presencialSearch')?.value || '').toLowerCase().trim();
+    const items = presencialesData.filter((r) => !q || (r.nombre + ' ' + r.correo + ' ' + r.codigo).toLowerCase().includes(q));
+    const cnt = document.getElementById('presencialCount');
+    const badge = document.getElementById('cntPresenciales');
+    if (cnt) cnt.textContent = items.length + ' presenciales';
+    if (badge) badge.textContent = presencialesData.length;
+    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin participantes presenciales.</td></tr>'; return; }
+    tbody.innerHTML = items.map((r) => '<tr><td><strong>' + esc(r.codigo) + '</strong></td><td>' + esc(r.nombre) + '<br><span class="k">' + esc(r.correo) + '</span>' + (r.equipo ? ' <span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">👥 ' + esc(r.equipo) + '</span>' : '') + '</td><td>' + (r.es_grupo ? 'Grupo' : 'Individual') + '</td><td>' + esc(r.anio || '—') + '</td><td>' + (r.notificado ? '✅' : '—') + '</td><td>' + (r.acreditado ? '✅' : '—') + '</td></tr>').join('');
+  }
+
+  (function initPresenciales() {
+    const s = document.getElementById('presencialSearch');
+    if (s) s.addEventListener('input', renderPresenciales);
+    const b = document.getElementById('copyPresencialCodes');
+    if (b) b.addEventListener('click', () => {
+      const text = presencialesData.map((r) => r.codigo + '\t' + r.nombre + '\t' + r.correo).join('\n');
+      navigator.clipboard.writeText(text).then(() => alert('Códigos copiados.')).catch(() => alert('No se pudo copiar.'));
+    });
+
+    const pr = document.getElementById('printPresenciales');
+    if (pr) pr.addEventListener('click', () => {
+      const filas = presencialesData.map((r, i) => '<tr><td>' + (i + 1) + '</td><td><b>' + esc(r.codigo) + '</b></td><td>' + esc(r.nombre) + '</td><td>' + esc(r.correo) + '</td><td>' + esc(r.anio || '—') + '</td><td>' + (r.es_grupo ? 'Grupo' : 'Indiv.') + '</td><td style="border:1px solid #999;width:60px"></td></tr>').join('');
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite las ventanas emergentes para imprimir.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Verificación presencial — Hackathon UNETI IA 2026</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:14px;color:#111}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{border:1px solid #999;padding:4px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px;letter-spacing:.4px}td:nth-child(1){width:28px;text-align:center;color:#666}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}}</style></head><body>' +
+        '<h1>Hackathon UNETI IA 2026 — Verificación presencial</h1>' +
+        '<h2>Lista de participantes presenciales · ' + new Date().toLocaleString('es-VE') + ' · Total: ' + presencialesData.length + '</h2>' +
+        '<table><thead><tr><th>#</th><th>Código</th><th>Nombre y apellido</th><th>Correo</th><th>Año</th><th>Tipo</th><th>Firma / ✓</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+        '</body></html>');
+      w.document.close();
+      w.focus();
+      setTimeout(() => w.print(), 350);
+    });
+
+    const cv = document.getElementById('csvPresenciales');
+    if (cv) cv.addEventListener('click', () => {
+      const rows = [['Código', 'Nombre', 'Correo', 'Año', 'Tipo', 'Notificado', 'Acreditado']];
+      presencialesData.forEach((r) => rows.push([r.codigo, r.nombre, r.correo, r.anio || '', r.es_grupo ? 'Grupo' : 'Individual', r.notificado ? 'Sí' : 'No', r.acreditado ? 'Sí' : 'No']));
+      const csv = rows.map((row) => row.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'presenciales-verificacion.csv';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    });
+  })();
 
   // ===== Errores =====
   async function loadErrores() {
@@ -2984,8 +3423,103 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     loadMentorTeams();
   })();
 
+  // ===== Verificación presencial =====
+  let verifData = [];
+  async function loadVerificacion() {
+    const el = document.getElementById('verifList');
+    if (!el) return;
+    try {
+      const res = await fetch('/api/admin/presenciales');
+      const data = await res.json();
+      verifData = data.personas || [];
+      renderVerificacion();
+    } catch (e) {
+      el.innerHTML = '<div class="empty">Error al cargar.</div>';
+    }
+  }
+
+  function renderVerificacion() {
+    const el = document.getElementById('verifList');
+    if (!el) return;
+    const q = (document.getElementById('verifSearch')?.value || '').toLowerCase().trim();
+    const items = verifData.filter((p) => !q || (p.nombre + ' ' + p.correo + ' ' + p.codigo + ' ' + (p.equipo || '')).toLowerCase().includes(q));
+    const equipos = new Set(verifData.filter((p) => p.equipo).map((p) => p.equipo));
+    const sinEquipo = verifData.filter((p) => !p.equipo).length;
+    const sum = document.getElementById('verifSummary');
+    if (sum) sum.innerHTML = '<span class="chip">👥 ' + equipos.size + ' equipos</span><span class="chip">🙋 ' + verifData.length + ' personas</span><span class="chip">⚠️ ' + sinEquipo + ' sin equipo</span>';
+    const cnt = document.getElementById('verifCount');
+    if (cnt) cnt.textContent = items.length + ' personas';
+    if (items.length === 0) { el.innerHTML = '<div class="empty">Sin resultados.</div>'; return; }
+    const grupos = new Map();
+    items.forEach((p) => {
+      const key = p.equipo || '(Sin equipo)';
+      if (!grupos.has(key)) grupos.set(key, []);
+      grupos.get(key).push(p);
+    });
+    let html = '';
+    for (const [equipo, miembros] of grupos.entries()) {
+      const codigo = miembros[0].codigo || '';
+      html += '<div class="group-block" style="margin-bottom:14px"><div class="sp-top"><strong>👥 ' + esc(equipo) + '</strong><span class="k">Código: ' + esc(codigo) + ' · ' + miembros.length + ' integrante(s)</span></div>' +
+        '<div class="table-wrap"><table class="data-table"><thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Año</th><th>Acreditado</th></tr></thead><tbody>' +
+        miembros.map((m, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(m.nombre) + '</td><td>' + esc(m.correo) + '</td><td>' + esc(m.anio || '—') + '</td><td>' + (m.acreditado ? '✅' : '☐') + '</td></tr>').join('') +
+        '</tbody></table></div></div>';
+    }
+    el.innerHTML = html;
+  }
+
+  function verifGrupos() {
+    const grupos = new Map();
+    verifData.forEach((p) => {
+      const key = p.equipo || '(Sin equipo)';
+      if (!grupos.has(key)) grupos.set(key, []);
+      grupos.get(key).push(p);
+    });
+    return [...grupos.entries()];
+  }
+
+  (function initVerificacion() {
+    const s = document.getElementById('verifSearch');
+    if (s) s.addEventListener('input', renderVerificacion);
+
+    const pr = document.getElementById('printVerificacion');
+    if (pr) pr.addEventListener('click', () => {
+      let filas = '';
+      verifGrupos().forEach(([equipo, miembros]) => {
+        filas += '<tr class="grupo"><td colspan="6">👥 ' + esc(equipo) + ' — ' + miembros.length + ' integrante(s)</td></tr>';
+        miembros.forEach((m) => {
+          filas += '<tr><td>' + esc(m.codigo) + '</td><td>' + esc(m.nombre) + '</td><td>' + esc(m.correo) + '</td><td>' + esc(m.anio || '—') + '</td><td></td><td></td></tr>';
+        });
+      });
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite las ventanas emergentes para imprimir.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Verificación presencial</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:14px;color:#111}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{border:1px solid #999;padding:4px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px;letter-spacing:.4px}tr.grupo td{background:#f0f4f8;font-weight:700;font-size:10.5px}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}}</style></head><body>' +
+        '<h1>Hackathon UNETI IA 2026 — Verificación presencial</h1>' +
+        '<h2>Listado por equipo · ' + new Date().toLocaleString('es-VE') + ' · ' + verifData.length + ' personas</h2>' +
+        '<table><thead><tr><th>Código</th><th>Nombre</th><th>Correo</th><th>Año</th><th>Firma</th><th>Acreditado</th></tr></thead><tbody>' + filas + '</tbody></table></body></html>');
+      w.document.close();
+      w.focus();
+      setTimeout(() => w.print(), 350);
+    });
+
+    const cv = document.getElementById('csvVerificacion');
+    if (cv) cv.addEventListener('click', () => {
+      const rows = [['Equipo', 'Código', 'Nombre', 'Correo', 'Año', 'Acreditado']];
+      verifGrupos().forEach(([equipo, miembros]) => {
+        miembros.forEach((m) => rows.push([equipo, m.codigo, m.nombre, m.correo, m.anio || '', m.acreditado ? 'Sí' : 'No']));
+      });
+      const csv = rows.map((row) => row.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'verificacion-presencial.csv';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadMentores(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
+    loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
   }
 
   // ===== Login =====

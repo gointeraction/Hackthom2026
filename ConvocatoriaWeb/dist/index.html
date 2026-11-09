@@ -1279,6 +1279,13 @@ section { padding: 84px 0; }
           <div class="member-hint">Ingresa los datos de los 5 integrantes del grupo.</div>
           <div id="gruMembers"></div>
           <div class="field">
+            <label for="gEje">Eje del proyecto <span class="req">*</span></label>
+            <select id="gEje" required>
+              <option value="IA Ética">IA Ética y Responsable</option>
+              <option value="Ciberseguridad">Ciberseguridad</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="gPropuesta">Propuesta de desarrollo <span class="req">*</span></label>
             <textarea id="gPropuesta" rows="4" placeholder="Describe brevemente la solución que tu equipo quiere desarrollar en el Hackathon."></textarea>
             <span class="error">Describe la propuesta de tu equipo.</span>
@@ -1669,7 +1676,8 @@ section { padding: 84px 0; }
     if (miembros.length !== 5) return { error: 'El grupo debe tener exactamente 5 integrantes.' };
     const propuesta = document.getElementById('gPropuesta').value.trim();
     if (propuesta.length < 10) return { error: 'Describe la propuesta de desarrollo de tu equipo.' };
-    return { tipo: 'grupal', propuesta, miembros };
+    const eje = document.getElementById('gEje').value;
+    return { tipo: 'grupal', propuesta, eje, miembros };
   }
 
   form.addEventListener('submit', (e) => {
