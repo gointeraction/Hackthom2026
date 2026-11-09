@@ -2441,7 +2441,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
         const consultasHtml = `<span>${r.consultas}</span>${r.consultas_pendientes > 0 ? ` <span class="badge-pend">${r.consultas_pendientes} pend.</span>` : ''}`;
         const ultima = r.ultima_consulta ? `<span class="k">${esc(r.ultima_consulta)}</span> <span class="st-${esc(r.ultima_consulta_estado)}">${esc(r.ultima_consulta_estado)}</span>` : '—';
         const repo = r.entrega ? `<a href="${esc(r.entrega)}" target="_blank" rel="noopener">${esc(r.entrega)}</a>${r.demo ? ' · <a href="' + esc(r.demo) + '" target="_blank" rel="noopener">demo</a>' : ''}` : '—';
-        tr.innerHTML = `<td><strong>${esc(r.codigo)}</strong>${r.legacy ? ' <span class="legacy-tag">sin código</span>' : ''}</td><td>${esc(r.nombre)}<br><span class="k">${r.integrantes} integrante(s)</span></td><td>${esc(r.tipo)}</td><td>${repo}</td><td>${consultasHtml}</td><td>${r.asistencia > 0 ? '✅ ' + r.asistencia : '—'}</td><td>${ultima}</td>`;
+        tr.innerHTML = `<td><strong>${esc(r.codigo)}</strong>${r.legacy ? ' <span class="legacy-tag">sin código</span>' : ''}</td><td>${esc(r.nombre)}<br><span class="k">${r.integrantes} integrante(s)</span></td><td>${esc(r.tipo)}<br><span class="k">${esc(r.modalidad)}</span></td><td>${repo}</td><td>${consultasHtml}</td><td>${r.asistencia > 0 ? '✅ ' + r.asistencia : '—'}</td><td>${ultima}</td>`;
         tbody.appendChild(tr);
       });
     } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Error.</td></tr>'; }

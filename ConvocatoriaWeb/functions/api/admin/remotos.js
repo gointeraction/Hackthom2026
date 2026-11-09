@@ -1,7 +1,9 @@
 // /api/admin/remotos — vista general de participantes remotos (estatus, aporte, consultas).
 export async function onRequestGet({ env }) {
   try {
-    const { results: registrations } = await env.DB.prepare('SELECT * FROM registrations ORDER BY id ASC').all();
+    const { results: registrations } = await env.DB.prepare(
+      "SELECT * FROM registrations WHERE modalidad = 'remoto' ORDER BY id ASC"
+    ).all();
     const { results: entregas } = await env.DB.prepare('SELECT * FROM entregas').all();
     const { results: consultas } = await env.DB.prepare('SELECT * FROM consultas ORDER BY id DESC').all();
     const { results: asistencia } = await env.DB.prepare(
@@ -39,7 +41,7 @@ export async function onRequestGet({ env }) {
         nombre,
         correo,
         integrantes: miembros.length,
-        modalidad: esIndividual ? 'Remota' : 'Grupal',
+        modalidad: 'Remota',
         entrega: entrega ? entrega.repositorio : null,
         proyecto: entrega ? entrega.proyecto : null,
         demo: entrega ? entrega.demo : null,
