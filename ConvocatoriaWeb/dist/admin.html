@@ -330,6 +330,7 @@
           <button class="menu-btn" data-panel="logistica"><span class="ic">🧰</span> Logística</button>
           <button class="menu-btn" data-panel="insumos"><span class="ic">📦</span> Insumos</button>
           <button class="menu-btn" data-panel="acreditacion"><span class="ic">✅</span> Acreditación</button>
+          <button class="menu-btn" data-panel="tickets"><span class="ic">🍽️</span> Tickets</button>
           <button class="menu-btn" data-panel="acreditacion-personal"><span class="ic">🪪</span> Acred. personal</button>
           <button class="menu-btn" data-panel="asistencia"><span class="ic">📶</span> Asistencia remota</button>
           <button class="menu-btn" data-panel="entregas"><span class="ic">📦</span> Entregas</button>
@@ -949,6 +950,78 @@
           <button type="submit" class="btn">Guardar invitado</button>
           <div class="form-status" id="invitadoStatus"></div>
         </form>
+      </div>
+    </section>
+
+    <!-- TICKETS DE COMIDA -->
+    <section class="panel" id="panel-tickets">
+      <div class="sec-head">
+        <span class="kicker">Tickets</span>
+        <h2>Tickets de comida</h2>
+        <p>Asignación y entrega de tickets para participantes, jurados, ponentes, mentores y personal de logística.</p>
+      </div>
+
+      <div class="form-card" style="margin-bottom:18px">
+        <h3>🎟️ Generar tickets</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:14px">
+          <div>
+            <div style="font-size:.8rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Personas</div>
+            <label style="display:block;margin-bottom:4px"><input type="checkbox" class="gen-tipo" value="participante" checked> Participantes presenciales</label>
+            <label style="display:block;margin-bottom:4px"><input type="checkbox" class="gen-tipo" value="jurado" checked> Jurados</label>
+            <label style="display:block;margin-bottom:4px"><input type="checkbox" class="gen-tipo" value="ponente" checked> Ponentes</label>
+            <label style="display:block;margin-bottom:4px"><input type="checkbox" class="gen-tipo" value="mentor" checked> Mentores</label>
+            <label style="display:block"><input type="checkbox" class="gen-tipo" value="logistica" checked> Personal de logística</label>
+          </div>
+          <div>
+            <div style="font-size:.8rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Comidas</div>
+            <label style="display:block;margin-bottom:4px"><input type="checkbox" class="gen-comida" value="Día 1|Almuerzo" checked> Día 1 · Almuerzo</label>
+            <label style="display:block;margin-bottom:4px"><input type="checkbox" class="gen-comida" value="Día 1|Cena" checked> Día 1 · Cena</label>
+            <label style="display:block;margin-bottom:4px"><input type="checkbox" class="gen-comida" value="Día 2|Desayuno" checked> Día 2 · Desayuno</label>
+            <label style="display:block"><input type="checkbox" class="gen-comida" value="Día 2|Almuerzo" checked> Día 2 · Almuerzo</label>
+          </div>
+        </div>
+        <button type="button" class="btn" id="btnGenerarTickets">Generar tickets</button>
+        <div class="form-status" id="ticketsStatus"></div>
+      </div>
+
+      <div id="ticketsSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px"></div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <input type="text" id="ticketSearch" placeholder="Buscar por nombre o código…" style="flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--line);border-radius:8px">
+        <select id="ticketFilterTipo" style="padding:9px 12px;border:1px solid var(--line);border-radius:8px">
+          <option value="">Todos los tipos</option>
+          <option value="participante">Participantes</option>
+          <option value="jurado">Jurados</option>
+          <option value="ponente">Ponentes</option>
+          <option value="mentor">Mentores</option>
+          <option value="logistica">Logística</option>
+        </select>
+        <select id="ticketFilterEstado" style="padding:9px 12px;border:1px solid var(--line);border-radius:8px">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendientes</option>
+          <option value="entregado">Entregados</option>
+        </select>
+        <button type="button" class="btn" id="btnPrintTickets">🖨️ Imprimir</button>
+        <span class="count" id="ticketCount">0 tickets</span>
+      </div>
+
+      <div id="ticketsList" style="display:grid;gap:8px;max-height:560px;overflow-y:auto"></div>
+
+      <div class="form-card" style="margin-top:20px">
+        <h3>👷 Personal de logística</h3>
+        <form id="logForm" style="margin-bottom:14px">
+          <div class="frow">
+            <div class="field"><label>Nombre *</label><input type="text" id="logNombre" required></div>
+            <div class="field"><label>Rol</label><input type="text" id="logRol" placeholder="Ej. Coordinador de sede"></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Correo</label><input type="email" id="logCorreo"></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="logTelefono"></div>
+          </div>
+          <button type="submit" class="btn">Agregar al personal</button>
+          <div class="form-status" id="logStatus"></div>
+        </form>
+        <div id="logList" style="display:grid;gap:6px"></div>
       </div>
     </section>
 
@@ -1849,7 +1922,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -3518,8 +3591,150 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     });
   })();
 
+  // ===== Tickets de comida =====
+  let ticketsData = [];
+  let logisticaData = [];
+  const TIPO_LABEL = { participante: 'Participante', jurado: 'Jurado', ponente: 'Ponente', mentor: 'Mentor', logistica: 'Logística' };
+
+  async function loadTickets() {
+    try {
+      const res = await fetch('/api/admin/tickets');
+      const data = await res.json();
+      ticketsData = data.tickets || [];
+      logisticaData = data.logistica || [];
+      renderTickets();
+      renderLogistica();
+    } catch (e) {}
+  }
+
+  function renderTickets() {
+    const q = (document.getElementById('ticketSearch')?.value || '').toLowerCase().trim();
+    const ftipo = document.getElementById('ticketFilterTipo')?.value || '';
+    const festado = document.getElementById('ticketFilterEstado')?.value || '';
+    let items = ticketsData;
+    if (ftipo) items = items.filter((t) => t.persona_tipo === ftipo);
+    if (q) items = items.filter((t) => ((t.nombre || '') + ' ' + (t.codigo || '')).toLowerCase().includes(q));
+    if (festado === 'pendiente') items = items.filter((t) => !t.entregado);
+    if (festado === 'entregado') items = items.filter((t) => t.entregado);
+
+    const sum = document.getElementById('ticketsSummary');
+    if (sum) {
+      const total = ticketsData.length;
+      const entregados = ticketsData.filter((t) => t.entregado).length;
+      const personas = new Set(ticketsData.map((t) => t.ref)).size;
+      sum.innerHTML = '<div class="dash-card"><span class="dash-num">' + personas + '</span><span class="dash-label">Personas</span></div>' +
+        '<div class="dash-card"><span class="dash-num">' + total + '</span><span class="dash-label">Tickets</span></div>' +
+        '<div class="dash-card"><span class="dash-num">' + entregados + '</span><span class="dash-label">Entregados</span></div>' +
+        '<div class="dash-card"><span class="dash-num">' + (total - entregados) + '</span><span class="dash-label">Pendientes</span></div>';
+    }
+    const cnt = document.getElementById('ticketCount');
+    if (cnt) cnt.textContent = items.length + ' tickets';
+
+    const porPersona = new Map();
+    items.forEach((t) => {
+      if (!porPersona.has(t.ref)) porPersona.set(t.ref, []);
+      porPersona.get(t.ref).push(t);
+    });
+
+    const cont = document.getElementById('ticketsList');
+    if (!cont) return;
+    if (porPersona.size === 0) { cont.innerHTML = '<div class="empty">Sin tickets. Genera los tickets arriba.</div>'; return; }
+    let html = '';
+    for (const [, lista] of porPersona.entries()) {
+      const p = lista[0];
+      const ent = lista.filter((t) => t.entregado).length;
+      html += '<div class="group-block" style="padding:10px 14px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">' +
+        '<div><strong>' + esc(p.nombre) + '</strong> <span class="tipo-tag">' + (TIPO_LABEL[p.persona_tipo] || p.persona_tipo) + '</span>' + (p.codigo ? ' <span class="k">' + esc(p.codigo) + '</span>' : '') + '</div>' +
+        '<span class="k">' + ent + '/' + lista.length + ' entregados</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">' +
+        lista.map((t) => '<button type="button" class="ticket-chip" data-ticket-id="' + t.id + '" data-entregado="' + (t.entregado ? '1' : '0') + '" style="padding:6px 10px;border-radius:8px;border:1px solid ' + (t.entregado ? 'var(--green)' : 'var(--line)') + ';background:' + (t.entregado ? 'rgba(6,167,125,.1)' : '#fff') + ';cursor:pointer;font-size:.78rem">' + (t.entregado ? '✅ ' : '🎟️ ') + esc(t.dia) + ' · ' + esc(t.comida) + '</button>').join('') +
+        '</div></div>';
+    }
+    cont.innerHTML = html;
+  }
+
+  function renderLogistica() {
+    const el = document.getElementById('logList');
+    if (!el) return;
+    if (!logisticaData.length) { el.innerHTML = '<div class="empty">Sin personal de logística.</div>'; return; }
+    el.innerHTML = logisticaData.map((l) => '<div class="sponsor-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px"><div><strong>' + esc(l.nombre) + '</strong> <span class="k">' + esc(l.rol || '') + (l.correo ? ' · ' + esc(l.correo) : '') + '</span></div><button type="button" class="del" data-del-log="' + l.id + '" aria-label="Eliminar">×</button></div>').join('');
+  }
+
+  (function initTickets() {
+    const b = document.getElementById('btnGenerarTickets');
+    if (b) b.addEventListener('click', async () => {
+      const tipos = [...document.querySelectorAll('.gen-tipo:checked')].map((c) => c.value);
+      const comidas = [...document.querySelectorAll('.gen-comida:checked')].map((c) => c.value);
+      if (!tipos.length) { setStatus('ticketsStatus', 'Selecciona al menos un tipo de persona.', false); return; }
+      if (!comidas.length) { setStatus('ticketsStatus', 'Selecciona al menos una comida.', false); return; }
+      b.disabled = true; b.textContent = 'Generando…';
+      const res = await fetch('/api/admin/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'generar', tipos, comidas }) });
+      const data = await res.json();
+      b.disabled = false; b.textContent = 'Generar tickets';
+      if (data.ok) {
+        setStatus('ticketsStatus', 'Tickets generados: ' + data.creados + ' nuevos (' + data.personas + ' personas).', true);
+        loadTickets();
+      } else {
+        setStatus('ticketsStatus', data.error || 'Error.', false);
+      }
+    });
+
+    ['ticketSearch', 'ticketFilterTipo', 'ticketFilterEstado'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', renderTickets);
+    });
+
+    const pr = document.getElementById('btnPrintTickets');
+    if (pr) pr.addEventListener('click', () => {
+      const filas = ticketsData.map((t, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(t.nombre) + '</td><td>' + esc(TIPO_LABEL[t.persona_tipo] || t.persona_tipo) + '</td><td>' + esc(t.codigo || '—') + '</td><td>' + esc(t.dia) + '</td><td>' + esc(t.comida) + '</td><td style="border:1px solid #999;width:60px"></td></tr>').join('');
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Tickets de comida</title><style>body{font-family:Arial,sans-serif;padding:14px}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #999;padding:4px 5px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:8.5px}@media print{@page{size:A4 landscape;margin:8mm}body{padding:0}}</style></head><body><h1>Hackathon UNETI IA 2026 — Tickets de comida</h1><h2>' + new Date().toLocaleString('es-VE') + ' · ' + ticketsData.length + ' tickets</h2><table><thead><tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Código</th><th>Día</th><th>Comida</th><th>Entregado</th></tr></thead><tbody>' + filas + '</tbody></table></body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+
+    const cont = document.getElementById('ticketsList');
+    if (cont) cont.addEventListener('click', async (e) => {
+      const chip = e.target.closest('.ticket-chip');
+      if (!chip) return;
+      const id = chip.dataset.ticketId;
+      const nuevo = chip.dataset.entregado !== '1';
+      const item = ticketsData.find((t) => String(t.id) === String(id));
+      if (item) item.entregado = nuevo ? 1 : 0;
+      renderTickets();
+      fetch('/api/admin/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'entregar', id, entregado: nuevo }) }).catch(() => {});
+    });
+
+    const lf = document.getElementById('logForm');
+    if (lf) lf.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        action: 'add-logistica',
+        nombre: document.getElementById('logNombre').value.trim(),
+        rol: document.getElementById('logRol').value.trim(),
+        correo: document.getElementById('logCorreo').value.trim(),
+        telefono: document.getElementById('logTelefono').value.trim(),
+      };
+      const res = await fetch('/api/admin/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.ok) { setStatus('logStatus', 'Personal agregado.', true); lf.reset(); loadTickets(); }
+      else setStatus('logStatus', data.error || 'Error.', false);
+    });
+
+    const ll = document.getElementById('logList');
+    if (ll) ll.addEventListener('click', async (e) => {
+      const del = e.target.closest('[data-del-log]');
+      if (!del) return;
+      if (!confirm('¿Eliminar este personal?')) return;
+      await fetch('/api/admin/tickets?log=' + del.dataset.delLog, { method: 'DELETE' });
+      loadTickets();
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
+    loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadTickets(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
   }
 
   // ===== Login =====
