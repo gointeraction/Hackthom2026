@@ -304,6 +304,7 @@
           <button class="menu-btn" data-panel="equipos"><span class="ic">👥</span> Equipos <span class="cnt" id="cntEquipos">0</span></button>
           <button class="menu-btn" data-panel="participantes"><span class="ic">🧑‍🎓</span> Participantes <span class="cnt" id="cntParticipantes">0</span></button>
           <button class="menu-btn" data-panel="jurados"><span class="ic">⚖️</span> Jurados <span class="cnt" id="cntJurados">0</span></button>
+          <button class="menu-btn" data-panel="mentores"><span class="ic">🤝</span> Mentores <span class="cnt" id="cntMentores">0</span></button>
           <button class="menu-btn" data-panel="remotos"><span class="ic">🧑‍💻</span> Remotos</button>
         </div>
       </div>
@@ -502,6 +503,42 @@
           </div>
           <button type="submit" class="btn">Guardar jurado</button>
           <div class="form-status" id="judgeStatus"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- MENTORES -->
+    <section class="panel" id="panel-mentores">
+      <div class="sec-head">
+        <span class="kicker">Mentores</span>
+        <h2>Mentores presenciales</h2>
+        <p>Mentores que acompañarán a los equipos en el IVIC. Los equipos remotos usan a <strong>Unitron</strong> (mentor IA online).</p>
+      </div>
+      <p class="count" id="mentorCount">0 mentores</p>
+      <div id="mentoresList"></div>
+      <div class="form-card">
+        <h3>➕ Agregar mentor</h3>
+        <form id="mentorForm">
+          <div class="frow">
+            <div class="field"><label>Nombre completo *</label><input type="text" id="mNombre" required></div>
+            <div class="field"><label>Organización</label><input type="text" id="mOrg"></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Correo</label><input type="email" id="mCorreo"></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="mTelefono" placeholder="0412-1234567"></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Eje</label>
+              <select id="mEje">
+                <option value="">—</option>
+                <option value="IA Ética">IA Ética</option>
+                <option value="Ciberseguridad">Ciberseguridad</option>
+              </select>
+            </div>
+            <div class="field"><label>Equipo asignado</label><select id="mEquipo"><option value="">—</option></select></div>
+          </div>
+          <button type="submit" class="btn">Guardar mentor</button>
+          <div class="form-status" id="mentorStatus"></div>
         </form>
       </div>
     </section>
@@ -1685,7 +1722,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','remotos','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -2884,8 +2921,71 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     });
   })();
 
+  // ===== Mentores =====
+  async function loadMentorTeams() {
+    const sel = document.getElementById('mEquipo');
+    if (!sel) return;
+    try {
+      const res = await fetch('/api/admin/teams');
+      const data = await res.json();
+      const teams = data.teams || [];
+      sel.innerHTML = '<option value="">—</option>' + teams.map((t) => '<option value="' + t.id + '">' + esc(t.nombre) + '</option>').join('');
+    } catch (e) {}
+  }
+
+  async function loadMentores() {
+    const list = document.getElementById('mentoresList');
+    if (!list) return;
+    try {
+      const res = await fetch('/api/admin/mentores');
+      const data = await res.json();
+      const items = data.mentores || [];
+      const cnt = document.getElementById('mentorCount');
+      const badge = document.getElementById('cntMentores');
+      if (cnt) cnt.textContent = items.length + ' mentores';
+      if (badge) badge.textContent = items.length;
+      if (items.length === 0) { list.innerHTML = '<div class="empty">Aún no hay mentores.</div>'; return; }
+      list.innerHTML = items.map((m) => '<div class="judge-item"><div class="info"><strong>' + esc(m.nombre) + '</strong><span>' + esc(m.organizacion || '') + (m.eje ? ' · ' + esc(m.eje) : '') + (m.equipo_nombre ? ' · 👥 ' + esc(m.equipo_nombre) : '') + (m.correo ? ' · ' + esc(m.correo) : '') + (m.telefono ? ' · 📞 ' + esc(m.telefono) : '') + '</span></div><button class="del" data-mentor-id="' + m.id + '" aria-label="Eliminar mentor">×</button></div>').join('');
+    } catch (e) {
+      list.innerHTML = '<div class="empty">Error al cargar mentores.</div>';
+    }
+  }
+
+  (function initMentores() {
+    const form = document.getElementById('mentorForm');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        nombre: document.getElementById('mNombre').value.trim(),
+        organizacion: document.getElementById('mOrg').value.trim(),
+        correo: document.getElementById('mCorreo').value.trim(),
+        telefono: document.getElementById('mTelefono').value.trim(),
+        eje: document.getElementById('mEje').value,
+        team_id: document.getElementById('mEquipo').value || null,
+      };
+      const res = await fetch('/api/admin/mentores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus('mentorStatus', 'Mentor agregado. Se envió la asignación por correo.', true);
+        form.reset();
+        loadMentores();
+      } else {
+        setStatus('mentorStatus', data.error || 'Error.', false);
+      }
+    });
+    document.getElementById('mentoresList').addEventListener('click', async (e) => {
+      const id = e.target.dataset.mentorId;
+      if (!id) return;
+      if (!confirm('¿Eliminar este mentor?')) return;
+      await fetch('/api/admin/mentores?id=' + id, { method: 'DELETE' });
+      loadMentores();
+    });
+    loadMentorTeams();
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
+    loadTeams(); loadJudges(); loadMentores(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
   }
 
   // ===== Login =====
