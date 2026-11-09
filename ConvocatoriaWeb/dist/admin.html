@@ -831,6 +831,7 @@
       </div>
       <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
         <button type="button" class="btn" id="btnPlanMaestro">🖨️ Imprimir Plan Maestro</button>
+        <button type="button" class="btn" id="btnPrintGrupos">🖨️ Imprimir actividades por grupo</button>
         <span class="k" style="align-self:center">Documento completo: minuto a minuto + grupo responsable</span>
       </div>
       <div class="itinerario">
@@ -3962,6 +3963,52 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const data = await res.json();
       if (data.ok) { setStatus('estimadoStatus', 'Rol agregado.', true); f.reset(); loadEstimado(); }
       else setStatus('estimadoStatus', data.error || 'Error.', false);
+    });
+  })();
+
+  // ===== Imprimir actividades por grupo logístico =====
+  (function initPrintGrupos() {
+    const btn = document.getElementById('btnPrintGrupos');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const nodos = [...document.querySelectorAll('#panel-itinerario .grupo-log')];
+      const grupos = nodos.map((g) => ({
+        titulo: (g.querySelector('h4') || {}).textContent || '',
+        items: [...g.querySelectorAll('li')].map((li) => li.textContent),
+      }));
+      if (!grupos.length) { alert('No se encontraron grupos.'); return; }
+
+      const bloques = grupos.map((g, i) =>
+        '<div class="grupo">' +
+        '<h3><span class="num">' + (i + 1) + '</span> ' + esc(g.titulo.replace(/^\d+\.\s*/, '')) + '</h3>' +
+        '<ul>' + g.items.map((it) => '<li>' + esc(it) + '</li>').join('') + '</ul>' +
+        '<div class="chk">☐ Verificado &nbsp;&nbsp; ☐ Pendiente &nbsp;&nbsp; Responsable: ______________________</div>' +
+        '</div>').join('');
+
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite las ventanas emergentes para imprimir.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Actividades por grupo logístico — Hackathon UNETI IA 2026</title><style>' +
+        '*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:16px;font-size:10.5px;line-height:1.4}' +
+        '.head{border-bottom:3px solid #1f6f5c;padding-bottom:10px;margin-bottom:14px}' +
+        'h1{font-size:18px;margin:0 0 3px}h1 span{color:#1f6f5c}.meta{font-size:10px;color:#555;margin:0}' +
+        '.grupo{border:1px solid #c9d1db;border-radius:6px;padding:10px 14px;margin-bottom:10px;page-break-inside:avoid}' +
+        '.grupo h3{font-size:12px;margin:0 0 6px;color:#1f6f5c;display:flex;align-items:center;gap:8px}' +
+        '.num{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#1f6f5c;color:#fff;font-size:10px;align-items:center;justify-content:center;flex-shrink:0}' +
+        'ul{margin:0 0 8px;padding-left:18px}li{margin-bottom:3px;font-size:10.2px}' +
+        '.chk{margin-top:6px;padding-top:6px;border-top:1px dashed #c9d1db;font-size:8.8px;color:#777;letter-spacing:.2px}' +
+        '.firma{display:flex;justify-content:space-between;margin-top:22px;gap:20px}' +
+        '.firma div{flex:1;border-top:1px solid #333;padding-top:4px;font-size:9px;text-align:center}' +
+        '@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}}' +
+        '</style></head><body>' +
+        '<div class="head"><h1>Hackathon <span>UNETI IA 2026</span> — Actividades por grupo logístico</h1>' +
+        '<p class="meta"><strong>Evento:</strong> viernes 13 y sábado 14 de noviembre de 2026 · <strong>Sede:</strong> Parque Tecnológico + Más Ciencia (IVIC)</p>' +
+        '<p class="meta">Documento generado: ' + new Date().toLocaleString('es-VE') + ' · ' + grupos.length + ' grupos</p></div>' +
+        bloques +
+        '<div class="firma"><div>Coordinación General</div><div>Logística</div><div>Protocolo</div></div>' +
+        '</body></html>');
+      w.document.close();
+      w.focus();
+      setTimeout(() => w.print(), 400);
     });
   })();
 
