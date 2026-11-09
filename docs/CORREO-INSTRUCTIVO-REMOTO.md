@@ -42,7 +42,8 @@ Completa estos campos:
 
   • Repositorio GitHub/GitLab (OBLIGATORIO)
     Ejemplo: https://github.com/usuario/mi-proyecto
-    ⚠️ El repositorio debe ser PÚBLICO o tener acceso para el jurado.
+    ⚠️ El repositorio DEBE SER PÚBLICO. Si es privado,
+       el sistema lo rechazará y no podrás entregar.
 
   • Nombre del proyecto (opcional)
   • Enlace de demo (opcional)
@@ -112,7 +113,8 @@ Esto es obligatorio para optar a los premios.
 
 💡 RECOMENDACIONES
 
-  • Asegúrate de que tu repositorio sea accesible (público).
+  • El repositorio DEBE ser público (GitHub o GitLab).
+    Si es privado, el sistema no lo aceptará.
   • Incluye un README con: qué hace, cómo se instala y cómo se usa.
   • Sube tu demo o video para que el jurado pueda verlo funcionando.
   • Actualiza la descripción antes del pitch.
@@ -163,7 +165,7 @@ Hackathon UNETI IA 2026
 
 | Campo | Obligatorio | Formato | Ejemplo |
 |---|---|---|---|
-| **Repositorio** | ✅ Sí | URL de GitHub o GitLab | `https://github.com/usuario/repo` |
+| **Repositorio** | ✅ Sí | URL pública de GitHub o GitLab | `https://github.com/usuario/repo` |
 | **Nombre del proyecto** | ❌ No | Texto | `SOC Nacional IA` |
 | **Enlace de demo** | ❌ No | URL | `https://demo.mi-proyecto.com` |
 | **Video demo** | ❌ No | URL | `https://youtube.com/watch?v=...` |
@@ -181,6 +183,7 @@ Hackathon UNETI IA 2026
 |---|---|
 | Código | Debe existir en `registrations` |
 | Repositorio | `https://github.com/...` o `https://gitlab.com/...` |
+| Visibilidad | **Público obligatorio** (validado vía API; privado = rechazado) |
 | Turnstile | Verificación anti-bot obligatoria |
 | Actualización | Upsert por código (última versión prevalece) |
 | Correo | Se envía confirmación automática |

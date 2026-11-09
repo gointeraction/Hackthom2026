@@ -69,7 +69,7 @@
     <form class="card" id="entregaForm" style="display:none" novalidate>
       <h2>📦 Entrega de proyecto</h2>
       <div class="field"><label>Código</label><input type="text" id="feCodigo" readonly></div>
-      <div class="field"><label>Repositorio GitHub/GitLab <span style="color:#d64545">*</span></label><input type="url" id="feRepo" placeholder="https://github.com/usuario/repo" required></div>
+      <div class="field"><label>Repositorio GitHub/GitLab <span style="color:#d64545">*</span> <span style="color:#0a7d5a;font-weight:700">(debe ser público)</span></label><input type="url" id="feRepo" placeholder="https://github.com/usuario/repo" required><span class="k" style="font-size:.75rem;display:block;margin-top:4px">El repositorio debe ser público para que el jurado pueda leerlo. Si es privado, el sistema lo rechazará.</span></div>
       <div class="frow">
         <div class="field"><label>Nombre del proyecto (opcional)</label><input type="text" id="feProyecto"></div>
         <div class="field"><label>Enlace de demo (opcional)</label><input type="url" id="feDemo"></div>

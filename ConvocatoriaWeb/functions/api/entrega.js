@@ -17,6 +17,56 @@ async function verifyTurnstile(env, token, action, ip) {
   }
 }
 
+async function checkRepoPublic(url) {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '').toLowerCase();
+
+    if (host === 'github.com') {
+      const parts = u.pathname.split('/').filter(Boolean);
+      if (parts.length < 2) return { ok: false, error: 'URL de repositorio inválida.' };
+      const repo = parts[1].replace(/\.git$/, '');
+      const r = await fetch(`https://api.github.com/repos/${parts[0]}/${repo}`, {
+        headers: { 'User-Agent': 'hackathon-uneti-ia', Accept: 'application/vnd.github+json' },
+      });
+      if (r.status === 200) {
+        const j = await r.json().catch(() => null);
+        if (j && j.private === true) {
+          return { ok: false, error: 'El repositorio es privado. Debe ser PÚBLICO para que el jurado pueda leerlo.' };
+        }
+        return { ok: true };
+      }
+      if (r.status === 404) {
+        return { ok: false, error: 'El repositorio no existe o es privado. Debe ser PÚBLICO para que el jurado pueda leerlo.' };
+      }
+      return { ok: true };
+    }
+
+    if (host === 'gitlab.com') {
+      const path = u.pathname.replace(/^\//, '').replace(/\.git$/, '');
+      if (!path) return { ok: false, error: 'URL de repositorio inválida.' };
+      const r = await fetch(`https://gitlab.com/api/v4/projects/${encodeURIComponent(path)}`, {
+        headers: { 'User-Agent': 'hackathon-uneti-ia' },
+      });
+      if (r.status === 200) {
+        const j = await r.json().catch(() => null);
+        if (j && j.visibility && j.visibility !== 'public') {
+          return { ok: false, error: 'El repositorio es privado. Debe ser PÚBLICO para que el jurado pueda leerlo.' };
+        }
+        return { ok: true };
+      }
+      if (r.status === 404) {
+        return { ok: false, error: 'El repositorio no existe o es privado. Debe ser PÚBLICO para que el jurado pueda leerlo.' };
+      }
+      return { ok: true };
+    }
+
+    return { ok: true };
+  } catch (e) {
+    return { ok: true };
+  }
+}
+
 export async function onRequestPost({ request, env, waitUntil }) {
   const data = await request.json().catch(() => null);
   if (!data) return Response.json({ ok: false, error: 'Datos inválidos.' }, { status: 400 });
@@ -46,6 +96,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const reg = await env.DB.prepare('SELECT nombre, apellido, correo, codigo FROM registrations WHERE codigo = ?').bind(codigo).first();
   if (!reg) {
     return Response.json({ ok: false, error: 'Código inválido.' }, { status: 403 });
+  }
+
+  // El repositorio debe ser público para que el jurado pueda leerlo.
+  const repoCheck = await checkRepoPublic(repositorio);
+  if (!repoCheck.ok) {
+    return Response.json({ ok: false, error: repoCheck.error }, { status: 400 });
   }
 
   try {
