@@ -110,6 +110,31 @@ export async function onRequestPost({ request, env }) {
   }
 
   const data = await request.json().catch(() => ({}));
+
+  if (data.all === true) {
+    const { results } = await env.DB.prepare(
+      "SELECT nombre, apellido, correo, codigo FROM registrations WHERE modalidad = 'presencial' AND correo IS NOT NULL AND correo <> ''"
+    ).all();
+    const list = results || [];
+    let sent = 0;
+    let failed = 0;
+    const errors = [];
+    for (let i = 0; i < list.length; i += 10) {
+      const batch = list.slice(i, i + 10);
+      await Promise.all(batch.map(async (r) => {
+        const nombre = `${r.nombre || ''} ${r.apellido || ''}`.trim();
+        const res = await sendEmail(env, {
+          to: r.correo,
+          subject: 'Instrucciones de participación presencial — Hackathon UNETI IA 2026',
+          text: plantilla({ nombre, codigo: r.codigo }),
+        });
+        if (res.ok) sent++;
+        else { failed++; errors.push({ correo: r.correo, error: res.error || 'send_failed' }); }
+      }));
+    }
+    return Response.json({ ok: true, total: list.length, sent, failed, errors: errors.slice(0, 20) });
+  }
+
   const to = String(data.to || '').trim().toLowerCase();
   if (!to) return Response.json({ ok: false, error: 'Falta el destinatario.' }, { status: 400 });
 
