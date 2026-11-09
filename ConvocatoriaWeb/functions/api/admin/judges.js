@@ -60,7 +60,7 @@ export async function onRequestPost({ request, env }) {
       enviado = !!r.ok;
     }
 
-    return Response.json({ ok: true, codigo, enviado, sinCorreo: !correo });
+    return Response.json({ ok: true, codigo, enviado, sinCorreo: !correo, correo });
   } catch (err) {
     return Response.json({ ok: false, error: 'Error al guardar el jurado.' }, { status: 500 });
   }

@@ -2296,7 +2296,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
           btn.textContent = '✅ Enviado';
           btn.style.color = '#169A6A';
           btn.style.borderColor = '#169A6A';
-          setStatus('judgeStatus', 'Código ' + data.codigo + ' enviado por correo.', true);
+          setStatus('judgeStatus', 'Código ' + data.codigo + ' enviado a ' + (data.correo || 'su correo') + '.', true);
         } else if (data.ok) {
           btn.textContent = '⚠️ Sin enviar';
           btn.style.color = '#B7791F';
@@ -2336,7 +2336,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     const data = await res.json();
     if (data.ok) {
       document.getElementById('judgeForm').reset();
-      setStatus('judgeStatus', 'Jurado agregado. Código: ' + data.codigo + (data.enviado ? ' · enviado por correo' : (data.sinCorreo ? ' · sin correo registrado' : ' · falló el envío')), true);
+      setStatus('judgeStatus', 'Jurado agregado. Código: ' + data.codigo + (data.enviado ? ' · enviado a ' + (data.correo || 'su correo') : (data.sinCorreo ? ' · sin correo registrado' : ' · falló el envío')), true);
       loadJudges();
     } else {
       setStatus('judgeStatus', data.error || 'Error.', false);
