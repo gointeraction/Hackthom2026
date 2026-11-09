@@ -3617,7 +3617,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       if (cnt) cnt.textContent = items.length + ' mentores';
       if (badge) badge.textContent = items.length;
       if (items.length === 0) { list.innerHTML = '<div class="empty">Aún no hay mentores.</div>'; return; }
-      list.innerHTML = items.map((m) => '<div class="judge-item"><div class="info"><strong>' + esc(m.nombre) + '</strong><span>' + esc(m.organizacion || '') + (m.eje ? ' · ' + esc(m.eje) : '') + (m.equipo_nombre ? ' · 👥 ' + esc(m.equipo_nombre) : '') + (m.correo ? ' · ' + esc(m.correo) : '') + (m.telefono ? ' · 📞 ' + esc(m.telefono) : '') + '</span></div><button class="del" data-mentor-id="' + m.id + '" aria-label="Eliminar mentor">×</button></div>').join('');
+      list.innerHTML = items.map((m) => '<div class="judge-item"><div class="info"><strong>' + esc(m.nombre) + '</strong><span>' + esc(m.organizacion || '') + (m.eje ? ' · ' + esc(m.eje) : '') + (m.equipo_nombre ? ' · 👥 ' + esc(m.equipo_nombre) : '') + (m.correo ? ' · ' + esc(m.correo) : '') + (m.telefono ? ' · 📞 ' + esc(m.telefono) : '') + '</span>' + (m.correo ? '<span style="margin-top:5px"><button type="button" data-mentor-resend="' + m.id + '" style="padding:3px 9px;font-size:.7rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#0B6E8A">Reenviar correo</button></span>' : '<span style="margin-top:5px;color:#d64545;font-weight:700;font-size:.72rem">Sin correo</span>') + '</div><button class="del" data-mentor-id="' + m.id + '" aria-label="Eliminar mentor">×</button></div>').join('');
     } catch (e) {
       list.innerHTML = '<div class="empty">Error al cargar mentores.</div>';
     }
@@ -3650,6 +3650,16 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       }
     });
     document.getElementById('mentoresList').addEventListener('click', async (e) => {
+      const resendId = e.target.dataset.mentorResend;
+      if (resendId) {
+        e.target.disabled = true;
+        const res = await fetch('/api/admin/mentores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reenviar', id: Number(resendId) }) });
+        const data = await res.json();
+        const okMail = data.ok && data.enviado;
+        setStatus('mentorStatus', data.ok ? (data.enviado ? 'Correo reenviado con su rol.' : 'No se pudo enviar el correo.') : (data.error || 'Error.'), okMail);
+        e.target.disabled = false;
+        return;
+      }
       const id = e.target.dataset.mentorId;
       if (!id) return;
       if (!confirm('¿Eliminar este mentor?')) return;

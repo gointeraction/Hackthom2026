@@ -70,6 +70,30 @@ export async function onRequestPost({ request, env }) {
   const data = await request.json().catch(() => null);
   if (!data) return Response.json({ ok: false, error: 'Datos inválidos.' }, { status: 400 });
 
+  // Reenviar el correo con su rol
+  if (data.action === 'reenviar') {
+    const id = Number(data.id);
+    if (!id) return Response.json({ ok: false, error: 'Falta el id.' }, { status: 400 });
+    const m = await env.DB.prepare(
+      'SELECT m.*, t.nombre AS equipo_nombre, t.eje AS equipo_eje FROM mentores m LEFT JOIN teams t ON t.id = m.team_id WHERE m.id = ?'
+    ).bind(id).first();
+    if (!m) return Response.json({ ok: false, error: 'Mentor no encontrado.' }, { status: 404 });
+    if (!m.correo) return Response.json({ ok: false, error: 'El mentor no tiene correo registrado.', enviado: false }, { status: 400 });
+
+    let enviado = false;
+    try {
+      const r = await sendEmail(env, {
+        to: m.correo,
+        subject: 'Tu rol como MENTOR — Hackathon UNETI IA 2026',
+        text: plantillaMentor({ nombre: m.nombre, equipo: m.equipo_nombre || '', eje: m.equipo_eje || m.eje || '' }),
+      });
+      enviado = !!r.ok;
+    } catch (e) {
+      enviado = false;
+    }
+    return Response.json({ ok: true, enviado });
+  }
+
   const nombre = String(data.nombre || '').trim();
   const organizacion = String(data.organizacion || '').trim();
   const correo = String(data.correo || '').trim().toLowerCase();
