@@ -1440,6 +1440,7 @@
           <option value="sin_config">⚠️ Sin configurar</option>
         </select>
         <button type="button" class="btn" id="emailRefresh">🔄 Actualizar</button>
+        <button type="button" class="btn" id="emailCsv">⬇️ Exportar CSV</button>
       </div>
       <div id="emailResumen" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
       <div class="table-wrap">
@@ -3087,6 +3088,17 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     if (selTipo) selTipo.addEventListener('change', loadEmailsLog);
     const selEstado = document.getElementById('emailEstado');
     if (selEstado) selEstado.addEventListener('change', loadEmailsLog);
+    const csvBtn = document.getElementById('emailCsv');
+    if (csvBtn) csvBtn.addEventListener('click', () => {
+      const q = (document.getElementById('emailSearch') || {}).value || '';
+      const tipo = (document.getElementById('emailTipo') || {}).value || '';
+      const estado = (document.getElementById('emailEstado') || {}).value || '';
+      const params = new URLSearchParams({ format: 'csv' });
+      if (q.trim()) params.set('q', q.trim());
+      if (tipo) params.set('tipo', tipo);
+      if (estado) params.set('estado', estado);
+      window.location.href = '/api/admin/emails-log?' + params.toString();
+    });
   })();
 
   // ===== Comunicados (admin) =====
