@@ -133,6 +133,8 @@ export async function enviarInstructivoRemoto(env, { dryRun = false } = {}) {
           to: r.correo,
           subject: 'Tu panel remoto está listo — reporta tu proyecto y avances · Hackathon UNETI IA 2026',
           text: plantillaInstructivoRemoto({ nombre, codigo: r.codigo || '' }),
+          tipo: 'instructivo-remoto',
+          referencia: r.codigo || r.correo,
         });
         if (res.ok) sent++;
         else { failed++; errores.push({ correo: r.correo, error: res.error || 'send_failed' }); }

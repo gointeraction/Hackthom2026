@@ -86,6 +86,8 @@ export async function onRequestPost({ request, env }) {
         to: m.correo,
         subject: 'Tu rol como MENTOR — Hackathon UNETI IA 2026',
         text: plantillaMentor({ nombre: m.nombre, equipo: m.equipo_nombre || '', eje: m.equipo_eje || m.eje || '' }),
+        tipo: 'mentor',
+        referencia: 'mentor:' + m.id,
       });
       enviado = !!r.ok;
     } catch (e) {
@@ -123,6 +125,8 @@ export async function onRequestPost({ request, env }) {
           to: correo,
           subject: 'Tu rol como MENTOR — Hackathon UNETI IA 2026',
           text: plantillaMentor({ nombre, equipo, eje: ejeEquipo }),
+          tipo: 'mentor',
+          referencia: correo,
         });
         enviado = !!r.ok;
       } catch (e) {

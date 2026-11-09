@@ -62,5 +62,7 @@ export async function enviarCorreoJurado(env, { nombre, correo, codigo }) {
     to: correo,
     subject: 'Tu código de acceso como Jurado — Hackathon UNETI IA 2026',
     text: plantillaJurado({ nombre, codigo }),
+    tipo: 'jurado',
+    referencia: correo,
   });
 }
