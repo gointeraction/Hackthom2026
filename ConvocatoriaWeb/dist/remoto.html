@@ -317,6 +317,7 @@
     el.textContent = text;
     chat.appendChild(el);
     chat.scrollTop = chat.scrollHeight;
+    return el;
   }
   document.getElementById('mentorForm').addEventListener('submit', async (e) => {
     e.preventDefault();
