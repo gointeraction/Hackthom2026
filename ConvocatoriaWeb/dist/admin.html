@@ -387,6 +387,7 @@
         <h2>Panel de control</h2>
         <p>Vista general del evento y exportación de datos.</p>
       </div>
+      <div id="alertaPlan" style="display:none;margin-bottom:20px;padding:16px 20px;border-radius:14px;background:linear-gradient(135deg,rgba(230,57,102,.10),rgba(255,193,7,.08));border:1px solid rgba(230,57,102,.35)"></div>
       <div class="dash-grid">
         <div class="dash-card"><span class="dash-num" id="dInscritos">0</span><span class="dash-label">Inscritos totales</span></div>
         <div class="dash-card"><span class="dash-num" id="dIndividuales">0</span><span class="dash-label">Individuales</span></div>
@@ -2771,6 +2772,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       document.getElementById('dIndividuales').textContent = data.individuales || 0;
       document.getElementById('dPresenciales').textContent = data.presenciales || 0;
       document.getElementById('dRemotos').textContent = data.remotos || 0;
+      renderAlertaPlan(data);
       document.getElementById('dGrupos').textContent = data.grupos || 0;
       document.getElementById('dEquipos').textContent = data.equipos || 0;
       document.getElementById('dJurados').textContent = data.jurados || 0;
@@ -4209,6 +4211,35 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       w.document.close(); w.focus(); setTimeout(() => w.print(), 400);
     });
   })();
+
+  function renderAlertaPlan(data) {
+    const el = document.getElementById('alertaPlan');
+    if (!el) return;
+    const evento = new Date('2026-11-13T00:00:00-04:00');
+    const dias = Math.max(0, Math.ceil((evento - new Date()) / 86400000));
+    const gaps = [];
+    if (!data.jurados) gaps.push({ txt: '⚖️ Jurados sin cargar', va: 'jurados' });
+    if (!data.mentores) gaps.push({ txt: '🤝 Mentores sin cargar', va: 'mentores' });
+    if (!data.logisticaPersonal) gaps.push({ txt: '👷 Logística sin cargar', va: 'tickets' });
+    if (!data.responsables) gaps.push({ txt: '🪪 Responsables sin asignar', va: 'responsables' });
+    if (!data.invitados) gaps.push({ txt: '🎟️ Invitados sin cargar', va: 'acreditacion-personal' });
+    if (!data.tickets) gaps.push({ txt: '🍽️ Tickets sin generar', va: 'tickets' });
+
+    el.style.display = 'block';
+    if (!gaps.length) {
+      el.innerHTML = '<div><strong style="font-size:1.1rem">✅ Todo listo · faltan ' + dias + ' días</strong><br><span class="k">No hay brechas críticas pendientes.</span></div>';
+      return;
+    }
+    el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">' +
+      '<div><strong style="font-size:1.1rem">⏰ Faltan ' + dias + ' días para el evento</strong><br><span class="k">' + gaps.length + ' brecha(s) crítica(s) por cerrar</span></div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' + gaps.map((g) => '<a href="#" class="tipo-tag" data-goto="' + g.va + '" style="background:rgba(230,57,102,.12);color:var(--rose);text-decoration:none;cursor:pointer;padding:5px 10px;border-radius:8px">' + g.txt + '</a>').join('') + '</div>' +
+      '</div>';
+    el.querySelectorAll('[data-goto]').forEach((a) => a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const btn = document.querySelector('.menu-btn[data-panel="' + a.dataset.goto + '"]');
+      if (btn) btn.click();
+    }));
+  }
 
   function loadAll() {
     loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadTickets(); loadEstimado(); loadGruposLogistica(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();

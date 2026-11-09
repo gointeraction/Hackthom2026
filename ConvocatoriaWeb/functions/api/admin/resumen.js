@@ -18,7 +18,12 @@ export async function onRequestGet({ env }) {
     const evaluaciones = await c('SELECT COUNT(DISTINCT team_id) AS c FROM scores');
     const preseleccionados = await c("SELECT COUNT(*) AS c FROM evaluaciones WHERE estado='preseleccionado'");
     const finales = await c("SELECT COUNT(*) AS c FROM evaluaciones WHERE estado='final'");
-    return Response.json({ ok: true, inscritos, individuales, grupos, presenciales, remotos, individuales_presenciales, individuales_remotos, patrocinadores, equipos, jurados, evaluaciones, preseleccionados, finales });
+    const mentores = await c('SELECT COUNT(*) AS c FROM mentores');
+    const responsables = await c('SELECT COUNT(*) AS c FROM grupos_logistica');
+    const invitados = await c('SELECT COUNT(*) AS c FROM invitados');
+    const tickets = await c('SELECT COUNT(*) AS c FROM tickets');
+    const logisticaPersonal = await c('SELECT COUNT(*) AS c FROM personal_logistica');
+    return Response.json({ ok: true, inscritos, individuales, grupos, presenciales, remotos, individuales_presenciales, individuales_remotos, patrocinadores, equipos, jurados, evaluaciones, preseleccionados, finales, mentores, responsables, invitados, tickets, logisticaPersonal });
   } catch (err) {
     return Response.json({ ok: false, error: 'Error al calcular resumen.' }, { status: 500 });
   }
