@@ -105,13 +105,43 @@ export async function onRequestPost({ request, env }) {
     }
     // Enviar correos de confirmación (best-effort)
     try {
-      const subject = tipo === 'individual'
-        ? 'Inscripción confirmada — Hackathon UNETI IA 2026'
-        : 'Inscripción de grupo recibida — Hackathon UNETI IA 2026';
+      const subject = 'Inscripción confirmada — Hackathon UNETI IA 2026 (modalidad remota)';
       await Promise.all(limpios.map((m) => sendEmail(env, {
         to: m.correo,
         subject,
-        text: `Hola ${m.nombre},\n\nTu inscripción al Hackathon UNETI IA 2026 ha sido registrada correctamente.\n\nCódigo de ${tipo === 'individual' ? 'participante' : 'grupo'}: ${codigo}\n\nModalidad: remota.\n\nPronto recibirás el instructivo, la agenda y los criterios de selección.\n\n— Comité Organizador\nHackathon UNETI IA 2026`,
+        text: `Hola ${m.nombre},
+
+¡Gracias por inscribirte al Hackathon UNETI IA 2026!
+
+Tu inscripción ha sido registrada correctamente.
+
+Tu código de ${tipo === 'individual' ? 'participante' : 'grupo'}: ${codigo}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📅 FECHAS
+Viernes 13 y sábado 14 de noviembre de 2026
+
+💻 MODALIDAD
+Remota (online)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📩 IMPORTANTE — CONFIRMA TU PARTICIPACIÓN
+
+Tres (3) días antes del inicio del evento recibirás un correo con TODAS las instrucciones de participación.
+
+Debes estar pendiente de ese correo y CONFIRMAR tu participación respondiendo al mensaje.
+
+⚠️ Sin la confirmación, no podremos garantizar tu cupo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 CONTACTO
+• Telegram: https://t.me/+3u7vzOq8LBFmYzUx
+
+— Comité Organizador
+Hackathon UNETI IA 2026`,
       })));
     } catch (e) {
       // no bloqueamos la inscripción por un fallo en el correo
