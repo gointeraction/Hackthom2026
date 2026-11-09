@@ -21,6 +21,15 @@ async function verifyTurnstile(env, token, action, ip) {
 }
 
 export async function onRequestPost({ request, env }) {
+  // Cierre de inscripciones: miércoles 11/11/2026 a las 16:00 (hora de Venezuela)
+  const CIERRE_INSCRIPCIONES = new Date('2026-11-11T16:00:00-04:00');
+  if (Date.now() >= CIERRE_INSCRIPCIONES.getTime()) {
+    return Response.json(
+      { ok: false, error: 'Las inscripciones cerraron el miércoles 11 de noviembre de 2026 a las 4:00 pm.' },
+      { status: 403 }
+    );
+  }
+
   const data = await request.json().catch(() => null);
   if (!data) {
     return Response.json({ ok: false, error: 'Datos inválidos.' }, { status: 400 });
