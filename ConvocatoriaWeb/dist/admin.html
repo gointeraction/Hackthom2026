@@ -2285,16 +2285,42 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       return;
     }
     if (e.target.dataset.resend) {
-      e.target.disabled = true;
-      const res = await fetch('/api/admin/judges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'codigo', id: Number(e.target.dataset.resend) }) });
-      const data = await res.json();
-      if (data.ok) {
-        setStatus('judgeStatus', 'Código: ' + data.codigo + (data.enviado ? ' · enviado por correo' : ' · sin correo o falló el envío'), true);
-        loadJudges();
-      } else {
-        setStatus('judgeStatus', data.error || 'Error.', false);
+      const btn = e.target;
+      const orig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      try {
+        const res = await fetch('/api/admin/judges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'codigo', id: Number(btn.dataset.resend) }) });
+        const data = await res.json();
+        if (data.ok && data.enviado) {
+          btn.textContent = '✅ Enviado';
+          btn.style.color = '#169A6A';
+          btn.style.borderColor = '#169A6A';
+          setStatus('judgeStatus', 'Código ' + data.codigo + ' enviado por correo.', true);
+        } else if (data.ok) {
+          btn.textContent = '⚠️ Sin enviar';
+          btn.style.color = '#B7791F';
+          btn.style.borderColor = '#B7791F';
+          setStatus('judgeStatus', 'Código ' + data.codigo + ': no se pudo enviar (revisa el correo del jurado o SendGrid).', false);
+        } else {
+          btn.textContent = '❌ Error';
+          btn.style.color = '#D64545';
+          btn.style.borderColor = '#D64545';
+          setStatus('judgeStatus', data.error || 'Error al reenviar.', false);
+        }
+      } catch (err) {
+        btn.textContent = '❌ Error';
+        btn.style.color = '#D64545';
+        btn.style.borderColor = '#D64545';
+        setStatus('judgeStatus', 'Error de red al reenviar.', false);
       }
-      e.target.disabled = false;
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.disabled = false;
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 3500);
+      return;
     }
   });
 

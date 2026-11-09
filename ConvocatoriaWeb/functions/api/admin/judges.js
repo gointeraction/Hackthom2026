@@ -31,7 +31,7 @@ export async function onRequestPost({ request, env }) {
       const r = await enviarCorreoJurado(env, { nombre: j.nombre, correo: j.correo, codigo });
       enviado = !!r.ok;
     }
-    return Response.json({ ok: true, codigo, enviado });
+    return Response.json({ ok: true, codigo, enviado, correo: j.correo || '' });
   }
 
   const nombre = String(data.nombre || '').trim();

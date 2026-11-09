@@ -18,7 +18,11 @@ export async function sendEmail(env, { to, subject, text, html }) {
       },
       body: JSON.stringify(payload),
     });
-    return { ok: res.ok };
+    if (!res.ok) {
+      const detalle = await res.text().catch(() => '');
+      return { ok: false, error: 'SendGrid ' + res.status + ': ' + String(detalle).slice(0, 300) };
+    }
+    return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e && e.message) };
   }
