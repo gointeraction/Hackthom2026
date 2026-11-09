@@ -1,10 +1,19 @@
-// /api/admin/mentores — gestión de mentores presenciales.
+// /api/admin/mentores — gestión de mentores presenciales (correo con su rol al crearlos).
 import { sendEmail } from '../../_lib/mail';
 
 function plantillaMentor({ nombre, equipo, eje }) {
   return `Hola ${nombre},
 
-¡Gracias por acompañarnos como mentor del Hackathon UNETI IA 2026!
+¡Bienvenido/a como MENTOR del Hackathon UNETI IA 2026!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎓 TU ROL: MENTOR
+
+Acompañarás a los equipos durante las 48 horas de desarrollo,
+orientándolos en IA ética, ciberseguridad, pitch y repositorio.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🏆 EQUIPO ASIGNADO
 ${equipo || 'Por asignar'}
@@ -12,12 +21,30 @@ ${equipo || 'Por asignar'}
 🎯 EJE
 ${eje || 'Por definir'}
 
-📅 DISPONIBILIDAD
-Viernes 13 y sábado 14 de noviembre de 2026
-Sede: Parque Tecnológico + Más Ciencia (IVIC)
+📅 FECHAS
+Viernes 13 y sábado 14 de noviembre de 2026 (desarrollo continuo con pernocta)
+
+📍 SEDE
+Parque Tecnológico + Más Ciencia (IVIC), Caracas
+Traslado desde Mincyt (Av. Universidad) el viernes 13 a las 7:00 am.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧭 TU FUNCIÓN COMO MENTOR
+
+  • Orientar técnicamente a tu equipo.
+  • Ayudar a aterrizar el MVP.
+  • Revisar que el repositorio sea PÚBLICO.
+  • Preparar el pitch.
+  • Motivar y desbloquear al equipo.
+
+⚠️ Importante: la evaluación la realiza el JURADO, no el mentor.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💬 CANAL
-Los equipos te contactarán en el evento. Para coordinación general usa el canal de Telegram.
+Los equipos te contactarán en el evento. Para coordinación general
+usa el canal de Telegram.
 
 📞 CONTACTO
 • Telegram: https://t.me/+3u7vzOq8LBFmYzUx
@@ -57,21 +84,29 @@ export async function onRequestPost({ request, env }) {
       'INSERT INTO mentores (nombre, organizacion, correo, telefono, eje, team_id, activo) VALUES (?, ?, ?, ?, ?, ?, 1)'
     ).bind(nombre, organizacion, correo, telefono, eje, team_id).run();
 
-    if (correo) {
-      let equipo = '';
-      let ejeEquipo = eje;
-      if (team_id) {
-        const t = await env.DB.prepare('SELECT nombre, eje FROM teams WHERE id = ?').bind(team_id).first();
-        if (t) { equipo = t.nombre || ''; ejeEquipo = t.eje || eje; }
-      }
-      sendEmail(env, {
-        to: correo,
-        subject: 'Asignación como mentor — Hackathon UNETI IA 2026',
-        text: plantillaMentor({ nombre, equipo, eje: ejeEquipo }),
-      }).catch(() => {});
+    let enviado = false;
+    let equipo = '';
+    let ejeEquipo = eje;
+
+    if (team_id) {
+      const t = await env.DB.prepare('SELECT nombre, eje FROM teams WHERE id = ?').bind(team_id).first();
+      if (t) { equipo = t.nombre || ''; ejeEquipo = t.eje || eje; }
     }
 
-    return Response.json({ ok: true });
+    if (correo) {
+      try {
+        const r = await sendEmail(env, {
+          to: correo,
+          subject: 'Tu rol como MENTOR — Hackathon UNETI IA 2026',
+          text: plantillaMentor({ nombre, equipo, eje: ejeEquipo }),
+        });
+        enviado = !!r.ok;
+      } catch (e) {
+        enviado = false;
+      }
+    }
+
+    return Response.json({ ok: true, enviado, sinCorreo: !correo });
   } catch (err) {
     return Response.json({ ok: false, error: 'Error al guardar el mentor.' }, { status: 500 });
   }

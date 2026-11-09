@@ -3639,7 +3639,10 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const res = await fetch('/api/admin/mentores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await res.json();
       if (data.ok) {
-        setStatus('mentorStatus', 'Mentor agregado. Se envió la asignación por correo.', true);
+        const msg = data.enviado
+          ? 'Mentor agregado. Correo con su rol enviado.'
+          : (data.sinCorreo ? 'Mentor agregado. Sin correo registrado (no se envió aviso).' : 'Mentor agregado. No se pudo enviar el correo.');
+        setStatus('mentorStatus', msg, data.enviado);
         form.reset();
         loadMentores();
       } else {
