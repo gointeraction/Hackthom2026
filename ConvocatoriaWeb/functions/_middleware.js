@@ -58,6 +58,21 @@ export async function onRequest(ctx) {
     }
   }
 
+  // Acceso exclusivo de jurados (cookie judge_auth)
+  const isJudgeApi = path.startsWith('/api/jurado/') && path !== '/api/jurado/login' && path !== '/api/jurado/logout';
+  if (isJudgeApi) {
+    const cookie = ctx.request.headers.get('Cookie') || '';
+    const token = (cookie.match(/judge_auth=([^;]+)/) || [])[1] || '';
+    const role = await verifyToken(token, ctx.env.AUTH_SECRET);
+    if (!role || !role.startsWith('judge:')) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'No autorizado.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+      );
+    }
+    return ctx.next();
+  }
+
   const isLogin = path === '/api/admin/login';
   const isProtectedApi = path.startsWith('/api/admin/') && !isLogin;
 

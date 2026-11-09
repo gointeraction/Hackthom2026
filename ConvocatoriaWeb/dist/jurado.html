@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Jurado · Hackathon UNETI IA 2026</title>
+<style>
+  :root { --navy: #0B1F3A; --cyan: #00B4D8; --ink: #10243E; --soft: #5B6B7C; --line: #E4EAF1; --bg: #F5F8FB; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  .top { background: var(--navy); color: #fff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .top h1 { font-size: 1.1rem; font-weight: 700; }
+  .top a { color: #9BD9EE; text-decoration: none; font-size: .85rem; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 22px 16px 40px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(16,36,62,.06); }
+  .card h2 { font-size: 1rem; margin-bottom: 12px; color: var(--navy); }
+  .card h3 { font-size: .95rem; margin-bottom: 12px; color: var(--navy); }
+  label { display: block; font-size: .85rem; font-weight: 600; color: var(--soft); margin-bottom: 6px; }
+  input, select { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 1rem; font-family: inherit; background: #fff; }
+  .btn { display: inline-block; background: linear-gradient(135deg,#0B1F3A,#12345F); color: #fff; border: 0; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: .95rem; font-family: inherit; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-cyan { background: linear-gradient(135deg,#00B4D8,#0B6E8A); }
+  .msg { margin-top: 12px; font-size: .9rem; }
+  .msg.err { color: #d64545; }
+  .msg.ok { color: #1a9e5c; }
+  .k { color: var(--soft); font-size: .82rem; }
+  .team { border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; background: #FBFCFE; }
+  .team h4 { font-size: .98rem; margin-bottom: 4px; color: var(--navy); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .86rem; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--soft); font-size: .76rem; text-transform: uppercase; letter-spacing: .4px; }
+  td select { padding: 8px; width: 80px; }
+  .peso { color: #0B6E8A; font-weight: 700; white-space: nowrap; }
+  .prom { font-weight: 800; color: #0B1F3A; }
+  .repo { color: var(--cyan); font-weight: 600; text-decoration: none; word-break: break-all; font-size: .84rem; }
+  .entrega { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: .86rem; }
+  .entrega:last-child { border-bottom: 0; }
+  .fila-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .cerrado { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: #DFF5E8; color: #1a9e5c; }
+  @media (max-width: 600px) { td select { width: 100%; } th:nth-child(3), td:nth-child(3) { display: none; } }
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>⚖️ Panel de Jurado · Hackathon UNETI IA 2026</h1>
+    <a href="/">← Volver al sitio</a>
+  </header>
+
+  <div class="wrap">
+    <!-- LOGIN -->
+    <form class="card" id="loginForm" novalidate>
+      <h2>🔐 Acceso exclusivo de jurados</h2>
+      <p class="k" style="margin-bottom:14px">Ingresa el código que recibiste por correo al ser registrado como jurado.</p>
+      <label for="codigo">Código de jurado</label>
+      <input type="text" id="codigo" placeholder="AB12CD34" autocomplete="off" autofocus style="text-transform:uppercase;letter-spacing:.16em;font-weight:800;text-align:center;font-size:1.3rem;padding:16px">
+      <div style="margin-top:14px"><button type="submit" class="btn btn-cyan" style="width:100%;padding:16px;font-size:1.05rem">Entrar al panel de jurado</button></div>
+      <div class="msg" id="msg"></div>
+      <p class="k" style="margin-top:14px;text-align:center">¿No recibiste tu código? Escríbenos por <a href="https://t.me/+3u7vzOq8LBFmYzUx" target="_blank" rel="noopener" style="color:var(--cyan);font-weight:700">Telegram</a>.</p>
+    </form>
+
+    <!-- PANEL -->
+    <div id="panel" style="display:none">
+      <div class="card">
+        <div class="fila-top">
+          <div>
+            <h2 style="margin-bottom:2px" id="judgeName">Jurado</h2>
+            <span class="k" id="judgeOrg"></span>
+          </div>
+          <button type="button" class="btn" id="btnSalir" style="padding:9px 16px;font-size:.85rem">Salir</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📋 Rúbrica de evaluación</h3>
+        <p class="k" style="margin-bottom:10px">Puntúa cada criterio de 1 a 5. El puntaje final es la suma ponderada (máximo 5.00).</p>
+        <div id="criteriosInfo"></div>
+      </div>
+
+      <div class="card">
+        <h3>👥 Equipos a evaluar</h3>
+        <div id="teamsList"></div>
+      </div>
+
+      <div class="card">
+        <h3>📦 Entregas registradas</h3>
+        <div id="entregasList"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let criterios = [];
+  let panelData = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function setMsg(id, text, ok) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'msg ' + (ok ? 'ok' : 'err');
+    el.textContent = text;
+  }
+
+  async function cargarPanel() {
+    const res = await fetch('/api/jurado/panel');
+    if (res.status === 401) { mostrarLogin(); return; }
+    const data = await res.json();
+    if (!data.ok) { mostrarLogin(); return; }
+    panelData = data;
+    criterios = data.criterios || [];
+    mostrarPanel(data);
+  }
+
+  function mostrarLogin() {
+    document.getElementById('loginForm').style.display = '';
+    document.getElementById('panel').style.display = 'none';
+  }
+
+  function mostrarPanel(data) {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('panel').style.display = '';
+    document.getElementById('judgeName').textContent = data.judge.nombre || 'Jurado';
+    document.getElementById('judgeOrg').textContent = data.judge.organizacion || '';
+
+    // Rúbrica
+    document.getElementById('criteriosInfo').innerHTML = criterios.map((c) =>
+      '<div class="entrega"><strong>' + esc(c.nombre) + '</strong> <span class="peso">' + Math.round(c.peso * 100) + ' %</span></div>'
+    ).join('');
+
+    // Equipos
+    const scoresMap = {};
+    (data.scores || []).forEach((s) => {
+      scoresMap[s.team_id] = scoresMap[s.team_id] || {};
+      scoresMap[s.team_id][s.criterio] = s.puntaje;
+    });
+
+    const cont = document.getElementById('teamsList');
+    if (!data.teams.length) {
+      cont.innerHTML = '<p class="k">Aún no hay equipos registrados.</p>';
+    } else {
+      cont.innerHTML = data.teams.map((t) => {
+        const prev = scoresMap[t.id] || {};
+        const filas = criterios.map((c) => {
+          const val = prev[c.id] || '';
+          let opts = '<option value="">—</option>';
+          for (let n = 1; n <= 5; n++) opts += '<option value="' + n + '"' + (Number(val) === n ? ' selected' : '') + '>' + n + '</option>';
+          return '<tr><td>' + esc(c.nombre) + '</td><td class="peso">' + Math.round(c.peso * 100) + ' %</td><td><select data-team="' + t.id + '" data-crit="' + esc(c.id) + '">' + opts + '</select></td></tr>';
+        }).join('');
+        const completo = criterios.every((c) => prev[c.id]);
+        return '<div class="team">' +
+          '<h4>Equipo #' + t.id + ' · ' + esc(t.nombre || 'Sin nombre') + (completo ? ' <span class="cerrado">evaluado</span>' : '') + '</h4>' +
+          '<p class="k">Eje: ' + esc(t.eje || '—') + ' · Modalidad: ' + esc(t.modalidad || '—') + (t.integrantes ? ' · Integrantes: ' + esc(t.integrantes) : '') + '</p>' +
+          '<table><thead><tr><th>Criterio</th><th>Peso</th><th>Puntaje</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+          '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+          '<button type="button" class="btn btn-cyan" data-save="' + t.id + '">Guardar evaluación</button>' +
+          '<span class="prom" id="prom-' + t.id + '"></span>' +
+          '</div>' +
+          '<div class="msg" id="tmsg-' + t.id + '"></div>' +
+        '</div>';
+      }).join('');
+      actualizarPromedios();
+    }
+
+    // Entregas
+    const ec = document.getElementById('entregasList');
+    if (!data.entregas.length) {
+      ec.innerHTML = '<p class="k">Aún no hay entregas registradas.</p>';
+    } else {
+      ec.innerHTML = data.entregas.map((e) =>
+        '<div class="entrega">' +
+        '<div class="fila-top"><strong>' + esc(e.proyecto || 'Proyecto sin nombre') + '</strong><span class="k">Código: ' + esc(e.codigo) + '</span></div>' +
+        '<div style="margin-top:4px"><a class="repo" href="' + esc(e.repositorio) + '" target="_blank" rel="noopener">' + esc(e.repositorio) + '</a></div>' +
+        (e.tags ? '<div class="k" style="margin-top:4px">Tecnologías: ' + esc(e.tags) + '</div>' : '') +
+        (e.descripcion ? '<div class="k" style="margin-top:4px">' + esc(e.descripcion) + '</div>' : '') +
+        '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">' +
+        (e.demo ? '<a class="repo" href="' + esc(e.demo) + '" target="_blank" rel="noopener">▶️ Demo</a>' : '') +
+        (e.video ? '<a class="repo" href="' + esc(e.video) + '" target="_blank" rel="noopener">🎬 Video</a>' : '') +
+        (e.deck ? '<a class="repo" href="' + esc(e.deck) + '" target="_blank" rel="noopener">📊 Deck</a>' : '') +
+        '</div></div>'
+      ).join('');
+    }
+  }
+
+  function leerScores(teamId) {
+    const sels = document.querySelectorAll('select[data-team="' + teamId + '"]');
+    const out = [];
+    sels.forEach((s) => {
+      if (s.value) out.push({ criterio: s.dataset.crit, puntaje: Number(s.value) });
+    });
+    return out;
+  }
+
+  function actualizarPromedios() {
+    document.querySelectorAll('[data-save]').forEach((btn) => {
+      const teamId = btn.dataset.save;
+      const scores = leerScores(teamId);
+      const el = document.getElementById('prom-' + teamId);
+      if (!el) return;
+      if (scores.length !== criterios.length) { el.textContent = ''; return; }
+      let total = 0;
+      criterios.forEach((c) => {
+        const s = scores.find((x) => x.criterio === c.id);
+        if (s) total += s.puntaje * c.peso;
+      });
+      el.textContent = 'Puntaje: ' + total.toFixed(2) + ' / 5.00';
+    });
+  }
+
+  document.addEventListener('change', (e) => {
+    if (e.target.matches('select[data-team]')) actualizarPromedios();
+  });
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-save]');
+    if (!btn) return;
+    const teamId = Number(btn.dataset.save);
+    const scores = leerScores(teamId);
+    if (scores.length !== criterios.length) {
+      setMsg('tmsg-' + teamId, 'Completa los ' + criterios.length + ' criterios antes de guardar.', false);
+      return;
+    }
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = 'Guardando…';
+    try {
+      const res = await fetch('/api/jurado/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ team_id: teamId, scores }),
+      });
+      const data = await res.json();
+      if (data.ok) setMsg('tmsg-' + teamId, 'Evaluación guardada correctamente.', true);
+      else setMsg('tmsg-' + teamId, data.error || 'Error al guardar.', false);
+    } catch (err) {
+      setMsg('tmsg-' + teamId, 'Error de red.', false);
+    }
+    btn.disabled = false;
+    btn.textContent = orig;
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const codigo = document.getElementById('codigo').value.trim().toUpperCase();
+    if (!codigo) { setMsg('msg', 'Ingresa tu código.', false); return; }
+    const btn = e.currentTarget.querySelector('button');
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = 'Verificando…';
+    try {
+      const res = await fetch('/api/jurado/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        await cargarPanel();
+      } else {
+        setMsg('msg', data.error || 'Código inválido.', false);
+      }
+    } catch (err) {
+      setMsg('msg', 'Error de red.', false);
+    }
+    btn.disabled = false;
+    btn.textContent = orig;
+  });
+
+  document.getElementById('btnSalir').addEventListener('click', async () => {
+    await fetch('/api/jurado/logout', { method: 'POST' });
+    mostrarLogin();
+  });
+
+  cargarPanel();
+</script>
+</body>
+</html>

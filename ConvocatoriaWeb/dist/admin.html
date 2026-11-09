@@ -526,6 +526,11 @@
         <h2>Jurados invitados</h2>
         <p>Define los jurados (máximo 10) que evaluarán los proyectos.</p>
       </div>
+      <div style="background:#EAF7FB;border:1px solid rgba(0,180,216,.35);border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:.86rem;color:#0B4A63">
+        <strong>🔐 Acceso exclusivo de jurados:</strong>
+        al agregar un jurado se genera un <strong>código</strong> que se envía a su correo.
+        El jurado entra a <a href="/jurado" target="_blank" rel="noopener" style="color:#0B6E8A;font-weight:800">hackathon-uneti-ia.pages.dev/jurado</a>, ingresa el código y evalúa los equipos.
+      </div>
       <p class="count" id="judgeCount">0 / 10 jurados</p>
       <div class="judges" id="judgesList"></div>
       <div class="form-card">
@@ -2212,7 +2217,10 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       judges.forEach((j) => {
         const el = document.createElement('div');
         el.className = 'judge-item';
-        el.innerHTML = `<div class="info"><strong>${esc(j.nombre)}</strong><span>${esc(j.organizacion || '')}${j.correo ? ' · ' + esc(j.correo) : ''}${j.telefono ? ' · 📞 ' + esc(j.telefono) : ''}</span></div><button class="del" data-id="${j.id}" aria-label="Eliminar jurado">×</button>`;
+        const codigo = j.codigo
+          ? `<code style="background:#EAF7FB;color:#0B6E8A;padding:2px 7px;border-radius:5px;font-weight:800;letter-spacing:.08em">${esc(j.codigo)}</code>`
+          : '<span style="color:#d64545;font-weight:700">Sin código</span>';
+        el.innerHTML = `<div class="info"><strong>${esc(j.nombre)}</strong><span>${esc(j.organizacion || '')}${j.correo ? ' · ' + esc(j.correo) : ''}${j.telefono ? ' · 📞 ' + esc(j.telefono) : ''}</span><span style="margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">Acceso: ${codigo} <button type="button" data-resend="${j.id}" style="padding:3px 9px;font-size:.7rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#0B6E8A">Reenviar</button></span></div><button class="del" data-id="${j.id}" aria-label="Eliminar jurado">×</button>`;
         list.appendChild(el);
       });
       const sel = document.getElementById('sJudge');
@@ -2228,6 +2236,19 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     if (e.target.classList.contains('del')) {
       await fetch('/api/admin/judges?id=' + e.target.dataset.id, { method: 'DELETE' });
       loadJudges();
+      return;
+    }
+    if (e.target.dataset.resend) {
+      e.target.disabled = true;
+      const res = await fetch('/api/admin/judges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'codigo', id: Number(e.target.dataset.resend) }) });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus('judgeStatus', 'Código: ' + data.codigo + (data.enviado ? ' · enviado por correo' : ' · sin correo o falló el envío'), true);
+        loadJudges();
+      } else {
+        setStatus('judgeStatus', data.error || 'Error.', false);
+      }
+      e.target.disabled = false;
     }
   });
 
@@ -2243,7 +2264,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     const data = await res.json();
     if (data.ok) {
       document.getElementById('judgeForm').reset();
-      setStatus('judgeStatus', 'Jurado agregado.', true);
+      setStatus('judgeStatus', 'Jurado agregado. Código: ' + data.codigo + (data.enviado ? ' · enviado por correo' : (data.sinCorreo ? ' · sin correo registrado' : ' · falló el envío')), true);
       loadJudges();
     } else {
       setStatus('judgeStatus', data.error || 'Error.', false);
