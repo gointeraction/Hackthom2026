@@ -331,6 +331,7 @@
           <button class="menu-btn" data-panel="insumos"><span class="ic">📦</span> Insumos</button>
           <button class="menu-btn" data-panel="acreditacion"><span class="ic">✅</span> Acreditación</button>
           <button class="menu-btn" data-panel="tickets"><span class="ic">🍽️</span> Tickets</button>
+          <button class="menu-btn" data-panel="responsables"><span class="ic">👷</span> Responsables</button>
           <button class="menu-btn" data-panel="acreditacion-personal"><span class="ic">🪪</span> Acred. personal</button>
           <button class="menu-btn" data-panel="asistencia"><span class="ic">📶</span> Asistencia remota</button>
           <button class="menu-btn" data-panel="entregas"><span class="ic">📦</span> Entregas</button>
@@ -1023,6 +1024,46 @@
         </form>
         <div id="logList" style="display:grid;gap:6px"></div>
       </div>
+    </section>
+
+    <!-- RESPONSABLES POR GRUPO -->
+    <section class="panel" id="panel-responsables">
+      <div class="sec-head">
+        <span class="kicker">Logística</span>
+        <h2>Responsables por grupo</h2>
+        <p>Asigna una persona responsable a cada grupo de logística con su nombre, correo y teléfono.</p>
+      </div>
+      <div class="form-card" style="margin-bottom:18px">
+        <h3>➕ Agregar responsable</h3>
+        <form id="grupoForm">
+          <div class="frow">
+            <div class="field">
+              <label>Grupo *</label>
+              <input type="text" id="grNombre" list="gruposSugeridos" placeholder="Ej. Acreditación" required>
+              <datalist id="gruposSugeridos">
+                <option value="Acreditación"></option>
+                <option value="Alimentación"></option>
+                <option value="Transporte"></option>
+                <option value="Sala y audio"></option>
+                <option value="Ponentes"></option>
+                <option value="Jurados"></option>
+                <option value="Mentores"></option>
+                <option value="Insumos y materiales"></option>
+                <option value="Logística general"></option>
+              </datalist>
+            </div>
+            <div class="field"><label>Responsable *</label><input type="text" id="grResponsable" required></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Correo</label><input type="email" id="grCorreo"></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="grTelefono" placeholder="0412-1234567"></div>
+          </div>
+          <div class="field"><label>Nota (opcional)</label><input type="text" id="grNota" placeholder="Ej. Encargado de la mesa de entrada"></div>
+          <button type="submit" class="btn">Guardar responsable</button>
+          <div class="form-status" id="grupoStatus"></div>
+        </form>
+      </div>
+      <div id="gruposList" style="display:grid;gap:10px"></div>
     </section>
 
     <!-- EVALUACIÓN -->
@@ -1922,7 +1963,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -3733,8 +3774,59 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     });
   })();
 
+  // ===== Responsables por grupo de logística =====
+  let gruposLogData = [];
+  async function loadGruposLogistica() {
+    try {
+      const res = await fetch('/api/admin/grupos-logistica');
+      const data = await res.json();
+      gruposLogData = data.grupos || [];
+      renderGruposLogistica();
+    } catch (e) {}
+  }
+
+  function renderGruposLogistica() {
+    const el = document.getElementById('gruposList');
+    if (!el) return;
+    if (!gruposLogData.length) { el.innerHTML = '<div class="empty">Aún no hay responsables asignados.</div>'; return; }
+    el.innerHTML = gruposLogData.map((g) => '<div class="group-block" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">' +
+      '<div><strong style="font-size:1rem">👷 ' + esc(g.grupo) + '</strong><br>' +
+      '<span class="k">Responsable: <strong>' + esc(g.responsable) + '</strong></span><br>' +
+      '<span class="k">' + (g.correo ? '📧 ' + esc(g.correo) : '') + (g.telefono ? ' · 📞 ' + esc(g.telefono) : '') + '</span>' +
+      (g.nota ? '<br><span class="k" style="font-style:italic">' + esc(g.nota) + '</span>' : '') +
+      '</div>' +
+      '<button type="button" class="del" data-del-grupo="' + g.id + '" aria-label="Eliminar">×</button>' +
+      '</div>').join('');
+  }
+
+  (function initGruposLogistica() {
+    const f = document.getElementById('grupoForm');
+    if (f) f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        grupo: document.getElementById('grNombre').value.trim(),
+        responsable: document.getElementById('grResponsable').value.trim(),
+        correo: document.getElementById('grCorreo').value.trim(),
+        telefono: document.getElementById('grTelefono').value.trim(),
+        nota: document.getElementById('grNota').value.trim(),
+      };
+      const res = await fetch('/api/admin/grupos-logistica', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.ok) { setStatus('grupoStatus', 'Responsable guardado.', true); f.reset(); loadGruposLogistica(); }
+      else setStatus('grupoStatus', data.error || 'Error.', false);
+    });
+    const l = document.getElementById('gruposList');
+    if (l) l.addEventListener('click', async (e) => {
+      const del = e.target.closest('[data-del-grupo]');
+      if (!del) return;
+      if (!confirm('¿Eliminar este responsable?')) return;
+      await fetch('/api/admin/grupos-logistica?id=' + del.dataset.delGrupo, { method: 'DELETE' });
+      loadGruposLogistica();
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadTickets(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
+    loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadTickets(); loadGruposLogistica(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
   }
 
   // ===== Login =====

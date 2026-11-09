@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS grupos_logistica (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  grupo TEXT NOT NULL,
+  responsable TEXT NOT NULL,
+  correo TEXT,
+  telefono TEXT,
+  nota TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
