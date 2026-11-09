@@ -338,6 +338,7 @@
           <button class="menu-btn" data-panel="insumos"><span class="ic">📦</span> Insumos</button>
           <button class="menu-btn" data-panel="acreditacion"><span class="ic">✅</span> Acreditación</button>
           <button class="menu-btn" data-panel="tickets"><span class="ic">🍽️</span> Tickets</button>
+          <button class="menu-btn" data-panel="estimado"><span class="ic">📊</span> Estimado</button>
           <button class="menu-btn" data-panel="acreditacion-personal"><span class="ic">🪪</span> Acred. personal</button>
           <button class="menu-btn" data-panel="asistencia"><span class="ic">📶</span> Asistencia remota</button>
           <button class="menu-btn" data-panel="entregas"><span class="ic">📦</span> Entregas</button>
@@ -1070,6 +1071,46 @@
         </form>
       </div>
       <div id="gruposList" style="display:grid;gap:10px"></div>
+    </section>
+
+    <!-- ESTIMADO DE PERSONAS -->
+    <section class="panel" id="panel-estimado">
+      <div class="sec-head">
+        <span class="kicker">Logística</span>
+        <h2>Estimado de personas</h2>
+        <p>Detalle de todas las personas involucradas en el evento. Puedes ajustar los valores estimados.</p>
+      </div>
+      <div id="estimadoResumen" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px"></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Grupo</th><th>Rol</th><th>Mín</th><th>Máx</th><th>Estimado</th><th>Nota</th></tr>
+          </thead>
+          <tbody id="estimadoBody"></tbody>
+        </table>
+      </div>
+      <div id="estimadoTickets" style="margin-top:16px"></div>
+      <div class="form-card" style="margin-top:18px">
+        <h3>➕ Agregar rol al estimado</h3>
+        <form id="estimadoForm">
+          <div class="frow">
+            <div class="field"><label>Grupo *</label>
+              <select id="esGrupo">
+                <option>Participantes</option>
+                <option>Personal</option>
+                <option>Invitados</option>
+              </select>
+            </div>
+            <div class="field"><label>Rol *</label><input type="text" id="esRol" required></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Cantidad estimada *</label><input type="number" id="esCentral" min="0" value="1" required></div>
+            <div class="field"><label>Nota</label><input type="text" id="esNota"></div>
+          </div>
+          <button type="submit" class="btn">Agregar</button>
+          <div class="form-status" id="estimadoStatus"></div>
+        </form>
+      </div>
     </section>
 
     <!-- EVALUACIÓN -->
@@ -1969,7 +2010,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -3831,8 +3872,78 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     });
   })();
 
+  // ===== Estimado de personas =====
+  let estimadoData = [];
+  async function loadEstimado() {
+    try {
+      const res = await fetch('/api/admin/estimado');
+      const data = await res.json();
+      estimadoData = data.estimado || [];
+      renderEstimado();
+    } catch (e) {}
+  }
+
+  function renderEstimado() {
+    const body = document.getElementById('estimadoBody');
+    if (!body) return;
+    if (!estimadoData.length) { body.innerHTML = '<tr><td colspan="6" class="empty">Sin datos.</td></tr>'; return; }
+    const grupos = ['Participantes', 'Personal', 'Invitados'];
+    let html = '';
+    grupos.forEach((g) => {
+      const items = estimadoData.filter((e) => e.grupo === g);
+      if (!items.length) return;
+      const sub = items.reduce((s, e) => s + (e.central || 0), 0);
+      html += '<tr style="background:#F0F4F9"><td colspan="4"><strong>' + esc(g) + '</strong></td><td><strong>' + sub + '</strong></td><td></td></tr>';
+      items.forEach((e) => {
+        html += '<tr><td></td><td>' + esc(e.rol) + '</td><td>' + (e.minimo || 0) + '</td><td>' + (e.maximo || 0) + '</td><td><input type="number" class="est-input" data-id="' + e.id + '" value="' + (e.central || 0) + '" min="0" style="width:70px;padding:4px 8px;border:1px solid var(--line);border-radius:6px"></td><td><span class="k">' + esc(e.nota || '') + '</span></td></tr>';
+      });
+    });
+    body.innerHTML = html;
+
+    const total = estimadoData.reduce((s, e) => s + (e.central || 0), 0);
+    const part = estimadoData.filter((e) => e.grupo === 'Participantes').reduce((s, e) => s + (e.central || 0), 0);
+    const pers = estimadoData.filter((e) => e.grupo === 'Personal').reduce((s, e) => s + (e.central || 0), 0);
+    const inv = estimadoData.filter((e) => e.grupo === 'Invitados').reduce((s, e) => s + (e.central || 0), 0);
+    const res = document.getElementById('estimadoResumen');
+    if (res) res.innerHTML = '<div class="dash-card"><span class="dash-num">' + part + '</span><span class="dash-label">Participantes</span></div>' +
+      '<div class="dash-card"><span class="dash-num">' + pers + '</span><span class="dash-label">Personal</span></div>' +
+      '<div class="dash-card"><span class="dash-num">' + inv + '</span><span class="dash-label">Invitados</span></div>' +
+      '<div class="dash-card"><span class="dash-num">' + total + '</span><span class="dash-label">Total</span></div>';
+    const tk = document.getElementById('estimadoTickets');
+    if (tk) tk.innerHTML = '<div class="group-block" style="padding:12px 16px"><strong>🍽️ Tickets de comida estimados:</strong> ' + total + ' personas × 4 comidas = <strong>' + (total * 4) + ' tickets</strong></div>';
+
+    body.querySelectorAll('.est-input').forEach((inp) => {
+      inp.addEventListener('change', async () => {
+        const id = inp.dataset.id;
+        const val = Math.max(0, Number(inp.value) || 0);
+        const item = estimadoData.find((e) => String(e.id) === String(id));
+        if (item) item.central = val;
+        renderEstimado();
+        fetch('/api/admin/estimado', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update', id, central: val }) }).catch(() => {});
+      });
+    });
+  }
+
+  (function initEstimado() {
+    const f = document.getElementById('estimadoForm');
+    if (f) f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        action: 'add',
+        grupo: document.getElementById('esGrupo').value,
+        rol: document.getElementById('esRol').value.trim(),
+        central: Number(document.getElementById('esCentral').value) || 0,
+        nota: document.getElementById('esNota').value.trim(),
+      };
+      const res = await fetch('/api/admin/estimado', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.ok) { setStatus('estimadoStatus', 'Rol agregado.', true); f.reset(); loadEstimado(); }
+      else setStatus('estimadoStatus', data.error || 'Error.', false);
+    });
+  })();
+
   function loadAll() {
-    loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadTickets(); loadGruposLogistica(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
+    loadTeams(); loadJudges(); loadMentores(); loadParticipantesEquipo(); loadTeamsForScore(); loadSponsors(); loadRegistrations(); loadLogistica(); loadInsumos(); loadAccreditation(); loadAcreditacionPersonal(); loadTickets(); loadEstimado(); loadGruposLogistica(); loadEvaluador(); loadResultados(); loadResumen(); loadPresupuesto(); loadAuditoria(); loadErrores(); loadUsuarios(); loadFotos(); loadCharlas(); loadComunicadosAdmin(); loadEntregas(); loadConsultas(); loadAsistencia(); loadRemotos(); loadPresenciales(); loadVerificacion(); loadEncuestas(); loadBackups(); loadApiKeys(); loadWebhooks();
   }
 
   // ===== Login =====
