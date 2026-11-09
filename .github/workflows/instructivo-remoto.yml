@@ -1,0 +1,22 @@
+name: Enviar instructivo a remotos
+
+on:
+  schedule:
+    # 11 de noviembre de 2026 · 23:00 UTC = 19:00 Venezuela (UTC-4)
+    - cron: '0 23 11 11 *'
+  workflow_dispatch:
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar instructivo del panel remoto
+        run: |
+          echo "Ejecutando envío del instructivo a participantes remotos..."
+          curl -sS -X POST "https://hackathon-uneti-ia.pages.dev/api/enviar-instructivo-remoto" \
+            -H "Content-Type: application/json" \
+            -H "X-Backup-Secret: ${{ secrets.BACKUP_SECRET }}" \
+            -d '{"dryRun":false}' \
+            -o respuesta.json -w "HTTP %{http_code}\n"
+          echo "Respuesta:"
+          cat respuesta.json

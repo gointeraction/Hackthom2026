@@ -1470,6 +1470,10 @@
         <h2>Participantes remotos</h2>
         <p>Estatus, aporte (repositorio), consultas y asistencia de los remotos.</p>
       </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <button type="button" class="btn" id="btnInstructivoRemoto">📨 Enviar instructivo a remotos</button>
+        <span class="k" style="align-self:center">Programado: miércoles 11/11/2026 · 7:00 pm</span>
+      </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead>
@@ -3068,6 +3072,29 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       a.download = 'presenciales-verificacion.csv';
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    });
+  })();
+
+  (function initInstructivoRemoto() {
+    const btn = document.getElementById('btnInstructivoRemoto');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const prev = await fetch('/api/admin/enviar-instructivo-remoto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dryRun: true }) });
+      const pdata = await prev.json().catch(() => ({}));
+      const total = pdata.total || 0;
+      if (!confirm('Se enviará el instructivo del panel remoto a ' + total + ' participante(s) remoto(s). ¿Continuar?')) return;
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Enviando…';
+      try {
+        const res = await fetch('/api/admin/enviar-instructivo-remoto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dryRun: false }) });
+        const data = await res.json();
+        alert(data.ok ? ('Enviados: ' + data.sent + ' · Fallidos: ' + data.failed) : (data.error || 'Error al enviar.'));
+      } catch (e) {
+        alert('Error de red al enviar.');
+      }
+      btn.disabled = false;
+      btn.textContent = original;
     });
   })();
 
