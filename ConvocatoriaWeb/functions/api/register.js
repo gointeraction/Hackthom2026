@@ -94,7 +94,7 @@ export async function onRequestPost({ request, env }) {
   const codigo = crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
 
   try {
-    const mod = tipo === 'individual' ? 'remoto' : null;
+    const mod = 'remoto';
     for (let i = 0; i < limpios.length; i++) {
       const m = limpios[i];
       const token = crypto.randomUUID();
@@ -111,7 +111,7 @@ export async function onRequestPost({ request, env }) {
       await Promise.all(limpios.map((m) => sendEmail(env, {
         to: m.correo,
         subject,
-        text: `Hola ${m.nombre},\n\nTu inscripción al Hackathon UNETI IA 2026 ha sido registrada correctamente.\n\nCódigo de ${tipo === 'individual' ? 'participante' : 'grupo'}: ${codigo}\n\nModalidad: ${tipo === 'individual' ? 'remota' : 'grupal (sujeta a preselección por propuesta)'}.\n\nPronto recibirás el instructivo, la agenda y los criterios de selección.\n\n— Comité Organizador\nHackathon UNETI IA 2026`,
+        text: `Hola ${m.nombre},\n\nTu inscripción al Hackathon UNETI IA 2026 ha sido registrada correctamente.\n\nCódigo de ${tipo === 'individual' ? 'participante' : 'grupo'}: ${codigo}\n\nModalidad: remota.\n\nPronto recibirás el instructivo, la agenda y los criterios de selección.\n\n— Comité Organizador\nHackathon UNETI IA 2026`,
       })));
     } catch (e) {
       // no bloqueamos la inscripción por un fallo en el correo
