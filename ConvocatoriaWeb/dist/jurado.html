@@ -24,12 +24,12 @@
   .msg.err { color: #d64545; }
   .msg.ok { color: #1a9e5c; }
   .k { color: var(--soft); font-size: .82rem; }
-  .team { border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; background: #FBFCFE; }
+  .team { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: #FBFCFE; }
   .team h4 { font-size: .98rem; margin-bottom: 4px; color: var(--navy); }
   table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .86rem; }
   th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
   th { color: var(--soft); font-size: .76rem; text-transform: uppercase; letter-spacing: .4px; }
-  td select { padding: 8px; width: 80px; }
+  td select { padding: 8px; width: 90px; }
   .peso { color: #0B6E8A; font-weight: 700; white-space: nowrap; }
   .prom { font-weight: 800; color: #0B1F3A; }
   .repo { color: var(--cyan); font-weight: 600; text-decoration: none; word-break: break-all; font-size: .84rem; }
@@ -37,7 +37,12 @@
   .entrega:last-child { border-bottom: 0; }
   .fila-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
   .cerrado { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: #DFF5E8; color: #1a9e5c; }
-  @media (max-width: 600px) { td select { width: 100%; } th:nth-child(3), td:nth-child(3) { display: none; } }
+  .pendiente { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: #FFF3D6; color: #9a6a00; }
+  .progreso { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .barra { flex: 1; min-width: 120px; height: 8px; background: #E4EAF1; border-radius: 999px; overflow: hidden; }
+  .barra > div { height: 100%; background: linear-gradient(90deg,#00B4D8,#0B6E8A); border-radius: 999px; transition: width .3s ease; }
+  #teamSelect { font-weight: 800; font-size: 1.02rem; padding: 14px; border: 2px solid rgba(0,180,216,.4); }
+  @media (max-width: 600px) { td select { width: 100%; } th:nth-child(2), td:nth-child(2) { display: none; } }
 </style>
 </head>
 <body>
@@ -70,17 +75,26 @@
         </div>
       </div>
 
+      <!-- SELECTOR DE EQUIPO -->
+      <div class="card">
+        <h3>👥 Selecciona el equipo a evaluar</h3>
+        <p class="k" style="margin-bottom:12px">Elige el grupo del listado y puntúa los 6 criterios de la rúbrica.</p>
+        <label for="teamSelect">Equipo / Grupo</label>
+        <select id="teamSelect"></select>
+        <div class="progreso" id="progreso"></div>
+      </div>
+
+      <!-- DETALLE DEL EQUIPO -->
+      <div id="teamDetail"></div>
+
+      <!-- RÚBRICA -->
       <div class="card">
         <h3>📋 Rúbrica de evaluación</h3>
-        <p class="k" style="margin-bottom:10px">Puntúa cada criterio de 1 a 5. El puntaje final es la suma ponderada (máximo 5.00).</p>
+        <p class="k" style="margin-bottom:10px">Cada criterio se puntúa de 1 a 5. El puntaje final es la suma ponderada (máximo 5.00).</p>
         <div id="criteriosInfo"></div>
       </div>
 
-      <div class="card">
-        <h3>👥 Equipos a evaluar</h3>
-        <div id="teamsList"></div>
-      </div>
-
+      <!-- ENTREGAS -->
       <div class="card">
         <h3>📦 Entregas registradas</h3>
         <div id="entregasList"></div>
@@ -91,6 +105,7 @@
 <script>
   let criterios = [];
   let panelData = null;
+  let scoresMap = {};
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function setMsg(id, text, ok) {
@@ -107,12 +122,22 @@
     if (!data.ok) { mostrarLogin(); return; }
     panelData = data;
     criterios = data.criterios || [];
+    scoresMap = {};
+    (data.scores || []).forEach((s) => {
+      scoresMap[s.team_id] = scoresMap[s.team_id] || {};
+      scoresMap[s.team_id][s.criterio] = s.puntaje;
+    });
     mostrarPanel(data);
   }
 
   function mostrarLogin() {
     document.getElementById('loginForm').style.display = '';
     document.getElementById('panel').style.display = 'none';
+  }
+
+  function estaEvaluado(teamId) {
+    const prev = scoresMap[teamId] || {};
+    return criterios.every((c) => prev[c.id]);
   }
 
   function mostrarPanel(data) {
@@ -126,43 +151,28 @@
       '<div class="entrega"><strong>' + esc(c.nombre) + '</strong> <span class="peso">' + Math.round(c.peso * 100) + ' %</span></div>'
     ).join('');
 
-    // Equipos
-    const scoresMap = {};
-    (data.scores || []).forEach((s) => {
-      scoresMap[s.team_id] = scoresMap[s.team_id] || {};
-      scoresMap[s.team_id][s.criterio] = s.puntaje;
-    });
-
-    const cont = document.getElementById('teamsList');
-    if (!data.teams.length) {
-      cont.innerHTML = '<p class="k">Aún no hay equipos registrados.</p>';
+    // Selector de equipos
+    const sel = document.getElementById('teamSelect');
+    const teams = data.teams || [];
+    if (!teams.length) {
+      sel.innerHTML = '<option value="">Sin equipos registrados</option>';
+      sel.disabled = true;
+      document.getElementById('teamDetail').innerHTML = '<div class="card"><p class="k">Aún no hay equipos registrados para evaluar.</p></div>';
     } else {
-      cont.innerHTML = data.teams.map((t) => {
-        const prev = scoresMap[t.id] || {};
-        const filas = criterios.map((c) => {
-          const val = prev[c.id] || '';
-          let opts = '<option value="">—</option>';
-          for (let n = 1; n <= 5; n++) opts += '<option value="' + n + '"' + (Number(val) === n ? ' selected' : '') + '>' + n + '</option>';
-          return '<tr><td>' + esc(c.nombre) + '</td><td class="peso">' + Math.round(c.peso * 100) + ' %</td><td><select data-team="' + t.id + '" data-crit="' + esc(c.id) + '">' + opts + '</select></td></tr>';
-        }).join('');
-        const completo = criterios.every((c) => prev[c.id]);
-        return '<div class="team">' +
-          '<h4>Equipo #' + t.id + ' · ' + esc(t.nombre || 'Sin nombre') + (completo ? ' <span class="cerrado">evaluado</span>' : '') + '</h4>' +
-          '<p class="k">Eje: ' + esc(t.eje || '—') + ' · Modalidad: ' + esc(t.modalidad || '—') + (t.integrantes ? ' · Integrantes: ' + esc(t.integrantes) : '') + '</p>' +
-          '<table><thead><tr><th>Criterio</th><th>Peso</th><th>Puntaje</th></tr></thead><tbody>' + filas + '</tbody></table>' +
-          '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
-          '<button type="button" class="btn btn-cyan" data-save="' + t.id + '">Guardar evaluación</button>' +
-          '<span class="prom" id="prom-' + t.id + '"></span>' +
-          '</div>' +
-          '<div class="msg" id="tmsg-' + t.id + '"></div>' +
-        '</div>';
+      sel.disabled = false;
+      sel.innerHTML = teams.map((t) => {
+        const ev = estaEvaluado(t.id);
+        return '<option value="' + t.id + '">Equipo #' + t.id + ' · ' + esc(t.nombre || 'Sin nombre') + (ev ? '  ✅' : '  ⏳') + '</option>';
       }).join('');
-      actualizarPromedios();
+      sel.value = String(teams[0].id);
+      renderEquipo(Number(sel.value));
     }
+
+    renderProgreso();
 
     // Entregas
     const ec = document.getElementById('entregasList');
-    if (!data.entregas.length) {
+    if (!(data.entregas || []).length) {
       ec.innerHTML = '<p class="k">Aún no hay entregas registradas.</p>';
     } else {
       ec.innerHTML = data.entregas.map((e) =>
@@ -180,42 +190,86 @@
     }
   }
 
+  function renderProgreso() {
+    const teams = (panelData && panelData.teams) || [];
+    if (!teams.length) { document.getElementById('progreso').innerHTML = ''; return; }
+    const total = teams.length;
+    const hechos = teams.filter((t) => estaEvaluado(t.id)).length;
+    const pct = Math.round((hechos / total) * 100);
+    document.getElementById('progreso').innerHTML =
+      '<span class="k"><strong>' + hechos + '</strong> de <strong>' + total + '</strong> equipos evaluados</span>' +
+      '<div class="barra"><div style="width:' + pct + '%"></div></div>' +
+      '<span class="k">' + pct + ' %</span>';
+  }
+
+  function renderEquipo(teamId) {
+    const teams = (panelData && panelData.teams) || [];
+    const t = teams.find((x) => Number(x.id) === Number(teamId));
+    const cont = document.getElementById('teamDetail');
+    if (!t) { cont.innerHTML = ''; return; }
+    const prev = scoresMap[t.id] || {};
+    const ev = estaEvaluado(t.id);
+
+    const filas = criterios.map((c) => {
+      const val = prev[c.id] || '';
+      let opts = '<option value="">—</option>';
+      for (let n = 1; n <= 5; n++) opts += '<option value="' + n + '"' + (Number(val) === n ? ' selected' : '') + '>' + n + '</option>';
+      return '<tr><td>' + esc(c.nombre) + '</td><td class="peso">' + Math.round(c.peso * 100) + ' %</td><td><select data-team="' + t.id + '" data-crit="' + esc(c.id) + '">' + opts + '</select></td></tr>';
+    }).join('');
+
+    cont.innerHTML =
+      '<div class="card"><div class="team">' +
+      '<div class="fila-top"><h4>Equipo #' + t.id + ' · ' + esc(t.nombre || 'Sin nombre') + '</h4>' +
+      (ev ? '<span class="cerrado">✅ Evaluado</span>' : '<span class="pendiente">⏳ Pendiente</span>') + '</div>' +
+      '<p class="k">Eje: ' + esc(t.eje || '—') + ' · Modalidad: ' + esc(t.modalidad || '—') + (t.integrantes ? ' · Integrantes: ' + esc(t.integrantes) : '') + '</p>' +
+      '<table><thead><tr><th>Criterio</th><th>Peso</th><th>Puntaje (1-5)</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+      '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+      '<button type="button" class="btn btn-cyan" id="btnGuardar">Guardar evaluación del equipo #' + t.id + '</button>' +
+      '<span class="prom" id="prom"></span>' +
+      '</div>' +
+      '<div class="msg" id="tmsg"></div>' +
+      '</div></div>';
+
+    actualizarPromedio();
+  }
+
   function leerScores(teamId) {
     const sels = document.querySelectorAll('select[data-team="' + teamId + '"]');
     const out = [];
-    sels.forEach((s) => {
-      if (s.value) out.push({ criterio: s.dataset.crit, puntaje: Number(s.value) });
-    });
+    sels.forEach((s) => { if (s.value) out.push({ criterio: s.dataset.crit, puntaje: Number(s.value) }); });
     return out;
   }
 
-  function actualizarPromedios() {
-    document.querySelectorAll('[data-save]').forEach((btn) => {
-      const teamId = btn.dataset.save;
-      const scores = leerScores(teamId);
-      const el = document.getElementById('prom-' + teamId);
-      if (!el) return;
-      if (scores.length !== criterios.length) { el.textContent = ''; return; }
-      let total = 0;
-      criterios.forEach((c) => {
-        const s = scores.find((x) => x.criterio === c.id);
-        if (s) total += s.puntaje * c.peso;
-      });
-      el.textContent = 'Puntaje: ' + total.toFixed(2) + ' / 5.00';
+  function actualizarPromedio() {
+    const el = document.getElementById('prom');
+    const btn = document.getElementById('btnGuardar');
+    if (!el || !btn) return;
+    const teamId = Number(document.getElementById('teamSelect').value);
+    const scores = leerScores(teamId);
+    if (scores.length !== criterios.length) { el.textContent = ''; return; }
+    let total = 0;
+    criterios.forEach((c) => {
+      const s = scores.find((x) => x.criterio === c.id);
+      if (s) total += s.puntaje * c.peso;
     });
+    el.textContent = 'Puntaje: ' + total.toFixed(2) + ' / 5.00';
   }
 
+  document.getElementById('teamSelect').addEventListener('change', (e) => {
+    renderEquipo(Number(e.target.value));
+  });
+
   document.addEventListener('change', (e) => {
-    if (e.target.matches('select[data-team]')) actualizarPromedios();
+    if (e.target.matches('select[data-team]')) actualizarPromedio();
   });
 
   document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-save]');
-    if (!btn) return;
-    const teamId = Number(btn.dataset.save);
+    if (!e.target.closest('#btnGuardar')) return;
+    const btn = document.getElementById('btnGuardar');
+    const teamId = Number(document.getElementById('teamSelect').value);
     const scores = leerScores(teamId);
     if (scores.length !== criterios.length) {
-      setMsg('tmsg-' + teamId, 'Completa los ' + criterios.length + ' criterios antes de guardar.', false);
+      setMsg('tmsg', 'Completa los ' + criterios.length + ' criterios antes de guardar.', false);
       return;
     }
     btn.disabled = true;
@@ -228,13 +282,27 @@
         body: JSON.stringify({ team_id: teamId, scores }),
       });
       const data = await res.json();
-      if (data.ok) setMsg('tmsg-' + teamId, 'Evaluación guardada correctamente.', true);
-      else setMsg('tmsg-' + teamId, data.error || 'Error al guardar.', false);
+      if (data.ok) {
+        scoresMap[teamId] = {};
+        scores.forEach((s) => { scoresMap[teamId][s.criterio] = s.puntaje; });
+        setMsg('tmsg', 'Evaluación guardada correctamente.', true);
+        const teams = panelData.teams || [];
+        const sel = document.getElementById('teamSelect');
+        const cur = sel.value;
+        sel.innerHTML = teams.map((t) => {
+          const ev2 = estaEvaluado(t.id);
+          return '<option value="' + t.id + '">Equipo #' + t.id + ' · ' + esc(t.nombre || 'Sin nombre') + (ev2 ? '  ✅' : '  ⏳') + '</option>';
+        }).join('');
+        sel.value = cur;
+        renderEquipo(teamId);
+        renderProgreso();
+      } else {
+        setMsg('tmsg', data.error || 'Error al guardar.', false);
+      }
     } catch (err) {
-      setMsg('tmsg-' + teamId, 'Error de red.', false);
+      setMsg('tmsg', 'Error de red.', false);
     }
-    btn.disabled = false;
-    btn.textContent = orig;
+    if (document.getElementById('btnGuardar')) document.getElementById('btnGuardar').disabled = false;
   });
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -252,11 +320,8 @@
         body: JSON.stringify({ codigo }),
       });
       const data = await res.json();
-      if (data.ok) {
-        await cargarPanel();
-      } else {
-        setMsg('msg', data.error || 'Código inválido.', false);
-      }
+      if (data.ok) await cargarPanel();
+      else setMsg('msg', data.error || 'Código inválido.', false);
     } catch (err) {
       setMsg('msg', 'Error de red.', false);
     }
