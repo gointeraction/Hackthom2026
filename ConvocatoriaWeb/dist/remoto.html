@@ -47,6 +47,36 @@
   .msg-bubble.typing .dot:nth-child(2) { animation-delay: .15s; }
   .msg-bubble.typing .dot:nth-child(3) { animation-delay: .3s; }
   @keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .35; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+  /* ===== Llamado a la acción de acceso ===== */
+  .cta-hero { text-align: center; padding: 22px 16px 4px; }
+  .cta-eyebrow { display: inline-block; background: rgba(0,180,216,.12); color: #0B6E8A; font-weight: 700; font-size: .76rem; letter-spacing: .7px; text-transform: uppercase; padding: 7px 15px; border-radius: 999px; margin-bottom: 14px; }
+  .cta-hero h2 { font-size: clamp(1.7rem, 4.6vw, 2.4rem); color: var(--navy); line-height: 1.12; margin-bottom: 10px; font-weight: 800; letter-spacing: -.5px; }
+  .cta-hero h2 span { color: var(--cyan); }
+  .cta-hero p { color: var(--soft); font-size: .98rem; max-width: 560px; margin: 0 auto 6px; line-height: 1.55; }
+  .cta-card { border: 2px solid rgba(0,180,216,.38); box-shadow: 0 14px 44px rgba(11,31,58,.14); border-radius: 20px; padding: 26px; position: relative; overflow: hidden; }
+  .cta-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 5px; background: linear-gradient(90deg, #00B4D8, #0B1F3A); }
+  .cta-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+  .cta-step { background: #F5F8FB; border: 1px solid var(--line); border-radius: 12px; padding: 12px 10px; font-size: .79rem; color: var(--soft); text-align: center; line-height: 1.35; }
+  .cta-step b { display: block; color: var(--ink); font-size: .82rem; margin-top: 2px; }
+  .cta-step span { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff; font-weight: 800; font-size: .8rem; align-items: center; justify-content: center; margin-bottom: 6px; }
+  .cta-input { font-size: 1.35rem !important; font-weight: 800; letter-spacing: .18em; text-align: center; text-transform: uppercase; padding: 16px !important; border: 2px solid var(--line) !important; border-radius: 14px !important; }
+  .cta-input:focus { outline: none; border-color: var(--cyan) !important; box-shadow: 0 0 0 4px rgba(0,180,216,.16); }
+  .cta-input::placeholder { letter-spacing: .12em; font-weight: 600; color: #B7C4D2; }
+  .cta-btn { width: 100%; margin-top: 16px; padding: 18px 20px !important; font-size: 1.08rem !important; border-radius: 14px !important; background: linear-gradient(135deg, #00B4D8, #0B6E8A) !important; box-shadow: 0 8px 24px rgba(0,180,216,.35); transition: transform .15s ease, box-shadow .15s ease; animation: cta-pulse 2.6s infinite; }
+  .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,180,216,.48); }
+  .cta-btn:active { transform: translateY(0); }
+  @keyframes cta-pulse { 0%, 100% { box-shadow: 0 8px 24px rgba(0,180,216,.35); } 50% { box-shadow: 0 8px 36px rgba(0,180,216,.62); } }
+  .cta-help { margin-top: 16px; font-size: .82rem; color: var(--soft); text-align: center; line-height: 1.55; }
+  .cta-help a { color: var(--cyan); font-weight: 700; text-decoration: none; }
+  .cta-help a:hover { text-decoration: underline; }
+  @media (max-width: 600px) {
+    .cta-steps { grid-template-columns: 1fr; }
+    .cta-step { display: flex; gap: 10px; align-items: center; text-align: left; padding: 10px 12px; }
+    .cta-step span { margin-bottom: 0; flex-shrink: 0; }
+    .cta-step b { margin-top: 0; }
+    .cta-card { padding: 20px 16px; }
+  }
 </style>
 </head>
 <body>
@@ -56,13 +86,24 @@
   </header>
 
   <div class="wrap">
-    <form class="card" id="codigoForm" novalidate>
-      <h2>Ingresa tu código</h2>
+    <div class="cta-hero">
+      <span class="cta-eyebrow">🔐 Acceso a tu panel remoto</span>
+      <h2>Tu proyecto empieza <span>aquí</span></h2>
+      <p>Ingresa tu código de participante o grupo para reportar tu proyecto, subir avances, consultar a los mentores y hablar con Unitron.</p>
+    </div>
+
+    <form class="card cta-card" id="codigoForm" novalidate>
+      <div class="cta-steps">
+        <div class="cta-step"><span>1</span><div>Escribe tu código<b>8 caracteres</b></div></div>
+        <div class="cta-step"><span>2</span><div>Verifica que no eres un robot<b>1 clic</b></div></div>
+        <div class="cta-step"><span>3</span><div>Entra y reporta tu proyecto<b>Listo</b></div></div>
+      </div>
       <label for="codigo">Código de participante o grupo</label>
-      <input type="text" id="codigo" placeholder="Ej: AB12CD34" autocomplete="off">
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="panel" style="margin:10px 0"></div>
-      <div style="margin-top:14px"><button type="submit" class="btn" id="btnVer">Ver mi panel</button></div>
+      <input type="text" id="codigo" placeholder="AB12CD34" autocomplete="off" autofocus class="cta-input">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFvMBBNAnUeH11ix" data-action="panel" style="margin:14px 0 0"></div>
+      <button type="submit" class="btn cta-btn" id="btnVer">🚀 Ver mi panel remoto</button>
       <div class="msg" id="msg"></div>
+      <p class="cta-help">¿No encuentras tu código? Está en el correo de confirmación de tu inscripción. También puedes pedirlo por <a href="https://t.me/+3u7vzOq8LBFmYzUx" target="_blank" rel="noopener">Telegram</a>.</p>
     </form>
 
     <!-- FORMULARIOS (se autocompletan con tu código) -->
