@@ -407,7 +407,7 @@ npx wrangler pages deploy ./dist --branch=staging
 
 ### 11.4 Correo (SendGrid)
 
-> ⚠️ El remitente `hackathon@uneti.edu.ve` debe verificarse en SendGrid (SPF/DKIM) para que los correos salgan.
+> ✅ El remitente `hackathon@uneti.edu.ve` está **verificado** y los correos se envían correctamente (probado 2026-11-08 con `jibohorquez@gmail.com`, SendGrid `202 Accepted`).
 
 ---
 
