@@ -339,6 +339,7 @@
           <button class="menu-btn" data-panel="acreditacion"><span class="ic">✅</span> Acreditación</button>
           <button class="menu-btn" data-panel="tickets"><span class="ic">🍽️</span> Tickets</button>
           <button class="menu-btn" data-panel="estimado"><span class="ic">📊</span> Estimado</button>
+          <button class="menu-btn" data-panel="plan-maestro"><span class="ic">📋</span> Plan Maestro</button>
           <button class="menu-btn" data-panel="acreditacion-personal"><span class="ic">🪪</span> Acred. personal</button>
           <button class="menu-btn" data-panel="asistencia"><span class="ic">📶</span> Asistencia remota</button>
           <button class="menu-btn" data-panel="entregas"><span class="ic">📦</span> Entregas</button>
@@ -1116,6 +1117,20 @@
           <div class="form-status" id="estimadoStatus"></div>
         </form>
       </div>
+    </section>
+
+    <!-- PLAN MAESTRO -->
+    <section class="panel" id="panel-plan-maestro">
+      <div class="sec-head">
+        <span class="kicker">Operación</span>
+        <h2>Plan Maestro del evento</h2>
+        <p>Cronograma de choque (T-4), riesgos, checklist y recomendaciones para llegar a tiempo.</p>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <button type="button" class="btn" id="btnPrintPlanCompleto">🖨️ Imprimir Plan Maestro completo</button>
+        <span class="k" style="align-self:center">Incluye cronograma de choque, riesgos, checklist y recomendaciones</span>
+      </div>
+      <div id="planMaestroContent"></div>
     </section>
 
     <!-- EVALUACIÓN -->
@@ -2015,7 +2030,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -4049,6 +4064,149 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       w.document.close();
       w.focus();
       setTimeout(() => w.print(), 400);
+    });
+  })();
+
+  // ===== Plan Maestro del evento =====
+  const PLAN = {
+    choque: [
+      { dia: 'Lunes 9 de noviembre (T-4)', foco: 'Cierre y decisión', tareas: [
+        ['09:00', 'Cerrar inscripciones (o definir fecha de cierre)', 'Coordinación'],
+        ['10:00', 'Validar datos de los 64 registrados (correos, códigos, años)', 'Registro'],
+        ['11:00', 'Confirmar jurados (llamadas + carga en el sistema)', 'Coordinación'],
+        ['12:00', 'Confirmar mentores (llamadas + carga)', 'Coordinación'],
+        ['14:00', 'Confirmar ponentes (6 charlas) y material', 'Protocolo'],
+        ['15:00', 'Pedido formal de catering (7 comidas)', 'Catering'],
+        ['16:00', 'Confirmar transporte (unidades, horarios, capacidad)', 'Transporte'],
+        ['17:00', 'Asignar responsables por grupo en el sistema', 'Coordinación'],
+      ]},
+      { dia: 'Martes 10 de noviembre (T-3)', foco: 'Comunicación', tareas: [
+        ['09:00', 'Enviar instructivo presencial a los 62', 'Comunicación'],
+        ['10:00', 'Enviar instructivo remoto a los 2 (con Unitron)', 'Comunicación'],
+        ['11:00', 'Publicar comunicado de modalidad remota en la web', 'Comunicación'],
+        ['12:00', 'Pedir confirmación de asistencia (responder al correo)', 'Comunicación'],
+        ['14:00', 'Confirmar invitados (autoridades, aliados, prensa)', 'Protocolo'],
+        ['15:00', 'Cargar personal de logística en el sistema', 'Logística'],
+        ['16:00', 'Cargar invitados en el sistema', 'Protocolo'],
+        ['17:00', 'Verificar plataforma (admin, remoto, certificado)', 'Tecnología'],
+      ]},
+      { dia: 'Miércoles 11 de noviembre (T-2)', foco: 'Producción', tareas: [
+        ['09:00', 'Generar tickets de comida (~560)', 'Logística'],
+        ['10:00', 'Imprimir gafetes con código de participante', 'Registro'],
+        ['11:00', 'Imprimir hojas de acreditación (participantes + personal)', 'Registro'],
+        ['12:00', 'Imprimir Plan Maestro y distribuirlo a los 11 grupos', 'Coordinación'],
+        ['14:00', 'Verificar inventario de insumos (cables, regletas, señalización)', 'Insumos'],
+        ['15:00', 'Confirmar menú y dietas especiales (alergias reportadas)', 'Catering'],
+        ['16:00', 'Prueba de audio/video en sede (si hay acceso)', 'Tecnología'],
+        ['17:00', 'Confirmar zona de pernocta (colchonetas, cobijas, carga)', 'Salas'],
+      ]},
+      { dia: 'Jueves 12 de noviembre (T-1)', foco: 'Cierre y briefing', tareas: [
+        ['09:00', 'Carga de sede (equipos, insumos, señalización)', 'Logística'],
+        ['11:00', 'Briefing general con los 11 grupos', 'Coordinación'],
+        ['13:00', 'Briefing de acreditación (mesa de entrada)', 'Registro'],
+        ['14:00', 'Briefing de jurados (rúbrica, tiempos, criterios)', 'Jurados'],
+        ['15:00', 'Briefing de mentores (equipos asignados)', 'Mentores'],
+        ['16:00', 'Prueba final de plataforma en sede', 'Tecnología'],
+        ['17:00', 'Checklist final completo', 'Coordinación'],
+        ['18:00', 'CIERRE DE PREPARACIÓN — lo que falte es riesgo', 'Coordinación'],
+      ]},
+    ],
+    riesgos: [
+      ['No-shows (participantes)', 'Media', 'Alto', 'Confirmación por correo + lista de espera'],
+      ['Falla de internet', 'Media', 'Alto', 'Hotspot 4G + lista impresa de respaldo'],
+      ['Falla de transporte', 'Baja', 'Alto', 'Unidad de respaldo + contacto del proveedor'],
+      ['Proveedor de comida falla', 'Baja', 'Alto', 'Proveedor alterno + menú de contingencia'],
+      ['Jurados no asisten', 'Media', 'Alto', 'Suplentes + jurado interno'],
+      ['Ponente no llega', 'Baja', 'Medio', 'Charla de respaldo / grabación'],
+      ['Corte de energía', 'Baja', 'Alto', 'UPS + planta del IVIC'],
+      ['Emergencia médica', 'Baja', 'Alto', 'Botiquín + protocolo + contacto'],
+      ['Plataforma caída', 'Baja', 'Medio', 'Listas impresas + backup de DB'],
+      ['Clima adverso', 'Media', 'Medio', 'Espacio techado + plan de traslado'],
+    ],
+    checklist: [
+      ['Personas', ['62 participantes confirmados', '5–7 jurados cargados', '6–8 mentores cargados', '15–20 logística cargados', '6–8 responsables asignados', '15–25 invitados cargados', '6 ponentes confirmados']],
+      ['Producción', ['560 tickets generados e impresos', '62 gafetes impresos', 'Hojas de acreditación impresas', 'Plan Maestro impreso (11 copias)', 'Señalización lista']],
+      ['Logística', ['Catering confirmado (7 comidas)', 'Dietas especiales cubiertas', 'Transporte confirmado (2 rutas)', 'Zona de pernocta equipada', 'Insumos (cables, regletas, botiquín)']],
+      ['Tecnología', ['Red principal + respaldo', 'Video beam + audio', 'Servidores + UPS', 'Backup de la base de datos', 'Plataforma probada']],
+      ['Comunicación', ['Instructivos enviados', 'Comunicado publicado', 'Confirmaciones recibidas', 'Canal de Telegram activo']],
+    ],
+    recomendaciones: [
+      ['🔴 Crítico (antes del martes 10)', ['Cargar jurados y mentores — sin ellos no hay evaluación ni acompañamiento.', 'Enviar los instructivos — los participantes deben saber a qué hora llegar (7:00 am en Mincyt).', 'Confirmar catering y transporte — son los dos proveedores que no se improvisan.']],
+      ['🟠 Importante (antes del miércoles 11)', ['Generar e imprimir los tickets (~560).', 'Imprimir gafetes y hojas de acreditación.', 'Asignar responsables por grupo en el sistema.', 'Cargar invitados para el control de acceso.']],
+      ['🟡 Necesario (antes del jueves 12)', ['Briefing con los 11 grupos.', 'Prueba de plataforma en sede.', 'Backup de la base de datos.', 'Checklist final completo.']],
+      ['💡 Buenas prácticas', ['Plan B en todo: internet, transporte, comida, energía.', 'Listas impresas de respaldo para acreditación.', 'Un solo canal de comunicación: Telegram.', 'Reservar 10% de contingencia en comida y transporte.', 'Designar un responsable de incidencias con poder de decisión.', 'Documentar todo en el sistema para tener trazabilidad.']],
+    ],
+  };
+
+  function planTabla(filas, cols) {
+    return '<table class="data-table"><thead><tr>' + cols.map((c) => '<th>' + c + '</th>').join('') + '</tr></thead><tbody>' +
+      filas.map((f) => '<tr>' + f.map((c) => '<td>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+  }
+
+  function renderPlanMaestro() {
+    const el = document.getElementById('planMaestroContent');
+    if (!el) return;
+    let html = '<h3 style="margin:0 0 10px">🔥 Cronograma de choque (T-4 a T-1)</h3>';
+    PLAN.choque.forEach((d) => {
+      html += '<div class="group-block" style="margin-bottom:14px;padding:12px 16px"><div class="sp-top" style="margin-bottom:8px"><strong>' + d.dia + '</strong> <span class="tipo-tag">' + d.foco + '</span></div>' +
+        '<div class="table-wrap">' + planTabla(d.tareas, ['Hora', 'Tarea', 'Responsable']) + '</div></div>';
+    });
+    html += '<h3 style="margin:18px 0 10px">⚠️ Riesgos y contingencias</h3><div class="table-wrap">' +
+      planTabla(PLAN.riesgos, ['Riesgo', 'Probabilidad', 'Impacto', 'Mitigación']) + '</div>';
+    html += '<h3 style="margin:18px 0 10px">✅ Checklist final</h3>';
+    PLAN.checklist.forEach(([cat, items]) => {
+      html += '<div class="group-block" style="margin-bottom:10px;padding:10px 14px"><strong>' + cat + '</strong><ul style="margin:8px 0 0;padding-left:18px">' +
+        items.map((i) => '<li style="font-size:.88rem">' + i + '</li>').join('') + '</ul></div>';
+    });
+    html += '<h3 style="margin:18px 0 10px">💡 Recomendaciones</h3>';
+    PLAN.recomendaciones.forEach(([t, items]) => {
+      html += '<div class="group-block" style="margin-bottom:10px;padding:10px 14px"><strong>' + t + '</strong><ul style="margin:8px 0 0;padding-left:18px">' +
+        items.map((i) => '<li style="font-size:.88rem">' + i + '</li>').join('') + '</ul></div>';
+    });
+    el.innerHTML = html;
+  }
+
+  (function initPlanMaestroCompleto() {
+    renderPlanMaestro();
+    const btn = document.getElementById('btnPrintPlanCompleto');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      let choqueHtml = '';
+      PLAN.choque.forEach((d) => {
+        choqueHtml += '<h2>' + d.dia + ' — ' + d.foco + '</h2><table><thead><tr><th style="width:60px">Hora</th><th>Tarea</th><th style="width:130px">Responsable</th></tr></thead><tbody>' +
+          d.tareas.map((t) => '<tr><td class="hora">' + t[0] + '</td><td>' + t[1] + '</td><td class="resp">' + t[2] + '</td></tr>').join('') + '</tbody></table>';
+      });
+      const riesgosHtml = '<h2>Riesgos y contingencias</h2><table><thead><tr><th>Riesgo</th><th style="width:60px">Prob.</th><th style="width:55px">Impacto</th><th>Mitigación</th></tr></thead><tbody>' +
+        PLAN.riesgos.map((r) => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>').join('') + '</tbody></table>';
+      let checkHtml = '<h2>Checklist final</h2>';
+      PLAN.checklist.forEach(([cat, items]) => {
+        checkHtml += '<h3>' + cat + '</h3><table><tbody>' + items.map((i) => '<tr><td style="width:18px">☐</td><td>' + i + '</td></tr>').join('') + '</tbody></table>';
+      });
+      let recHtml = '<h2>Recomendaciones</h2>';
+      PLAN.recomendaciones.forEach(([t, items]) => {
+        recHtml += '<h3>' + t + '</h3><ul>' + items.map((i) => '<li>' + i + '</li>').join('') + '</ul>';
+      });
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite las ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Plan Maestro completo — Hackathon UNETI IA 2026</title><style>' +
+        '*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:16px;font-size:10.5px;line-height:1.35}' +
+        '.head{border-bottom:3px solid #06A77D;padding-bottom:10px;margin-bottom:14px}h1{font-size:19px;margin:0 0 3px}h1 span{color:#06A77D}.meta{font-size:10px;color:#555;margin:0}' +
+        'h2{font-size:12px;margin:16px 0 6px;padding:5px 8px;background:#06A77D;color:#fff;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}' +
+        'h3{font-size:11px;margin:10px 0 4px;color:#0a5c46}' +
+        'table{width:100%;border-collapse:collapse;margin-bottom:6px}th,td{border:1px solid #c9d1db;padding:4px 6px;text-align:left;vertical-align:top}' +
+        'th{background:#eef2f6;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px}' +
+        'td.hora{font-weight:700;white-space:nowrap;color:#06A77D}td.resp{font-size:9px;font-weight:600;color:#0a5c46}' +
+        'ul{margin:0 0 8px;padding-left:16px}li{margin-bottom:3px}' +
+        '@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}h2{page-break-after:avoid}table{page-break-inside:auto}tr{page-break-inside:avoid}}' +
+        '</style></head><body>' +
+        '<div class="head"><h1>Hackathon <span>UNETI IA 2026</span> — Plan Maestro completo</h1>' +
+        '<p class="meta"><strong>Evento:</strong> viernes 13 y sábado 14 de noviembre de 2026 · <strong>Sede:</strong> Parque Tecnológico + Más Ciencia (IVIC)</p>' +
+        '<p class="meta">Documento generado: ' + new Date().toLocaleString('es-VE') + ' · Quedan 4 días (T-4)</p></div>' +
+        '<h2 style="background:#c0392b">Alerta de tiempo: 4 días restantes</h2>' +
+        '<p>Todo lo que no esté cerrado al jueves 12 a las 18:00 debe considerarse en riesgo.</p>' +
+        choqueHtml + riesgosHtml + checkHtml + recHtml +
+        '</body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 400);
     });
   })();
 
