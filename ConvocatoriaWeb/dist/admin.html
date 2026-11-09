@@ -1940,7 +1940,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
         const el = document.createElement('div');
         el.className = 'sponsor-item';
         el.innerHTML = `
-          <div class="sp-top"><strong>${esc(r.nombre)} ${esc(r.apellido)}</strong><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="tipo-tag">${esc(r.anio || '')}</span><span class="tipo-tag" style="background:rgba(230,57,102,.12);color:var(--rose)">Remoto</span><span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">Código: ${esc(r.codigo || '—')}</span></span></div>
+          <div class="sp-top"><strong>${esc(r.nombre)} ${esc(r.apellido)}</strong><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="tipo-tag">${esc(r.anio || '')}</span>${r.modalidad === 'presencial' ? '<span class="tipo-tag" style="background:rgba(6,167,125,.12);color:var(--green)">Presencial</span>' : '<span class="tipo-tag" style="background:rgba(230,57,102,.12);color:var(--rose)">Remoto</span>'}${r.notificado ? '<span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">📧 Notificado</span>' : ''}<span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">Código: ${esc(r.codigo || '—')}</span></span></div>
           <div class="sp-rows">
             <div><b>Correo:</b> ${esc(r.correo)}</div>
             <div><b>Nacimiento:</b> ${esc(r.nacimiento || '—')}</div>
