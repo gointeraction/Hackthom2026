@@ -2012,7 +2012,52 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   function showPanel(name) {
     document.querySelectorAll('.menu-btn').forEach((b) => b.classList.toggle('active', b.dataset.panel === name));
     document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === 'panel-' + name));
+    const loader = PANEL_LOADERS[name];
+    if (loader) { try { loader(); } catch (e) {} }
   }
+
+  // Cada panel recarga sus datos al abrirse (el dashboard siempre).
+  const PANEL_LOADERS = {
+    dashboard: () => loadResumen(),
+    equipos: () => { loadTeams(); loadParticipantesEquipo(); loadTeamsForScore(); },
+    participantes: () => { loadTeams(); loadParticipantesEquipo(); },
+    jurados: () => loadJudges(),
+    mentores: () => { loadMentores(); loadMentorTeams(); },
+    remotos: () => loadRemotos(),
+    presenciales: () => loadPresenciales(),
+    verificacion: () => loadVerificacion(),
+    evaluaciones: () => { loadJudges(); loadTeamsForScore(); },
+    resultados: () => loadResultados(),
+    evaluacion: () => loadEvaluador(),
+    acreditacion: () => loadAccreditation(),
+    'acreditacion-personal': () => loadAcreditacionPersonal(),
+    tickets: () => loadTickets(),
+    estimado: () => loadEstimado(),
+    responsables: () => loadGruposLogistica(),
+    logistica: () => loadLogistica(),
+    insumos: () => loadInsumos(),
+    patrocinadores: () => loadSponsors(),
+    entregas: () => loadEntregas(),
+    consultas: () => loadConsultas(),
+    asistencia: () => loadAsistencia(),
+    encuestas: () => loadEncuestas(),
+    comunicados: () => loadComunicadosAdmin(),
+    charlas: () => loadCharlas(),
+    galeria: () => loadFotos(),
+    presupuesto: () => loadPresupuesto(),
+    auditoria: () => loadAuditoria(),
+    errores: () => loadErrores(),
+    usuarios: () => loadUsuarios(),
+    backups: () => loadBackups(),
+    'api-keys': () => loadApiKeys(),
+    webhooks: () => loadWebhooks(),
+  };
+
+  // Auto-refresco del dashboard cada 30 segundos mientras esté visible.
+  setInterval(() => {
+    const dash = document.getElementById('panel-dashboard');
+    if (dash && dash.classList.contains('active')) loadResumen();
+  }, 30000);
   document.querySelectorAll('.menu-btn').forEach((btn) => {
     btn.addEventListener('click', () => showPanel(btn.dataset.panel));
   });
@@ -2227,6 +2272,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const cur = sel.value;
       sel.innerHTML = '<option value="">Selecciona…</option>' + judges.map((j) => `<option value="${j.id}">${esc(j.nombre)}</option>`).join('');
       sel.value = cur;
+      loadResumen();
     } catch (e) {
       document.getElementById('judgeCount').textContent = 'Error al cargar jurados.';
     }
@@ -3616,11 +3662,12 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const badge = document.getElementById('cntMentores');
       if (cnt) cnt.textContent = items.length + ' mentores';
       if (badge) badge.textContent = items.length;
-      if (items.length === 0) { list.innerHTML = '<div class="empty">Aún no hay mentores.</div>'; return; }
+      if (items.length === 0) { list.innerHTML = '<div class="empty">Aún no hay mentores.</div>'; loadResumen(); return; }
       list.innerHTML = items.map((m) => '<div class="judge-item"><div class="info"><strong>' + esc(m.nombre) + '</strong><span>' + esc(m.organizacion || '') + (m.eje ? ' · ' + esc(m.eje) : '') + (m.equipo_nombre ? ' · 👥 ' + esc(m.equipo_nombre) : '') + (m.correo ? ' · ' + esc(m.correo) : '') + (m.telefono ? ' · 📞 ' + esc(m.telefono) : '') + '</span>' + (m.correo ? '<span style="margin-top:5px"><button type="button" data-mentor-resend="' + m.id + '" style="padding:3px 9px;font-size:.7rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#0B6E8A">Reenviar correo</button></span>' : '<span style="margin-top:5px;color:#d64545;font-weight:700;font-size:.72rem">Sin correo</span>') + '</div><button class="del" data-mentor-id="' + m.id + '" aria-label="Eliminar mentor">×</button></div>').join('');
     } catch (e) {
       list.innerHTML = '<div class="empty">Error al cargar mentores.</div>';
     }
+    loadResumen();
   }
 
   (function initMentores() {
