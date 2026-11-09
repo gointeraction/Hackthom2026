@@ -827,6 +827,10 @@
         <h2>Itinerario interno por grupo logístico</h2>
         <p>Viernes 13 y sábado 14 de noviembre · desarrollo continuo con pernocta en Parque Tecnológico + Más Ciencia (IVIC) · traslado desde la sede Mincyt.</p>
       </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <button type="button" class="btn" id="btnPlanMaestro">🖨️ Imprimir Plan Maestro</button>
+        <span class="k" style="align-self:center">Documento completo: minuto a minuto + grupo responsable</span>
+      </div>
       <div class="itinerario">
         <h3>Agenda general — Día 1 (viernes 13)</h3>
         <div class="table-card">
@@ -3939,6 +3943,111 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const data = await res.json();
       if (data.ok) { setStatus('estimadoStatus', 'Rol agregado.', true); f.reset(); loadEstimado(); }
       else setStatus('estimadoStatus', data.error || 'Error.', false);
+    });
+  })();
+
+  // ===== Plan Maestro imprimible =====
+  (function initPlanMaestro() {
+    const btn = document.getElementById('btnPlanMaestro');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const dia1 = [
+        ['6:30 – 7:00', 'Concentración y chequeo de lista en sede Mincyt (Av. Universidad)', 'Transporte y Traslado'],
+        ['7:00 – 8:00', 'Salida Mincyt → Parque Tecnológico + Más Ciencia (IVIC)', 'Transporte y Traslado'],
+        ['7:30 – 8:30', 'Montaje: red, video beam, servidores, estaciones y señalización', 'Tecnología · Salas y Espacios'],
+        ['8:00 – 9:00', 'Acreditación de participantes (gafetes y verificación de códigos)', 'Registro y Acreditación'],
+        ['9:00 – 9:30', 'Acto de apertura (autoridades)', 'Protocolo y Charlas'],
+        ['9:30 – 10:00', 'Charla: DeepSeek Harness', 'Protocolo y Charlas'],
+        ['10:00 – 10:30', 'Charla: Antigravity', 'Protocolo y Charlas'],
+        ['10:30 – 11:00', 'Refrigerio', 'Catering y Alimentación'],
+        ['11:00 – 11:35', 'Charla: Cloudflare', 'Protocolo y Charlas'],
+        ['11:35 – 12:10', 'Charla: Ciberseguridad', 'Protocolo y Charlas'],
+        ['12:10 – 12:30', 'Q&A y transición', 'Protocolo y Charlas'],
+        ['12:30 – 13:30', 'Almuerzo', 'Catering y Alimentación'],
+        ['13:30 – 14:00', 'Conformación de equipos y asignación de estaciones', 'Coordinación General · Jurados'],
+        ['14:00 – 18:00', 'Desarrollo + mentoría presencial', 'Tecnología · Voluntariado'],
+        ['18:00 – 19:00', 'Cena', 'Catering y Alimentación'],
+        ['19:00 – 7:00', 'Desarrollo continuo — pernocta en IVIC', 'Coordinación · Seguridad · Voluntariado'],
+      ];
+      const dia2 = [
+        ['7:00 – 8:30', 'Desayuno', 'Catering y Alimentación'],
+        ['8:30 – 9:00', 'Preparación de estaciones', 'Tecnología · Salas y Espacios'],
+        ['9:00 – 9:30', 'Bienvenida y repaso', 'Coordinación General'],
+        ['9:30 – 10:05', 'Charla: Creación y gestión de Agentes IA', 'Protocolo y Charlas'],
+        ['10:05 – 10:40', 'Charla: Ciberseguridad', 'Protocolo y Charlas'],
+        ['10:40 – 11:00', 'Q&A y repaso', 'Protocolo y Charlas'],
+        ['11:00 – 11:30', 'Refrigerio', 'Catering y Alimentación'],
+        ['11:30 – 13:00', 'Desarrollo final', 'Tecnología · Voluntariado'],
+        ['13:00 – 14:00', 'Almuerzo', 'Catering y Alimentación'],
+        ['14:00 – 15:30', 'Preparación de pitch', 'Coordinación General · Jurados'],
+        ['15:30 – 17:30', 'Presentaciones ante el jurado', 'Jurados y Evaluación'],
+        ['17:30 – 18:00', 'Premiación y clausura', 'Protocolo y Charlas'],
+        ['18:00', 'Fin del evento · traslado IVIC → Mincyt', 'Transporte y Traslado'],
+      ];
+      const grupos = [
+        ['1. Coordinación General', 'Supervisión del plan maestro, permisos MPPCT, reuniones de seguimiento, apertura de sede (7:30), resolución de incidencias, cierre y evaluación post-evento.'],
+        ['2. Registro y Acreditación', 'Acreditación 8:00–9:00 (verificar inscritos y gafetes). Validar preseleccionados presenciales y remotos. Control de asistencia ambos días.'],
+        ['3. Tecnología y Servidores', 'Montaje de red, video beam, servidores y estaciones (7:30–8:30). Soporte técnico continuo. Prueba de audio/video para pitches (día 2 · 15:00). Desmontaje (día 2 · 18:30).'],
+        ['4. Salas y Espacios', 'Mesas, sillas, señalización y distribución. Acondicionar zona de pernocta (colchonetas, puntos de carga, hidratación). Control de aforo. Desmontaje y limpieza.'],
+        ['5. Catering y Alimentación', 'Día 1: refrigerio 10:30, almuerzo 12:30, cena 18:00. Pernocta: refrigerio nocturno y café. Día 2: desayuno 7:00, refrigerio 11:00, almuerzo 13:00. Dietas especiales (alergias).'],
+        ['6. Comunicaciones y Difusión', 'Convocatoria y redes sociales. Cobertura (fotos/videos) y redes en vivo. Envío de instructivo a remotos. Comunicado de resultados (día 2 · 18:00).'],
+        ['7. Protocolo y Charlas', 'Acto de apertura (9:00). Coordinación de charlistas y agenda técnica. Acto de premiación (día 2 · 18:00).'],
+        ['8. Jurados y Evaluación', 'Entrega de rúbrica y materiales (día 1). Evaluación de pitches (día 2 · 15:30–17:30). Deliberación y resultados (17:30).'],
+        ['9. Voluntariado y Soporte', 'Apoyo general y orientación de participantes. Turno nocturno de acompañamiento en la pernocta. Tareas asignadas por Coordinación General.'],
+        ['10. Seguridad y Accesos', 'Coordinación de accesos con MPPCT (7:30). Control de ingreso y listas. Vigilancia durante la pernocta. Salida ordenada (día 2 · 18:00).'],
+        ['11. Transporte y Traslado', 'Día 1 · 7:00 am: salida desde sede Mincyt al IVIC. Día 2 · 18:00: regreso IVIC → Mincyt. Coordinar unidades, horarios, listas de pasajeros y puntos de encuentro.'],
+      ];
+
+      const tabla = (filas) => '<table><thead><tr><th style="width:88px">Hora</th><th>Actividad</th><th style="width:170px">Grupo responsable</th></tr></thead><tbody>' +
+        filas.map((f) => '<tr><td class="hora">' + esc(f[0]) + '</td><td>' + esc(f[1]) + '</td><td class="resp">' + esc(f[2]) + '</td></tr>').join('') + '</tbody></table>';
+
+      let responsablesHtml = '';
+      if (typeof gruposLogData !== 'undefined' && gruposLogData.length) {
+        responsablesHtml = '<h2>Responsables por grupo</h2><table><thead><tr><th>Grupo</th><th>Responsable</th><th>Correo</th><th>Teléfono</th></tr></thead><tbody>' +
+          gruposLogData.map((g) => '<tr><td>' + esc(g.grupo) + '</td><td>' + esc(g.responsable) + '</td><td>' + esc(g.correo || '—') + '</td><td>' + esc(g.telefono || '—') + '</td></tr>').join('') + '</tbody></table>';
+      }
+
+      let estimadoHtml = '';
+      if (typeof estimadoData !== 'undefined' && estimadoData.length) {
+        const total = estimadoData.reduce((s, e) => s + (e.central || 0), 0);
+        estimadoHtml = '<h2>Estimado de personas</h2><table><thead><tr><th>Grupo</th><th>Rol</th><th>Cantidad</th></tr></thead><tbody>' +
+          estimadoData.map((e) => '<tr><td>' + esc(e.grupo) + '</td><td>' + esc(e.rol) + '</td><td>' + (e.central || 0) + '</td></tr>').join('') +
+          '<tr class="total"><td colspan="2">TOTAL</td><td>' + total + '</td></tr></tbody></table>' +
+          '<p class="nota">Proyección de tickets de comida: ' + total + ' personas × 4 comidas = <strong>' + (total * 4) + ' tickets</strong></p>';
+      }
+
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite las ventanas emergentes para imprimir.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Plan Maestro — Hackathon UNETI IA 2026</title><style>' +
+        '*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:16px;font-size:10.5px;line-height:1.35}' +
+        '.head{border-bottom:3px solid #06A77D;padding-bottom:10px;margin-bottom:14px}' +
+        'h1{font-size:19px;margin:0 0 3px}h1 span{color:#06A77D}' +
+        '.meta{font-size:10px;color:#555;margin:0}' +
+        'h2{font-size:12px;margin:18px 0 6px;padding:5px 8px;background:#06A77D;color:#fff;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}' +
+        'table{width:100%;border-collapse:collapse;margin-bottom:6px}' +
+        'th,td{border:1px solid #c9d1db;padding:4px 6px;text-align:left;vertical-align:top}' +
+        'th{background:#eef2f6;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px}' +
+        'td.hora{font-weight:700;white-space:nowrap;color:#06A77D;font-size:10px}' +
+        'td.resp{font-size:9px;font-weight:600;color:#0a5c46}' +
+        'tr.total td{background:#eef2f6;font-weight:700}' +
+        '.nota{font-size:9.5px;color:#555;margin:4px 0 0}' +
+        '.firma{display:flex;justify-content:space-between;margin-top:26px;gap:20px}' +
+        '.firma div{flex:1;border-top:1px solid #333;padding-top:4px;font-size:9px;text-align:center}' +
+        '@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}.firma{page-break-inside:avoid}}' +
+        '</style></head><body>' +
+        '<div class="head"><h1>Hackathon <span>UNETI IA 2026</span> — Plan Maestro del Evento</h1>' +
+        '<p class="meta"><strong>Fechas:</strong> viernes 13 y sábado 14 de noviembre de 2026 · <strong>Sede:</strong> Parque Tecnológico + Más Ciencia (IVIC) · <strong>Traslado:</strong> sede Mincyt (Av. Universidad)</p>' +
+        '<p class="meta">Documento generado: ' + new Date().toLocaleString('es-VE') + '</p></div>' +
+        '<h2>Día 1 — Viernes 13 de noviembre</h2>' + tabla(dia1) +
+        '<h2>Día 2 — Sábado 14 de noviembre</h2>' + tabla(dia2) +
+        '<h2>Plan operativo por grupo logístico</h2><table><thead><tr><th style="width:200px">Grupo</th><th>Responsabilidades</th></tr></thead><tbody>' +
+        grupos.map((g) => '<tr><td><strong>' + esc(g[0]) + '</strong></td><td>' + esc(g[1]) + '</td></tr>').join('') + '</tbody></table>' +
+        responsablesHtml + estimadoHtml +
+        '<div class="firma"><div>Coordinación General</div><div>Logística</div><div>Protocolo</div></div>' +
+        '</body></html>');
+      w.document.close();
+      w.focus();
+      setTimeout(() => w.print(), 400);
     });
   })();
 
