@@ -314,6 +314,7 @@
         <div class="menu-group-items" data-group="personal">
           <button class="menu-btn" data-panel="jurados"><span class="ic">⚖️</span> Jurados <span class="cnt" id="cntJurados">0</span></button>
           <button class="menu-btn" data-panel="mentores"><span class="ic">🤝</span> Mentores <span class="cnt" id="cntMentores">0</span></button>
+          <button class="menu-btn" data-panel="invitados"><span class="ic">🎟️</span> Invitados <span class="cnt" id="cntInvitados">0</span></button>
           <button class="menu-btn" data-panel="responsables"><span class="ic">👷</span> Responsables</button>
         </div>
       </div>
@@ -1044,6 +1045,50 @@
           <div class="form-status" id="logStatus"></div>
         </form>
         <div id="logList" style="display:grid;gap:6px"></div>
+      </div>
+    </section>
+
+    <!-- INVITADOS -->
+    <section class="panel" id="panel-invitados">
+      <div class="sec-head">
+        <span class="kicker">Personal del evento</span>
+        <h2>🎟️ Invitados</h2>
+        <p>Registro de invitados especiales con sus datos de contacto y organización.</p>
+      </div>
+      <p class="count" id="inv2Count">0 invitados</p>
+
+      <div class="form-card">
+        <h3 id="inv2FormTitle">➕ Agregar invitado</h3>
+        <form id="inv2Form" novalidate>
+          <input type="hidden" id="inv2Id">
+          <div class="frow">
+            <div class="field"><label>Nombre *</label><input type="text" id="inv2Nombre" required></div>
+            <div class="field"><label>Apellido</label><input type="text" id="inv2Apellido"></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Teléfono</label><input type="tel" id="inv2Telefono" placeholder="0414-1234567"></div>
+            <div class="field"><label>Correo</label><input type="email" id="inv2Correo" placeholder="correo@ejemplo.com"></div>
+          </div>
+          <div class="field"><label>Organización</label><input type="text" id="inv2Organizacion" placeholder="Institución o empresa"></div>
+          <div class="save-row">
+            <button type="submit" class="btn" id="inv2Submit">Guardar invitado</button>
+            <button type="button" class="btn" id="inv2Cancelar" style="display:none;background:#6B7C8F">Cancelar</button>
+            <div class="form-status" id="inv2Status"></div>
+          </div>
+        </form>
+      </div>
+
+      <div style="margin:18px 0 10px">
+        <input type="text" id="inv2Search" placeholder="🔍 Buscar por nombre, correo u organización..." style="max-width:380px;padding:10px 12px;border:1px solid var(--line);border-radius:8px">
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Nombre y apellido</th><th>Teléfono</th><th>Correo</th><th>Organización</th><th>Acreditado</th><th style="width:120px">Acciones</th></tr>
+          </thead>
+          <tbody id="inv2Tbody"></tbody>
+        </table>
       </div>
     </section>
 
@@ -2057,6 +2102,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     participantes: () => { loadTeams(); loadParticipantesEquipo(); },
     jurados: () => loadJudges(),
     mentores: () => { loadMentores(); loadMentorTeams(); },
+    invitados: () => loadInvitados2(),
     remotos: () => loadRemotos(),
     presenciales: () => loadPresenciales(),
     verificacion: () => loadVerificacion(),
@@ -2122,7 +2168,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','invitados','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -3865,6 +3911,132 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       loadMentores();
     });
     loadMentorTeams();
+  })();
+
+  // ===== Invitados (sección dedicada) =====
+  let invitados2Data = [];
+
+  function resetInvitados2Form() {
+    const form = document.getElementById('inv2Form');
+    if (form) form.reset();
+    const idEl = document.getElementById('inv2Id');
+    if (idEl) idEl.value = '';
+    const t = document.getElementById('inv2FormTitle');
+    if (t) t.textContent = '➕ Agregar invitado';
+    const s = document.getElementById('inv2Submit');
+    if (s) s.textContent = 'Guardar invitado';
+    const c = document.getElementById('inv2Cancelar');
+    if (c) c.style.display = 'none';
+  }
+
+  function renderInvitados2() {
+    const tbody = document.getElementById('inv2Tbody');
+    if (!tbody) return;
+    const q = ((document.getElementById('inv2Search') || {}).value || '').trim().toLowerCase();
+    const lista = q
+      ? invitados2Data.filter((i) => (((i.nombre || '') + ' ' + (i.apellido || '') + ' ' + (i.correo || '') + ' ' + (i.organizacion || '') + ' ' + (i.telefono || '')).toLowerCase().indexOf(q) !== -1))
+      : invitados2Data;
+
+    if (!lista.length) {
+      tbody.innerHTML = '<tr><td colspan="6">' + (q ? 'Sin resultados.' : 'Aún no hay invitados registrados.') + '</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = lista.map((i) => {
+      const nombre = ((i.nombre || '') + ' ' + (i.apellido || '')).trim();
+      const acred = i.acreditado
+        ? '<span style="background:#DFF5E8;color:#1a9e5c;padding:2px 9px;border-radius:999px;font-weight:700;font-size:.72rem">✅ Sí</span>'
+        : '<span style="background:#FFF3D6;color:#9a6a00;padding:2px 9px;border-radius:999px;font-weight:700;font-size:.72rem">⏳ No</span>';
+      return '<tr>' +
+        '<td><strong>' + esc(nombre || '—') + '</strong></td>' +
+        '<td>' + esc(i.telefono || '—') + '</td>' +
+        '<td style="word-break:break-all">' + esc(i.correo || '—') + '</td>' +
+        '<td>' + esc(i.organizacion || '—') + '</td>' +
+        '<td>' + acred + '</td>' +
+        '<td style="white-space:nowrap">' +
+          '<button type="button" data-inv2-edit="' + i.id + '" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#0B6E8A;margin-right:4px">Editar</button>' +
+          '<button type="button" data-inv2-del="' + i.id + '" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#D64545">×</button>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  async function loadInvitados2() {
+    const tbody = document.getElementById('inv2Tbody');
+    if (!tbody) return;
+    try {
+      const res = await fetch('/api/admin/invitados');
+      const data = await res.json();
+      invitados2Data = data.invitados || [];
+      const cnt = document.getElementById('inv2Count');
+      if (cnt) cnt.textContent = invitados2Data.length + ' invitado(s)';
+      const badge = document.getElementById('cntInvitados');
+      if (badge) badge.textContent = invitados2Data.length;
+      renderInvitados2();
+      if (typeof loadResumen === 'function') loadResumen();
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="6">Error al cargar invitados.</td></tr>';
+    }
+  }
+
+  (function initInvitados2() {
+    const form = document.getElementById('inv2Form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('inv2Id').value;
+      const payload = {
+        nombre: document.getElementById('inv2Nombre').value.trim(),
+        apellido: document.getElementById('inv2Apellido').value.trim(),
+        telefono: document.getElementById('inv2Telefono').value.trim(),
+        correo: document.getElementById('inv2Correo').value.trim(),
+        organizacion: document.getElementById('inv2Organizacion').value.trim(),
+      };
+      if (!payload.nombre) { setStatus('inv2Status', 'El nombre es obligatorio.', false); return; }
+      if (id) { payload.action = 'update'; payload.id = Number(id); }
+
+      const res = await fetch('/api/admin/invitados', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus('inv2Status', id ? 'Invitado actualizado.' : 'Invitado agregado.', true);
+        resetInvitados2Form();
+        loadInvitados2();
+      } else {
+        setStatus('inv2Status', data.error || 'Error.', false);
+      }
+    });
+
+    const cancel = document.getElementById('inv2Cancelar');
+    if (cancel) cancel.addEventListener('click', resetInvitados2Form);
+
+    const tbody = document.getElementById('inv2Tbody');
+    if (tbody) tbody.addEventListener('click', async (e) => {
+      const editId = e.target.dataset.inv2Edit;
+      if (editId) {
+        const i = invitados2Data.find((x) => Number(x.id) === Number(editId));
+        if (!i) return;
+        document.getElementById('inv2Id').value = i.id;
+        document.getElementById('inv2Nombre').value = i.nombre || '';
+        document.getElementById('inv2Apellido').value = i.apellido || '';
+        document.getElementById('inv2Telefono').value = i.telefono || '';
+        document.getElementById('inv2Correo').value = i.correo || '';
+        document.getElementById('inv2Organizacion').value = i.organizacion || '';
+        document.getElementById('inv2FormTitle').textContent = '✏️ Editar invitado';
+        document.getElementById('inv2Submit').textContent = 'Guardar cambios';
+        document.getElementById('inv2Cancelar').style.display = '';
+        return;
+      }
+      const delId = e.target.dataset.inv2Del;
+      if (delId) {
+        if (!confirm('¿Eliminar este invitado?')) return;
+        await fetch('/api/admin/invitados?id=' + delId, { method: 'DELETE' });
+        loadInvitados2();
+      }
+    });
+
+    const search = document.getElementById('inv2Search');
+    if (search) search.addEventListener('input', renderInvitados2);
   })();
 
   // ===== Verificación presencial =====
