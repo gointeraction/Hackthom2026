@@ -368,6 +368,30 @@
   @keyframes remote-pulse { 0%, 100% { box-shadow: 0 10px 28px rgba(0,180,216,.45); } 50% { box-shadow: 0 10px 40px rgba(0,180,216,.78); } }
   @media (max-width: 720px) { .remote-cta-card { padding: 22px; gap: 16px; } .remote-cta-btn { width: 100%; justify-content: center; } }
 
+  /* ===== Contador de inscritos en vivo ===== */
+  .contador { padding: 34px 0 6px; background: var(--bg); }
+  .contador-card { position: relative; overflow: hidden; border-radius: 24px; padding: 30px 28px 24px; text-align: center; color: #fff; background: linear-gradient(135deg, #0B1F3A 0%, #0d3a5c 45%, #0a5c6e 100%); box-shadow: 0 20px 60px rgba(11,31,58,.28); }
+  .contador-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(720px 250px at 50% -10%, rgba(0,180,216,.42), transparent 66%); pointer-events: none; }
+  .contador-card::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 42px 42px; pointer-events: none; }
+  .contador-kicker { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; background: rgba(0,180,216,.18); color: #7FE3F5; font-weight: 800; font-size: .74rem; letter-spacing: 1px; text-transform: uppercase; padding: 7px 15px; border-radius: 999px; }
+  .contador-kicker .dot-live { width: 8px; height: 8px; border-radius: 50%; background: #34D399; box-shadow: 0 0 0 0 rgba(52,211,153,.7); animation: live-pulse 1.6s infinite; }
+  @keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.7); } 70% { box-shadow: 0 0 0 10px rgba(52,211,153,0); } 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } }
+  .contador-main { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 18px; margin: 16px 0 6px; flex-wrap: wrap; }
+  .contador-num { font-size: clamp(3.4rem, 11vw, 6rem); font-weight: 900; line-height: .95; letter-spacing: -3px; background: linear-gradient(180deg, #FFFFFF 30%, #7FE3F5 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 40px rgba(0,180,216,.55)); font-variant-numeric: tabular-nums; }
+  .contador-label { text-align: left; font-size: clamp(.95rem, 2.2vw, 1.15rem); font-weight: 700; color: rgba(255,255,255,.92); line-height: 1.25; }
+  .contador-split { position: relative; z-index: 1; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+  .contador-item { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); border-radius: 16px; padding: 14px 26px; min-width: 118px; }
+  .contador-item .ic { font-size: 1.25rem; }
+  .contador-item b { font-size: 1.55rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+  .contador-item .cnt-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: rgba(255,255,255,.68); font-weight: 700; }
+  .contador-note { position: relative; z-index: 1; margin-top: 18px; font-size: .76rem; color: rgba(255,255,255,.52); }
+  @media (max-width: 560px) {
+    .contador-card { padding: 24px 18px 20px; border-radius: 18px; }
+    .contador-main { flex-direction: column; gap: 4px; }
+    .contador-label { text-align: center; }
+    .contador-item { padding: 10px 16px; min-width: 96px; }
+  }
+
   /* ===== Tarjeta CTA en Zona de participantes ===== */
   .zona-cta { position: relative; max-width: 780px; margin: 0 auto 26px; padding: 28px; border-radius: 18px; background: linear-gradient(135deg, rgba(0,180,216,.09), rgba(11,31,58,.04)); border: 2px solid rgba(0,180,216,.35); text-align: center; }
   .zona-cta .zc-icon { font-size: 2.2rem; margin-bottom: 6px; }
@@ -847,6 +871,25 @@ section { padding: 84px 0; }
         <div class="cd-unit"><span class="cd-num" id="cdHoras">0</span><span class="cd-label">Horas</span></div>
         <div class="cd-unit"><span class="cd-num" id="cdMin">0</span><span class="cd-label">Min</span></div>
         <div class="cd-unit"><span class="cd-num" id="cdSeg">0</span><span class="cd-label">Seg</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTADOR DE INSCRITOS EN VIVO -->
+  <section class="contador" id="contador">
+    <div class="wrap">
+      <div class="contador-card">
+        <span class="contador-kicker"><span class="dot-live"></span> Inscripciones en vivo</span>
+        <div class="contador-main">
+          <span class="contador-num" id="contTotal">0</span>
+          <span class="contador-label">participantes<br>registrados</span>
+        </div>
+        <div class="contador-split">
+          <div class="contador-item"><span class="ic">🏛️</span><b id="contPres">0</b><span class="cnt-label">Presenciales</span></div>
+          <div class="contador-item"><span class="ic">💻</span><b id="contRem">0</b><span class="cnt-label">Remotos</span></div>
+          <div class="contador-item"><span class="ic">👥</span><b id="contGrupos">0</b><span class="cnt-label">Equipos</span></div>
+        </div>
+        <p class="contador-note">Actualizado en tiempo real · Inscripciones abiertas hasta el miércoles 11/11 · 4:00 pm</p>
       </div>
     </div>
   </section>
@@ -2319,6 +2362,50 @@ section { padding: 84px 0; }
       }
     });
   })();
+</script>
+<script>
+/* Contador de inscritos en vivo */
+(function contadorInscritos() {
+  var elT = document.getElementById('contTotal');
+  if (!elT) return;
+  var elP = document.getElementById('contPres');
+  var elR = document.getElementById('contRem');
+  var elG = document.getElementById('contGrupos');
+
+  function animar(el, hasta, duracion) {
+    if (!el) return;
+    var desde = Number(el.getAttribute('data-val') || 0);
+    if (desde === hasta) { el.textContent = hasta; el.setAttribute('data-val', hasta); return; }
+    var t0 = null;
+    function paso(t) {
+      if (t0 === null) t0 = t;
+      var p = Math.min((t - t0) / duracion, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var val = Math.round(desde + (hasta - desde) * eased);
+      el.textContent = val;
+      if (p < 1) requestAnimationFrame(paso);
+      else { el.textContent = hasta; el.setAttribute('data-val', hasta); }
+    }
+    requestAnimationFrame(paso);
+  }
+
+  function cargar() {
+    fetch('/api/inscritos', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        animar(elT, d.total || 0, 900);
+        animar(elP, d.presenciales || 0, 700);
+        animar(elR, d.remotos || 0, 700);
+        animar(elG, d.grupos || 0, 700);
+      })
+      .catch(function () {});
+  }
+
+  cargar();
+  setInterval(cargar, 30000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) cargar(); });
+})();
 </script>
 <script>
 if ('serviceWorker' in navigator) {
