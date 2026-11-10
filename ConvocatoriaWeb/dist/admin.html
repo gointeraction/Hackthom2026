@@ -1078,8 +1078,9 @@
         </form>
       </div>
 
-      <div style="margin:18px 0 10px">
+      <div style="margin:18px 0 10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <input type="text" id="inv2Search" placeholder="🔍 Buscar por nombre, correo u organización..." style="max-width:380px;padding:10px 12px;border:1px solid var(--line);border-radius:8px">
+        <button type="button" class="btn" id="inv2Print">🖨️ Imprimir listado</button>
       </div>
 
       <div class="table-wrap">
@@ -4037,6 +4038,34 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
 
     const search = document.getElementById('inv2Search');
     if (search) search.addEventListener('input', renderInvitados2);
+
+    const printBtn = document.getElementById('inv2Print');
+    if (printBtn) printBtn.addEventListener('click', () => {
+      const q = ((document.getElementById('inv2Search') || {}).value || '').trim().toLowerCase();
+      const lista = q
+        ? invitados2Data.filter((i) => (((i.nombre || '') + ' ' + (i.apellido || '') + ' ' + (i.correo || '') + ' ' + (i.organizacion || '') + ' ' + (i.telefono || '')).toLowerCase().indexOf(q) !== -1))
+        : invitados2Data;
+      if (!lista.length) { alert('No hay invitados para imprimir.'); return; }
+
+      const filas = lista.map((i, idx) => '<tr>' +
+        '<td>' + (idx + 1) + '</td>' +
+        '<td>' + esc(((i.nombre || '') + ' ' + (i.apellido || '')).trim()) + '</td>' +
+        '<td>' + esc(i.telefono || '—') + '</td>' +
+        '<td>' + esc(i.correo || '—') + '</td>' +
+        '<td>' + esc(i.organizacion || '—') + '</td>' +
+        '<td style="border:1px solid #999;width:80px"></td>' +
+        '</tr>').join('');
+
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Listado de invitados</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:14px}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{border:1px solid #999;padding:5px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}thead{display:table-header-group}}</style></head><body>' +
+        '<h1>Hackathon UNETI IA 2026 — Listado de invitados</h1>' +
+        '<h2>' + new Date().toLocaleString('es-VE') + ' · ' + lista.length + ' invitado(s)</h2>' +
+        '<table><thead><tr><th>#</th><th>Nombre y apellido</th><th>Teléfono</th><th>Correo</th><th>Organización</th><th>Firma</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+        '</body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
   })();
 
   // ===== Verificación presencial =====
