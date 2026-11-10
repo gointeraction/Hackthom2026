@@ -376,20 +376,15 @@
   .contador-kicker { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; background: rgba(0,180,216,.18); color: #7FE3F5; font-weight: 800; font-size: .74rem; letter-spacing: 1px; text-transform: uppercase; padding: 7px 15px; border-radius: 999px; }
   .contador-kicker .dot-live { width: 8px; height: 8px; border-radius: 50%; background: #34D399; box-shadow: 0 0 0 0 rgba(52,211,153,.7); animation: live-pulse 1.6s infinite; }
   @keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.7); } 70% { box-shadow: 0 0 0 10px rgba(52,211,153,0); } 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } }
-  .contador-main { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 18px; margin: 16px 0 6px; flex-wrap: wrap; }
-  .contador-num { font-size: clamp(3.4rem, 11vw, 6rem); font-weight: 900; line-height: .95; letter-spacing: -3px; background: linear-gradient(180deg, #FFFFFF 30%, #7FE3F5 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 40px rgba(0,180,216,.55)); font-variant-numeric: tabular-nums; }
-  .contador-label { text-align: left; font-size: clamp(.95rem, 2.2vw, 1.15rem); font-weight: 700; color: rgba(255,255,255,.92); line-height: 1.25; }
-  .contador-split { position: relative; z-index: 1; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
-  .contador-item { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); border-radius: 16px; padding: 14px 26px; min-width: 118px; }
-  .contador-item .ic { font-size: 1.25rem; }
-  .contador-item b { font-size: 1.55rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
-  .contador-item .cnt-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: rgba(255,255,255,.68); font-weight: 700; }
-  .contador-note { position: relative; z-index: 1; margin-top: 18px; font-size: .76rem; color: rgba(255,255,255,.52); }
+  .contador-main { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 20px; margin: 18px 0 8px; flex-wrap: wrap; }
+  .contador-num { font-size: clamp(4.2rem, 15vw, 8rem); font-weight: 900; line-height: .9; letter-spacing: -4px; background: linear-gradient(180deg, #FFFFFF 30%, #7FE3F5 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 45px rgba(0,180,216,.6)); font-variant-numeric: tabular-nums; }
+  .contador-label { text-align: left; font-size: clamp(1rem, 2.6vw, 1.3rem); font-weight: 700; color: rgba(255,255,255,.92); line-height: 1.25; }
+  .contador-note { position: relative; z-index: 1; margin-top: 22px; font-size: .76rem; color: rgba(255,255,255,.52); }
   @media (max-width: 560px) {
-    .contador-card { padding: 24px 18px 20px; border-radius: 18px; }
-    .contador-main { flex-direction: column; gap: 4px; }
+    .contador-card { padding: 26px 18px 22px; border-radius: 18px; }
+    .contador-main { flex-direction: column; gap: 2px; margin: 14px 0 4px; }
     .contador-label { text-align: center; }
-    .contador-item { padding: 10px 16px; min-width: 96px; }
+    .contador-num { letter-spacing: -2px; }
   }
 
   /* ===== Tarjeta CTA en Zona de participantes ===== */
@@ -883,11 +878,6 @@ section { padding: 84px 0; }
         <div class="contador-main">
           <span class="contador-num" id="contTotal">0</span>
           <span class="contador-label">participantes<br>registrados</span>
-        </div>
-        <div class="contador-split">
-          <div class="contador-item"><span class="ic">🏛️</span><b id="contPres">0</b><span class="cnt-label">Presenciales</span></div>
-          <div class="contador-item"><span class="ic">💻</span><b id="contRem">0</b><span class="cnt-label">Remotos</span></div>
-          <div class="contador-item"><span class="ic">👥</span><b id="contGrupos">0</b><span class="cnt-label">Equipos</span></div>
         </div>
         <p class="contador-note">Actualizado en tiempo real · Inscripciones abiertas hasta el miércoles 11/11 · 4:00 pm</p>
       </div>
@@ -2368,9 +2358,6 @@ section { padding: 84px 0; }
 (function contadorInscritos() {
   var elT = document.getElementById('contTotal');
   if (!elT) return;
-  var elP = document.getElementById('contPres');
-  var elR = document.getElementById('contRem');
-  var elG = document.getElementById('contGrupos');
 
   function animar(el, hasta, duracion) {
     if (!el) return;
@@ -2395,9 +2382,6 @@ section { padding: 84px 0; }
       .then(function (d) {
         if (!d || !d.ok) return;
         animar(elT, d.total || 0, 900);
-        animar(elP, d.presenciales || 0, 700);
-        animar(elR, d.remotos || 0, 700);
-        animar(elG, d.grupos || 0, 700);
       })
       .catch(function () {});
   }
