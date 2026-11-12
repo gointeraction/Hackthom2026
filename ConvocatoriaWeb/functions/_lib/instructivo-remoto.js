@@ -19,6 +19,13 @@ Tu código de participante: ${codigo}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+🎥 TRANSMISIÓN EN VIVO
+
+Sigue el evento en directo por YouTube:
+https://www.youtube.com/watch?v=oNbL-NB3aXo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 📦 1. REPORTA TU PROYECTO
 
 Al entrar con tu código verás el formulario "Entrega de proyecto".
