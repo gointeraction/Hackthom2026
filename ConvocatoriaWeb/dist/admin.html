@@ -563,7 +563,11 @@
         <h2>Mentores presenciales</h2>
         <p>Mentores que acompañarán a los equipos en el IVIC. Los equipos remotos usan a <strong>Unitron</strong> (mentor IA online).</p>
       </div>
-      <p class="count" id="mentorCount">0 mentores</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <p class="count" id="mentorCount" style="margin:0">0 mentores</p>
+        <button type="button" class="btn" id="mentoresCsv" style="padding:8px 14px;font-size:.82rem">⬇️ Exportar CSV</button>
+        <button type="button" class="btn" id="mentoresPrint" style="padding:8px 14px;font-size:.82rem">🖨️ Imprimir listado</button>
+      </div>
       <div id="mentoresList"></div>
       <div class="form-card">
         <h3>➕ Agregar mentor</h3>
@@ -3914,6 +3918,8 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     } catch (e) {}
   }
 
+  let mentoresData = [];
+
   async function loadMentores() {
     const list = document.getElementById('mentoresList');
     if (!list) return;
@@ -3921,6 +3927,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const res = await fetch('/api/admin/mentores');
       const data = await res.json();
       const items = data.mentores || [];
+      mentoresData = items;
       const cnt = document.getElementById('mentorCount');
       const badge = document.getElementById('cntMentores');
       if (cnt) cnt.textContent = items.length + ' mentores';
@@ -3932,6 +3939,63 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     }
     loadResumen();
   }
+
+  // ===== Mentores: exportar CSV e imprimir =====
+  (function initMentoresExport() {
+    const csvBtn = document.getElementById('mentoresCsv');
+    if (csvBtn) csvBtn.addEventListener('click', () => {
+      const lista = mentoresData || [];
+      if (!lista.length) { alert('No hay mentores para exportar.'); return; }
+      const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const filas = ['"#","Nombre","Organización","Eje","Equipo","Correo","Teléfono","Activo"'];
+      lista.forEach((m, i) => {
+        filas.push([
+          cell(i + 1),
+          cell(m.nombre),
+          cell(m.organizacion || ''),
+          cell(m.eje || ''),
+          cell(m.equipo_nombre || ''),
+          cell(m.correo || ''),
+          cell(m.telefono || ''),
+          cell(m.activo ? 'Sí' : 'No'),
+        ].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mentores-hackathon-2026.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    const printBtn = document.getElementById('mentoresPrint');
+    if (printBtn) printBtn.addEventListener('click', () => {
+      const lista = mentoresData || [];
+      if (!lista.length) { alert('No hay mentores para imprimir.'); return; }
+      const filas = lista.map((m, i) => '<tr>' +
+        '<td>' + (i + 1) + '</td>' +
+        '<td>' + esc(m.nombre) + '</td>' +
+        '<td>' + esc(m.organizacion || '—') + '</td>' +
+        '<td>' + esc(m.eje || '—') + '</td>' +
+        '<td>' + esc(m.equipo_nombre || '—') + '</td>' +
+        '<td>' + esc(m.correo || '—') + '</td>' +
+        '<td>' + esc(m.telefono || '—') + '</td>' +
+        '<td style="border:1px solid #999;width:75px"></td>' +
+        '</tr>').join('');
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Listado de mentores</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:14px}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{border:1px solid #999;padding:5px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}thead{display:table-header-group}}</style></head><body>' +
+        '<h1>Hackathon UNETI IA 2026 — Listado de mentores</h1>' +
+        '<h2>' + new Date().toLocaleString('es-VE') + ' · ' + lista.length + ' mentor(es)</h2>' +
+        '<table><thead><tr><th>#</th><th>Nombre</th><th>Organización</th><th>Eje</th><th>Equipo</th><th>Correo</th><th>Teléfono</th><th>Firma</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+        '</body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+  })();
 
   (function initMentores() {
     const form = document.getElementById('mentorForm');
