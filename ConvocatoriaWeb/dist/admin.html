@@ -533,7 +533,11 @@
         al agregar un jurado se genera un <strong>código</strong> que se envía a su correo.
         El jurado entra a <a href="/jurado" target="_blank" rel="noopener" style="color:#0B6E8A;font-weight:800">hackathon-uneti-ia.pages.dev/jurado</a>, ingresa el código y evalúa los equipos.
       </div>
-      <p class="count" id="judgeCount">0 / 20 jurados</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <p class="count" id="judgeCount" style="margin:0">0 / 20 jurados</p>
+        <button type="button" class="btn" id="judgesCsv" style="padding:8px 14px;font-size:.82rem">⬇️ Exportar CSV</button>
+        <button type="button" class="btn" id="judgesPrint" style="padding:8px 14px;font-size:.82rem">🖨️ Imprimir listado</button>
+      </div>
       <div class="judges" id="judgesList"></div>
       <div class="form-card">
         <h3>➕ Agregar jurado</h3>
@@ -2332,6 +2336,8 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     { key: 'escalabilidad', label: 'Escalabilidad / sostenibilidad', peso: 10 },
   ];
 
+  let judgesData = [];
+
   async function loadJudges() {
     const list = document.getElementById('judgesList');
     try {
@@ -2339,6 +2345,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const data = await res.json();
       list.innerHTML = '';
       const judges = data.judges || [];
+      judgesData = judges;
       document.getElementById('judgeCount').textContent = judges.length + ' / 20 jurados';
       document.getElementById('cntJurados').textContent = judges.length;
       judges.forEach((j) => {
@@ -2359,6 +2366,61 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       document.getElementById('judgeCount').textContent = 'Error al cargar jurados.';
     }
   }
+
+  // ===== Jurados: exportar CSV e imprimir =====
+  (function initJudgesExport() {
+    const csvBtn = document.getElementById('judgesCsv');
+    if (csvBtn) csvBtn.addEventListener('click', () => {
+      const lista = judgesData || [];
+      if (!lista.length) { alert('No hay jurados para exportar.'); return; }
+      const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const filas = ['"#","Nombre","Organización","Correo","Teléfono","Código","Acreditado"'];
+      lista.forEach((j, i) => {
+        filas.push([
+          cell(i + 1),
+          cell(j.nombre),
+          cell(j.organizacion || ''),
+          cell(j.correo || ''),
+          cell(j.telefono || ''),
+          cell(j.codigo || ''),
+          cell(j.acreditado ? 'Sí' : 'No'),
+        ].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'jurados-hackathon-2026.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    const printBtn = document.getElementById('judgesPrint');
+    if (printBtn) printBtn.addEventListener('click', () => {
+      const lista = judgesData || [];
+      if (!lista.length) { alert('No hay jurados para imprimir.'); return; }
+      const filas = lista.map((j, i) => '<tr>' +
+        '<td>' + (i + 1) + '</td>' +
+        '<td>' + esc(j.nombre) + '</td>' +
+        '<td>' + esc(j.organizacion || '—') + '</td>' +
+        '<td>' + esc(j.correo || '—') + '</td>' +
+        '<td>' + esc(j.telefono || '—') + '</td>' +
+        '<td style="font-family:monospace">' + esc(j.codigo || '—') + '</td>' +
+        '<td style="border:1px solid #999;width:75px"></td>' +
+        '</tr>').join('');
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Listado de jurados</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:14px}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{border:1px solid #999;padding:5px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}thead{display:table-header-group}}</style></head><body>' +
+        '<h1>Hackathon UNETI IA 2026 — Listado de jurados</h1>' +
+        '<h2>' + new Date().toLocaleString('es-VE') + ' · ' + lista.length + ' jurado(s)</h2>' +
+        '<table><thead><tr><th>#</th><th>Nombre</th><th>Organización</th><th>Correo</th><th>Teléfono</th><th>Código</th><th>Firma</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+        '</body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+  })();
 
   document.getElementById('judgesList').addEventListener('click', async (e) => {
     if (e.target.classList.contains('del')) {
