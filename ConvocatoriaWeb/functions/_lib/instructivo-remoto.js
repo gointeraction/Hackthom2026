@@ -84,7 +84,7 @@ Esto es obligatorio para optar a los premios.
 📅 FECHAS CLAVE
 
   • Inicio del evento: viernes 13 de noviembre
-  • Desarrollo continuo: 48 horas con pernocta
+  • Desarrollo continuo: 48 horas (participación en línea)
   • Pitch ante el jurado: sábado 14 de noviembre · 3:30 pm
   • Premiación y clausura: sábado 14 de noviembre · 5:30 pm
 

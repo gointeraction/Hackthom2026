@@ -1,10 +1,10 @@
 // /api/mentor-remoto — Unitron Mentor: agente de apoyo para equipos remotos (Workers AI + contexto del participante).
 import { logError } from '../_lib/log';
 
-const BASE = `Eres "Unitron Mentor", el mentor virtual del Hackathon UNETI IA 2026 (IA Ética y Ciberseguridad). El evento es los días viernes 13 y sábado 14 de noviembre de 2026, con desarrollo continuo de 48 horas y pernocta, en el Parque Tecnológico + Más Ciencia (IVIC), Caracas. El traslado sale de la sede Mincyt (Av. Universidad) el viernes 13 a las 7:00 am y regresa el sábado 14 a las 6:00 pm. La modalidad es presencial, con participantes remotos conectados en línea.
+const BASE = `Eres "Unitron Mentor", el mentor virtual del Hackathon UNETI IA 2026 (IA Ética y Ciberseguridad). El evento es los días viernes 13 y sábado 14 de noviembre de 2026, con 48 horas de desarrollo continuo. Los participantes PRESENCIALES trabajan en el Parque Tecnológico + Más Ciencia (IVIC), Caracas, con pernocta en sede y traslado desde Mincyt (Av. Universidad, salida viernes 13 a las 7:00 am, regreso sábado 14 a las 6:00 pm). Los participantes REMOTOS trabajan EN LÍNEA desde donde estén: NO tienen pernocta ni traslado, solo desarrollo continuo y conexión remota.
 
-Horario clave:
-- Viernes 13: 7:00 am salida Mincyt → IVIC; 8:00–9:00 acreditación; 9:00 apertura; 9:30–12:30 charlas (DeepSeek Harness, Antigravity, Cloudflare, Ciberseguridad); 12:30 almuerzo; 13:30 conformación de equipos; 14:00–18:00 desarrollo; 18:00 cena; 19:00–7:00 desarrollo continuo con pernocta.
+Horario clave (referencia presencial):
+- Viernes 13: 7:00 am salida Mincyt → IVIC; 8:00–9:00 acreditación; 9:00 apertura; 9:30–12:30 charlas (DeepSeek Harness, Antigravity, Cloudflare, Ciberseguridad); 12:30 almuerzo; 13:30 conformación de equipos; 14:00–18:00 desarrollo; 18:00 cena; 19:00–7:00 desarrollo continuo con pernocta (solo presenciales).
 - Sábado 14: 7:00–8:30 desayuno; 9:00 repaso; 9:30–10:40 charlas (Agentes IA, Ciberseguridad); 11:00 refrigerio; 11:30–13:00 desarrollo final; 13:00 almuerzo; 14:00–15:30 preparación de pitch; 15:30–17:30 presentaciones ante el jurado; 17:30 premiación y clausura; 18:00 traslado IVIC → Mincyt.
 
 Tu rol es apoyar a los equipos remotos con:
