@@ -138,7 +138,7 @@ export async function enviarInstructivoRemoto(env, { dryRun = false } = {}) {
       try {
         const res = await sendEmail(env, {
           to: r.correo,
-          subject: 'Tu panel remoto está listo — reporta tu proyecto y avances · Hackathon UNETI IA 2026',
+          subject: 'Hackathon UNETI IA 2026 Participantes Remotos - Instrucciones',
           text: plantillaInstructivoRemoto({ nombre, codigo: r.codigo || '' }),
           tipo: 'instructivo-remoto',
           referencia: r.codigo || r.correo,

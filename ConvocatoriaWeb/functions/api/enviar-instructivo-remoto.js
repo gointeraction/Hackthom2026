@@ -3,7 +3,7 @@
 import { enviarInstructivoRemoto, plantillaInstructivoRemoto } from '../_lib/instructivo-remoto';
 import { sendEmail } from '../_lib/mail';
 
-const ASUNTO = 'Tu panel remoto está listo — reporta tu proyecto y avances · Hackathon UNETI IA 2026';
+const ASUNTO = 'Hackathon UNETI IA 2026 Participantes Remotos - Instrucciones';
 
 export async function onRequestPost({ request, env }) {
   const secret = request.headers.get('X-Backup-Secret') || '';
