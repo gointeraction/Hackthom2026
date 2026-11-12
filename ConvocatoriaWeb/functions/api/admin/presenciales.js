@@ -46,19 +46,34 @@ export async function onRequestGet({ env }) {
 
     const personas = results.map((r) => {
       const full = `${r.nombre || ''} ${r.apellido || ''}`.trim();
+      const cedula = r.cedula || '';
+      const telefono = r.telefono || '';
       return {
         id: r.id,
         nombre: full,
         correo: r.correo || '',
         anio: r.anio || '',
         codigo: r.codigo || '',
+        cedula,
+        telefono,
+        confirmado: !!(cedula && telefono),
         es_grupo: !!r.group_id,
         acreditado: r.acreditado ? 1 : 0,
         equipo: teamByMember.get(full.toLowerCase()) || null,
       };
     });
 
-    return Response.json({ ok: true, presenciales: rows, personas, total: rows.length });
+    const confirmados = personas.filter((p) => p.confirmado).length;
+
+    return Response.json({
+      ok: true,
+      presenciales: rows,
+      personas,
+      total: rows.length,
+      personasTotal: personas.length,
+      confirmados,
+      sinConfirmar: personas.length - confirmados,
+    });
   } catch (err) {
     return Response.json({ ok: false, error: 'Error al leer presenciales.' }, { status: 500 });
   }

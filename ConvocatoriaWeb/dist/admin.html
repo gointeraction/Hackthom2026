@@ -1592,12 +1592,20 @@
         <h2>Participantes presenciales</h2>
         <p>Listado de los inscritos en modalidad presencial con su código de acceso.</p>
       </div>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px">
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px">
         <input type="text" id="presencialSearch" placeholder="Buscar por nombre, correo o código…" style="flex:1; min-width:220px; padding:10px 14px; border:1px solid var(--line); border-radius:8px">
+        <select id="presencialFiltro" style="padding:10px 12px; border:1px solid var(--line); border-radius:8px">
+          <option value="todos">Todos</option>
+          <option value="confirmados">✅ Confirmaron</option>
+          <option value="pendientes">⏳ Sin confirmar</option>
+        </select>
         <button type="button" class="btn" id="copyPresencialCodes">Copiar códigos</button>
         <button type="button" class="btn" id="printPresenciales">🖨️ Imprimir</button>
         <button type="button" class="btn" id="csvPresenciales">⬇️ CSV</button>
-        <span class="count" id="presencialCount">0 presenciales</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <span class="count" id="presencialCount" style="margin:0">0 presenciales</span>
+        <span id="presencialResumen" style="display:flex;gap:8px;flex-wrap:wrap"></span>
       </div>
       <div class="table-wrap">
         <table class="data-table">
@@ -1605,9 +1613,11 @@
             <tr>
               <th>Código</th>
               <th>Participante</th>
+              <th>Cédula</th>
+              <th>Teléfono</th>
               <th>Tipo</th>
               <th>Año</th>
-              <th>Notificado</th>
+              <th>Confirmó</th>
               <th>Acreditado</th>
             </tr>
           </thead>
@@ -3361,18 +3371,52 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     const tbody = document.getElementById('presencialesBody');
     if (!tbody) return;
     const q = (document.getElementById('presencialSearch')?.value || '').toLowerCase().trim();
-    const items = presencialesData.filter((r) => !q || (r.nombre + ' ' + r.correo + ' ' + r.codigo).toLowerCase().includes(q));
+    const filtro = (document.getElementById('presencialFiltro')?.value || 'todos');
+
+    let items = presencialesData.filter((r) => !q || (r.nombre + ' ' + r.correo + ' ' + r.codigo + ' ' + (r.cedula || '') + ' ' + (r.telefono || '')).toLowerCase().includes(q));
+    if (filtro === 'confirmados') items = items.filter((r) => r.confirmado);
+    if (filtro === 'pendientes') items = items.filter((r) => !r.confirmado);
+
     const cnt = document.getElementById('presencialCount');
     const badge = document.getElementById('cntPresenciales');
     if (cnt) cnt.textContent = items.length + ' presenciales';
     if (badge) badge.textContent = presencialesData.length;
-    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin participantes presenciales.</td></tr>'; return; }
-    tbody.innerHTML = items.map((r) => '<tr><td><strong>' + esc(r.codigo) + '</strong></td><td>' + esc(r.nombre) + '<br><span class="k">' + esc(r.correo) + '</span>' + (r.equipo ? ' <span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">👥 ' + esc(r.equipo) + '</span>' : '') + '</td><td>' + (r.es_grupo ? 'Grupo' : 'Individual') + '</td><td>' + esc(r.anio || '—') + '</td><td>' + (r.notificado ? '✅' : '—') + '</td><td>' + (r.acreditado ? '✅' : '—') + '</td></tr>').join('');
+
+    const total = presencialesData.length;
+    const confirmados = presencialesData.filter((r) => r.confirmado).length;
+    const resumen = document.getElementById('presencialResumen');
+    if (resumen) {
+      resumen.innerHTML =
+        '<span style="background:#DFF5E8;color:#1a9e5c;padding:5px 12px;border-radius:999px;font-weight:700;font-size:.78rem">✅ Confirmaron: ' + confirmados + '</span>' +
+        '<span style="background:#FFF3D6;color:#9a6a00;padding:5px 12px;border-radius:999px;font-weight:700;font-size:.78rem">⏳ Sin confirmar: ' + (total - confirmados) + '</span>' +
+        '<span style="background:#EAF7FB;color:#0B6E8A;padding:5px 12px;border-radius:999px;font-weight:700;font-size:.78rem">Total: ' + total + '</span>';
+    }
+
+    if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="empty">Sin participantes en este filtro.</td></tr>'; return; }
+    tbody.innerHTML = items.map((r) => {
+      const ced = r.cedula ? esc(r.cedula) : '<span style="color:#D64545;font-weight:700">Sin datos</span>';
+      const tel = r.telefono ? esc(r.telefono) : '<span style="color:#D64545;font-weight:700">Sin datos</span>';
+      const conf = r.confirmado
+        ? '<span style="background:#DFF5E8;color:#1a9e5c;padding:2px 9px;border-radius:999px;font-weight:700;font-size:.72rem">✅ Sí</span>'
+        : '<span style="background:#FFF3D6;color:#9a6a00;padding:2px 9px;border-radius:999px;font-weight:700;font-size:.72rem">⏳ No</span>';
+      return '<tr>' +
+        '<td><strong>' + esc(r.codigo) + '</strong></td>' +
+        '<td>' + esc(r.nombre) + '<br><span class="k">' + esc(r.correo) + '</span>' + (r.equipo ? ' <span class="tipo-tag" style="background:rgba(0,180,216,.12);color:var(--cyan)">👥 ' + esc(r.equipo) + '</span>' : '') + '</td>' +
+        '<td>' + ced + '</td>' +
+        '<td>' + tel + '</td>' +
+        '<td>' + (r.es_grupo ? 'Grupo' : 'Individual') + '</td>' +
+        '<td>' + esc(r.anio || '—') + '</td>' +
+        '<td>' + conf + '</td>' +
+        '<td>' + (r.acreditado ? '✅' : '—') + '</td>' +
+        '</tr>';
+    }).join('');
   }
 
   (function initPresenciales() {
     const s = document.getElementById('presencialSearch');
     if (s) s.addEventListener('input', renderPresenciales);
+    const f = document.getElementById('presencialFiltro');
+    if (f) f.addEventListener('change', renderPresenciales);
     const b = document.getElementById('copyPresencialCodes');
     if (b) b.addEventListener('click', () => {
       const text = presencialesData.map((r) => r.codigo + '\t' + r.nombre + '\t' + r.correo).join('\n');
