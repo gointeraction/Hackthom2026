@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Completa tus datos · Hackathon UNETI IA 2026</title>
+<style>
+  :root { --navy: #0B1F3A; --cyan: #00B4D8; --ink: #10243E; --soft: #5B6B7C; --line: #E4EAF1; --bg: #F5F8FB; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  .top { background: var(--navy); color: #fff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .top h1 { font-size: 1.05rem; font-weight: 700; }
+  .top a { color: #9BD9EE; text-decoration: none; font-size: .85rem; }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 24px 16px 44px; }
+  .hero { text-align: center; padding: 16px 0 6px; }
+  .hero .eyebrow { display: inline-block; background: rgba(0,180,216,.12); color: #0B6E8A; font-weight: 700; font-size: .72rem; letter-spacing: .7px; text-transform: uppercase; padding: 7px 14px; border-radius: 999px; margin-bottom: 12px; }
+  .hero h2 { font-size: clamp(1.5rem, 4.5vw, 2rem); color: var(--navy); line-height: 1.15; margin-bottom: 8px; font-weight: 800; }
+  .hero p { color: var(--soft); font-size: .95rem; line-height: 1.55; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-top: 18px; box-shadow: 0 6px 24px rgba(16,36,62,.07); }
+  .card h3 { font-size: 1rem; color: var(--navy); margin-bottom: 6px; }
+  .k { color: var(--soft); font-size: .84rem; line-height: 1.5; }
+  label { display: block; font-size: .85rem; font-weight: 700; color: var(--soft); margin: 16px 0 6px; }
+  input { width: 100%; padding: 14px; border: 2px solid var(--line); border-radius: 12px; font-size: 1.05rem; font-family: inherit; }
+  input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(0,180,216,.14); }
+  #codigo { text-transform: uppercase; letter-spacing: .16em; font-weight: 800; text-align: center; font-size: 1.25rem; }
+  .btn { width: 100%; margin-top: 20px; padding: 16px; border: 0; border-radius: 12px; font-weight: 800; font-size: 1rem; font-family: inherit; color: #fff; cursor: pointer; background: linear-gradient(135deg, #00B4D8, #0B6E8A); box-shadow: 0 8px 22px rgba(0,180,216,.35); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .msg { margin-top: 14px; font-size: .9rem; line-height: 1.5; }
+  .msg.err { color: #D64545; }
+  .msg.ok { color: #1a9e5c; }
+  .ident { background: #F5F8FB; border-left: 4px solid var(--cyan); border-radius: 0 12px 12px 0; padding: 14px 16px; margin-bottom: 8px; }
+  .ident .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .8px; color: var(--soft); font-weight: 700; }
+  .ident h2 { font-size: 1.4rem; color: var(--navy); font-weight: 800; margin: 4px 0 2px; }
+  .ok-icon { font-size: 3rem; text-align: center; margin-bottom: 10px; }
+  #listo { text-align: center; }
+  #listo h3 { font-size: 1.3rem; margin-bottom: 8px; }
+  .aviso { background: #FFF8E6; border: 1px solid #F2C94C; border-radius: 10px; padding: 10px 14px; font-size: .84rem; color: #7A5B00; margin-top: 14px; }
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>📋 Completa tus datos · Hackathon UNETI IA 2026</h1>
+    <a href="/">← Volver al sitio</a>
+  </header>
+
+  <div class="wrap">
+    <div class="hero">
+      <span class="eyebrow">Paso previo al evento</span>
+      <h2>Completa tu cédula y teléfono</h2>
+      <p>Para la acreditación y la logística del evento necesitamos estos datos que no se capturaron en la inscripción.</p>
+    </div>
+
+    <!-- PASO 1 -->
+    <div class="card" id="paso1">
+      <h3>1️⃣ Ingresa tu código de participante</h3>
+      <p class="k">Lo recibiste en el correo de confirmación de tu inscripción.</p>
+      <label for="codigo">Código de participante</label>
+      <input type="text" id="codigo" placeholder="AB12CD34" autocomplete="off" autofocus>
+      <button type="button" class="btn" id="btnVerificar">Verificar código</button>
+      <div class="msg" id="msg1"></div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="card" id="paso2" style="display:none">
+      <div class="ident">
+        <span class="lbl">Participante</span>
+        <h2 id="nombreMostrado"></h2>
+        <p class="k" id="metaMostrado"></p>
+      </div>
+      <div id="avisoRemoto" class="aviso" style="display:none">Este formulario es para participantes <strong>presenciales</strong>. Si participas de forma remota, no necesitas completarlo.</div>
+
+      <label for="cedula">Cédula de identidad *</label>
+      <input type="text" id="cedula" inputmode="numeric" placeholder="12345678" autocomplete="off">
+
+      <label for="telefono">Teléfono de contacto *</label>
+      <input type="tel" id="telefono" inputmode="tel" placeholder="0414-1234567" autocomplete="off">
+
+      <button type="button" class="btn" id="btnGuardar">Guardar mis datos</button>
+      <div class="msg" id="msg2"></div>
+    </div>
+
+    <!-- LISTO -->
+    <div class="card" id="listo" style="display:none">
+      <div class="ok-icon">✅</div>
+      <h3>¡Datos guardados!</h3>
+      <p class="k">Gracias, tus datos quedaron registrados. Nos vemos en el evento.</p>
+      <p class="k" style="margin-top:14px">📲 Mantente informado en el <a href="https://t.me/+3u7vzOq8LBFmYzUx" target="_blank" rel="noopener" style="color:#0B6E8A;font-weight:700">canal de Telegram</a>.</p>
+    </div>
+  </div>
+
+<script>
+  let codigoActual = '';
+
+  function setMsg(id, text, ok) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'msg ' + (ok ? 'ok' : 'err');
+    el.textContent = text;
+  }
+
+  function soloDigitos(v) { return String(v || '').replace(/\D+/g, ''); }
+
+  document.getElementById('btnVerificar').addEventListener('click', function () {
+    var codigo = document.getElementById('codigo').value.trim().toUpperCase();
+    if (!codigo) { setMsg('msg1', 'Ingresa tu código.', false); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    var orig = btn.textContent;
+    btn.textContent = 'Verificando…';
+
+    fetch('/api/datos-participante?codigo=' + encodeURIComponent(codigo))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) { setMsg('msg1', d.error || 'Código no encontrado.', false); return; }
+        codigoActual = codigo;
+        document.getElementById('nombreMostrado').textContent = ((d.nombre || '') + ' ' + (d.apellido || '')).trim();
+        var meta = [];
+        if (d.anio) meta.push(d.anio);
+        if (d.modalidad) meta.push(d.modalidad === 'presencial' ? '🏛️ Presencial' : '💻 Remoto');
+        document.getElementById('metaMostrado').textContent = meta.join(' · ');
+        document.getElementById('cedula').value = d.cedula || '';
+        document.getElementById('telefono').value = d.telefono || '';
+        document.getElementById('avisoRemoto').style.display = (d.modalidad && d.modalidad !== 'presencial') ? 'block' : 'none';
+        document.getElementById('paso1').style.display = 'none';
+        document.getElementById('paso2').style.display = 'block';
+        document.getElementById('cedula').focus();
+      })
+      .catch(function () { setMsg('msg1', 'Error de conexión. Intenta de nuevo.', false); })
+      .then(function () { btn.disabled = false; btn.textContent = orig; });
+  });
+
+  document.getElementById('codigo').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btnVerificar').click(); }
+  });
+
+  document.getElementById('btnGuardar').addEventListener('click', function () {
+    var cedula = soloDigitos(document.getElementById('cedula').value);
+    var telefono = soloDigitos(document.getElementById('telefono').value);
+
+    if (cedula.length < 5) { setMsg('msg2', 'La cédula debe tener al menos 5 dígitos.', false); return; }
+    if (telefono.length < 7) { setMsg('msg2', 'El teléfono debe tener al menos 7 dígitos.', false); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    var orig = btn.textContent;
+    btn.textContent = 'Guardando…';
+
+    fetch('/api/datos-participante', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo: codigoActual, cedula: cedula, telefono: telefono }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) {
+          document.getElementById('paso2').style.display = 'none';
+          document.getElementById('listo').style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          setMsg('msg2', d.error || 'Error al guardar.', false);
+        }
+      })
+      .catch(function () { setMsg('msg2', 'Error de conexión. Intenta de nuevo.', false); })
+      .then(function () { btn.disabled = false; btn.textContent = orig; });
+  });
+</script>
+</body>
+</html>

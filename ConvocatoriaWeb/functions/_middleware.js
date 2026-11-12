@@ -46,7 +46,7 @@ export async function onRequest(ctx) {
   }
 
   // Rate limiting para escrituras públicas (anti-abuso)
-  const publicWrites = ['/api/register', '/api/entrega', '/api/consulta', '/api/chat', '/api/encuesta', '/api/sponsors', '/api/asistencia', '/api/mentor-remoto'];
+  const publicWrites = ['/api/register', '/api/entrega', '/api/consulta', '/api/chat', '/api/encuesta', '/api/sponsors', '/api/asistencia', '/api/mentor-remoto', '/api/datos-participante'];
   if (publicWrites.includes(path) && ctx.request.method === 'POST') {
     const ip = ctx.request.headers.get('CF-Connecting-IP') || 'unknown';
     const allowed = await checkRateLimit(ctx.env, ip, path, 20, 60);
