@@ -1325,21 +1325,26 @@ section { padding: 84px 0; }
     <div class="wrap">
       <div class="sec-head" style="text-align:center; margin-left:auto; margin-right:auto;">
         <span class="sec-kicker">Registro</span>
-        <h2>Inscríbete</h2>
-        <p>Completa el formulario. La participación es gratuita y el cupo es limitado.</p>
+        <h2 id="inscTitle">Registro cerrado</h2>
+        <p id="inscSubtitle">El registro de participantes al Hackathon UNETI IA 2026 ha finalizado.</p>
       </div>
 
       <p class="note" style="max-width:760px; margin:0 auto 26px">Los grupos serán <strong>preseleccionados según su propuesta de desarrollo</strong> (presencial en UNETI o remoto), con base en estos criterios: <strong>viabilidad técnica y calidad del MVP · impacto y relevancia del problema · innovación y uso de IA · calidad del pitch · ética y responsabilidad de la IA · escalabilidad y sostenibilidad</strong>. <strong>Los participantes individuales participan de forma remota</strong>. A quienes participen de forma remota se les enviará un <strong>instructivo y las condiciones de participación</strong>.</p>
 
-      <div id="inscripcionCerrada" style="display:none; max-width:760px; margin:0 auto; padding:32px 24px; border-radius:16px; background:linear-gradient(135deg, rgba(230,57,102,.08), rgba(242,153,74,.06)); border:1px solid rgba(230,57,102,.3); text-align:center">
-        <div style="font-size:2.6rem; margin-bottom:10px">🔒</div>
-        <h3 style="margin:0 0 10px; font-size:1.5rem">Inscripciones cerradas</h3>
-        <p style="margin:0 0 8px; color:var(--ink-soft)">El registro de participantes cerró el <strong>miércoles 11 de noviembre de 2026 a las 4:00 pm</strong>.</p>
-        <p style="margin:0; color:var(--ink-soft)">Gracias por tu interés en el <strong>Hackathon UNETI IA 2026</strong>.</p>
-        <a class="btn" href="https://t.me/+3u7vzOq8LBFmYzUx" target="_blank" rel="noopener" style="margin-top:18px; display:inline-flex; align-items:center; gap:8px">Canal de Telegram</a>
+      <div id="inscripcionCerrada" style="max-width:780px; margin:0 auto; padding:38px 28px; border-radius:20px; background:linear-gradient(135deg, rgba(11,31,58,.04), rgba(0,180,216,.07)); border:2px solid rgba(0,180,216,.35); text-align:center; box-shadow:0 14px 40px rgba(11,31,58,.10)">
+        <div style="font-size:3.2rem; margin-bottom:12px; line-height:1">🔒</div>
+        <h3 style="margin:0 0 12px; font-size:1.65rem; color:#0B1F3A; font-weight:800">Inscripciones cerradas</h3>
+        <p style="margin:0 0 10px; color:var(--ink-soft); font-size:1.02rem; line-height:1.6">
+          El registro de participantes al <strong>Hackathon UNETI IA 2026</strong> cerró el
+          <strong>miércoles 11 de noviembre de 2026 a las 4:00 pm</strong>.
+        </p>
+        <p style="margin:0 0 24px; color:var(--ink-soft); font-size:.95rem">
+          Ya contamos con nuestros participantes confirmados. ¡Gracias por tu interés!
+        </p>
+        <a class="btn btn-primary" href="https://t.me/+3u7vzOq8LBFmYzUx" target="_blank" rel="noopener">📲 Seguir el evento en Telegram</a>
       </div>
 
-      <form class="form-shell" id="registro" novalidate>
+      <form class="form-shell" id="registro" style="display:none" novalidate>
         <div class="field">
           <label>Tipo de registro <span class="req">*</span></label>
           <div class="seg" id="segTipo">
@@ -2111,11 +2116,17 @@ section { padding: 84px 0; }
   // Cierre de inscripciones: miércoles 11/11/2026 a las 16:00 (hora de Venezuela)
   (function checkCierreInscripcion() {
     const CIERRE = new Date('2026-11-11T16:00:00-04:00').getTime();
-    if (Date.now() < CIERRE) return;
+    const abierto = Date.now() < CIERRE;
     const form = document.getElementById('registro');
     const cerrado = document.getElementById('inscripcionCerrada');
-    if (form) form.style.display = 'none';
-    if (cerrado) cerrado.style.display = 'block';
+    const titulo = document.getElementById('inscTitle');
+    const sub = document.getElementById('inscSubtitle');
+    if (form) form.style.display = abierto ? '' : 'none';
+    if (cerrado) cerrado.style.display = abierto ? 'none' : 'block';
+    if (titulo) titulo.textContent = abierto ? 'Inscríbete' : 'Registro cerrado';
+    if (sub) sub.textContent = abierto
+      ? 'Completa el formulario. La participación es gratuita y el cupo es limitado.'
+      : 'El registro de participantes al Hackathon UNETI IA 2026 ha finalizado.';
   })();
 
   async function loadCharlas() {
