@@ -1089,6 +1089,7 @@
       <div style="margin:18px 0 10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <input type="text" id="inv2Search" placeholder="🔍 Buscar por nombre, correo u organización..." style="max-width:380px;padding:10px 12px;border:1px solid var(--line);border-radius:8px">
         <button type="button" class="btn" id="inv2Print">🖨️ Imprimir listado</button>
+        <button type="button" class="btn" id="inv2Csv">⬇️ Exportar CSV</button>
       </div>
 
       <div class="table-wrap">
@@ -4216,12 +4217,15 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     const search = document.getElementById('inv2Search');
     if (search) search.addEventListener('input', renderInvitados2);
 
+    function listaFiltrada() {
+      const q = ((document.getElementById('inv2Search') || {}).value || '').trim().toLowerCase();
+      if (!q) return invitados2Data;
+      return invitados2Data.filter((i) => (((i.nombre || '') + ' ' + (i.apellido || '') + ' ' + (i.correo || '') + ' ' + (i.organizacion || '') + ' ' + (i.telefono || '')).toLowerCase().indexOf(q) !== -1));
+    }
+
     const printBtn = document.getElementById('inv2Print');
     if (printBtn) printBtn.addEventListener('click', () => {
-      const q = ((document.getElementById('inv2Search') || {}).value || '').trim().toLowerCase();
-      const lista = q
-        ? invitados2Data.filter((i) => (((i.nombre || '') + ' ' + (i.apellido || '') + ' ' + (i.correo || '') + ' ' + (i.organizacion || '') + ' ' + (i.telefono || '')).toLowerCase().indexOf(q) !== -1))
-        : invitados2Data;
+      const lista = listaFiltrada();
       if (!lista.length) { alert('No hay invitados para imprimir.'); return; }
 
       const filas = lista.map((i, idx) => '<tr>' +
@@ -4242,6 +4246,34 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
         '<table><thead><tr><th>#</th><th>Nombre y apellido</th><th>Teléfono</th><th>Correo</th><th>Organización</th><th>Firma</th></tr></thead><tbody>' + filas + '</tbody></table>' +
         '</body></html>');
       w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+
+    const csvBtn = document.getElementById('inv2Csv');
+    if (csvBtn) csvBtn.addEventListener('click', () => {
+      const lista = listaFiltrada();
+      if (!lista.length) { alert('No hay invitados para exportar.'); return; }
+      const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const filas = ['"#","Nombre","Apellido","Teléfono","Correo","Organización","Acreditado"'];
+      lista.forEach((i, idx) => {
+        filas.push([
+          cell(idx + 1),
+          cell(i.nombre || ''),
+          cell(i.apellido || ''),
+          cell(i.telefono || ''),
+          cell(i.correo || ''),
+          cell(i.organizacion || ''),
+          cell(i.acreditado ? 'Sí' : 'No'),
+        ].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'invitados-hackathon-2026.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     });
   })();
 
