@@ -44,8 +44,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   const { results } = await env.DB.prepare('SELECT COUNT(*) AS c FROM judges').all();
-  if (results && results[0] && results[0].c >= 10) {
-    return Response.json({ ok: false, error: 'Ya hay 10 jurados registrados.' }, { status: 400 });
+  if (results && results[0] && results[0].c >= 20) {
+    return Response.json({ ok: false, error: 'Ya hay 20 jurados registrados.' }, { status: 400 });
   }
 
   try {

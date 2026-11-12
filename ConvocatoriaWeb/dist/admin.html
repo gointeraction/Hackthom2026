@@ -526,14 +526,14 @@
       <div class="sec-head">
         <span class="kicker">Jurados</span>
         <h2>Jurados invitados</h2>
-        <p>Define los jurados (máximo 10) que evaluarán los proyectos.</p>
+        <p>Define los jurados (máximo 20) que evaluarán los proyectos.</p>
       </div>
       <div style="background:#EAF7FB;border:1px solid rgba(0,180,216,.35);border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:.86rem;color:#0B4A63">
         <strong>🔐 Acceso exclusivo de jurados:</strong>
         al agregar un jurado se genera un <strong>código</strong> que se envía a su correo.
         El jurado entra a <a href="/jurado" target="_blank" rel="noopener" style="color:#0B6E8A;font-weight:800">hackathon-uneti-ia.pages.dev/jurado</a>, ingresa el código y evalúa los equipos.
       </div>
-      <p class="count" id="judgeCount">0 / 10 jurados</p>
+      <p class="count" id="judgeCount">0 / 20 jurados</p>
       <div class="judges" id="judgesList"></div>
       <div class="form-card">
         <h3>➕ Agregar jurado</h3>
@@ -2339,7 +2339,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const data = await res.json();
       list.innerHTML = '';
       const judges = data.judges || [];
-      document.getElementById('judgeCount').textContent = judges.length + ' / 10 jurados';
+      document.getElementById('judgeCount').textContent = judges.length + ' / 20 jurados';
       document.getElementById('cntJurados').textContent = judges.length;
       judges.forEach((j) => {
         const el = document.createElement('div');
