@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca de proyectos · Hackathon UNETI IA 2026</title>
+<meta name="description" content="40 proyectos SDD del Hackathon UNETI IA 2026: especificación, pitch, impacto y guía de presentación. Ejes de IA Ética y Ciberseguridad.">
+<style>
+  :root { --navy: #0B1F3A; --cyan: #00B4D8; --green: #06A77D; --ink: #10243E; --soft: #5B6B7C; --line: #E4EAF1; --bg: #F5F8FB; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  .top { background: var(--navy); color: #fff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .top h1 { font-size: 1.02rem; font-weight: 700; }
+  .top a { color: #9BD9EE; text-decoration: none; font-size: .85rem; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 26px 18px 52px; }
+  .hero { text-align: center; padding: 8px 0 20px; }
+  .hero .eyebrow { display: inline-block; background: rgba(0,180,216,.12); color: #0B6E8A; font-weight: 700; font-size: .72rem; letter-spacing: .7px; text-transform: uppercase; padding: 7px 14px; border-radius: 999px; margin-bottom: 12px; }
+  .hero h2 { font-size: clamp(1.55rem, 4.4vw, 2.15rem); color: var(--navy); line-height: 1.14; margin-bottom: 10px; font-weight: 800; }
+  .hero p { color: var(--soft); font-size: .96rem; line-height: 1.6; max-width: 720px; margin: 0 auto; }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 22px 0 6px; }
+  .toolbar input { flex: 1; min-width: 240px; padding: 13px 16px; border: 2px solid var(--line); border-radius: 12px; font-size: .95rem; font-family: inherit; }
+  .toolbar input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(0,180,216,.13); }
+  .seg { display: inline-flex; background: #fff; border: 2px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .seg button { border: 0; background: transparent; padding: 12px 16px; font-weight: 700; font-size: .84rem; font-family: inherit; color: var(--soft); cursor: pointer; }
+  .seg button.active { background: linear-gradient(135deg, #00B4D8, #0B6E8A); color: #fff; }
+  .count { color: var(--soft); font-size: .84rem; font-weight: 700; margin: 14px 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .card { position: relative; display: flex; flex-direction: column; gap: 9px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 16px; text-decoration: none; color: inherit; box-shadow: 0 4px 16px rgba(16,36,62,.05); transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(16,36,62,.12); border-color: rgba(0,180,216,.5); }
+  .card .num { font-size: .72rem; font-weight: 800; letter-spacing: .1em; color: var(--cyan); }
+  .card .titulo { font-size: .98rem; font-weight: 800; color: var(--navy); line-height: 1.32; }
+  .card .eje { align-self: flex-start; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; padding: 4px 10px; border-radius: 999px; }
+  .eje.etica { background: rgba(0,180,216,.12); color: #0B6E8A; }
+  .eje.ciber { background: rgba(6,167,125,.13); color: #0a7d5a; }
+  .card .cta { margin-top: 4px; font-size: .78rem; font-weight: 800; color: #0B6E8A; }
+  .empty { grid-column: 1/-1; text-align: center; color: var(--soft); padding: 42px 16px; font-size: .95rem; }
+  .foot { text-align: center; margin-top: 40px; color: var(--soft); font-size: .84rem; line-height: 1.7; }
+  .foot a { color: #0B6E8A; font-weight: 700; text-decoration: none; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .toolbar input { min-width: 100%; } }
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>📚 Biblioteca de proyectos · Hackathon UNETI IA 2026</h1>
+    <a href="/">← Volver al sitio</a>
+  </header>
+
+  <div class="wrap">
+    <div class="hero">
+      <span class="eyebrow">Documentación</span>
+      <h2>Biblioteca de proyectos (SDD)</h2>
+      <p>40 documentos de especificación de proyecto (SDD) con su pitch, impacto y guía de presentación. Organizados en los ejes de <strong>IA Ética</strong> y <strong>Ciberseguridad</strong>.</p>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="buscar" placeholder="🔍 Buscar proyecto o eje…" autocomplete="off">
+      <div class="seg" id="segEje">
+        <button type="button" data-eje="todos" class="active">Todos (40)</button>
+        <button type="button" data-eje="IA Ética">IA Ética (20)</button>
+        <button type="button" data-eje="Ciberseguridad">Ciberseguridad (20)</button>
+      </div>
+    </div>
+
+    <p class="count" id="contador">40 documentos</p>
+    <div class="grid" id="grid"></div>
+
+    <div class="foot">
+      <p>Hackathon UNETI IA 2026 · Parque Tecnológico + Más Ciencia (IVIC) · 13 y 14 de noviembre</p>
+      <p><a href="/">Volver al sitio principal</a> · <a href="/remoto">Panel de participantes remotos</a></p>
+    </div>
+  </div>
+
+<script>
+  var PROYECTOS = [
+    ['01-auditoria-algoritmica.md','Plataforma nacional de auditoría algorítmica','IA Ética'],
+    ['02-registro-modelos-ia.md','Registro soberano de modelos de IA del Estado','IA Ética'],
+    ['03-fichas-modelo.md','Generador de fichas de modelo (model cards)','IA Ética'],
+    ['04-equidad-programas-sociales.md','Motor de equidad para programas sociales y becas','IA Ética'],
+    ['05-explicabilidad-decisiones.md','Sistema de explicabilidad de decisiones administrativas','IA Ética'],
+    ['06-anonimizacion-datos-abiertos.md','Anonimización de datos para datos abiertos','IA Ética'],
+    ['07-privacidad-diferencial.md','Plataforma de privacidad diferencial','IA Ética'],
+    ['08-consentimiento-datos.md','Gestión de consentimiento y derechos del titular','IA Ética'],
+    ['09-anti-desinformacion.md','Detector de desinformación para la esfera pública','IA Ética'],
+    ['10-verificacion-identidad.md','Verificación de identidad documental con detección de fraude','IA Ética'],
+    ['11-asistente-ciudadano.md','Asistente ciudadano estatal con IA explicable','IA Ética'],
+    ['12-dpia-algoritmico.md','Evaluación de impacto algorítmico (DPIA)','IA Ética'],
+    ['13-observatorio-transparencia.md','Observatorio de transparencia algorítmica','IA Ética'],
+    ['14-ia-salud-publica.md','IA explicable de apoyo al diagnóstico en salud pública','IA Ética'],
+    ['15-datos-sinteticos.md','Plataforma de datos sintéticos con privacidad','IA Ética'],
+    ['16-detector-deepfakes.md','Detector de deepfakes para comunicados oficiales','IA Ética'],
+    ['17-trazabilidad-decisiones.md','Trazabilidad de decisiones automatizadas (ledger)','IA Ética'],
+    ['18-guardian-llm.md','Guardián de integridad de LLMs en servicios públicos','IA Ética'],
+    ['19-sesgo-contratacion.md','Detector de sesgo en contratación pública','IA Ética'],
+    ['20-certificacion-ia-etica.md','Plataforma de certificación en IA ética','IA Ética'],
+    ['21-soc-nacional.md','SOC nacional asistido por IA','Ciberseguridad'],
+    ['22-cti-infraestructura.md','Plataforma de inteligencia de amenazas (CTI)','Ciberseguridad'],
+    ['23-ids-ips.md','IDS/IPS para redes gubernamentales','Ciberseguridad'],
+    ['24-anti-phishing.md','Detección de phishing dirigido a funcionarios','Ciberseguridad'],
+    ['25-scada-iot.md','Protección de sistemas SCADA/IoT industrial','Ciberseguridad'],
+    ['26-iam-riesgo.md','Gestión de identidad y acceso con riesgo adaptativo','Ciberseguridad'],
+    ['27-identidad-digital-firma.md','Identidad digital ciudadana y firma electrónica','Ciberseguridad'],
+    ['28-csirt-playbooks.md','CSIRT con triaje y playbooks automatizados','Ciberseguridad'],
+    ['29-analizador-malware.md','Analizador de malware a escala nacional','Ciberseguridad'],
+    ['30-escaner-vulnerabilidades.md','Escáner de vulnerabilidades de aplicaciones del Estado','Ciberseguridad'],
+    ['31-dlp.md','Prevención de fuga de datos (DLP)','Ciberseguridad'],
+    ['32-attack-surface.md','Gestión de superficie de ataque','Ciberseguridad'],
+    ['33-anti-fraude-subsidios.md','Detección de fraude en programas sociales','Ciberseguridad'],
+    ['34-anti-bots-tramites.md','Anti-bots y anti-fraude en trámites en línea','Ciberseguridad'],
+    ['35-integridad-electoral.md','Integridad y auditoría de procesos electorales','Ciberseguridad'],
+    ['36-coordinacion-incidentes.md','Coordinación de incidentes entre entes','Ciberseguridad'],
+    ['37-osint-nlp.md','OSINT de amenazas con NLP','Ciberseguridad'],
+    ['38-ciber-resiliencia.md','Ciber-resiliencia y continuidad de servicios públicos','Ciberseguridad'],
+    ['39-datos-biometricos.md','Protección de datos biométricos del Estado','Ciberseguridad'],
+    ['40-observatorio-ciberseguridad.md','Observatorio nacional de ciberseguridad','Ciberseguridad']
+  ];
+
+  var ejeActual = 'todos';
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function render() {
+    var q = (document.getElementById('buscar').value || '').trim().toLowerCase();
+    var grid = document.getElementById('grid');
+    var items = PROYECTOS.filter(function (p) {
+      var okEje = ejeActual === 'todos' || p[2] === ejeActual;
+      var okQ = !q || p[1].toLowerCase().indexOf(q) !== -1 || p[2].toLowerCase().indexOf(q) !== -1;
+      return okEje && okQ;
+    });
+
+    document.getElementById('contador').textContent = items.length + (items.length === 1 ? ' documento' : ' documentos');
+
+    if (!items.length) {
+      grid.innerHTML = '<div class="empty">Sin resultados para tu búsqueda.</div>';
+      return;
+    }
+
+    grid.innerHTML = items.map(function (p) {
+      var clase = p[2] === 'IA Ética' ? 'etica' : 'ciber';
+      return '<a class="card" href="/sdd/' + esc(p[0]) + '" target="_blank" rel="noopener">' +
+        '<span class="num">PROYECTO ' + esc(p[0].split('-')[0]) + '</span>' +
+        '<span class="titulo">' + esc(p[1]) + '</span>' +
+        '<span class="eje ' + clase + '">' + esc(p[2]) + '</span>' +
+        '<span class="cta">Ver documento SDD →</span>' +
+        '</a>';
+    }).join('');
+  }
+
+  document.getElementById('buscar').addEventListener('input', render);
+
+  document.getElementById('segEje').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-eje]');
+    if (!b) return;
+    ejeActual = b.dataset.eje;
+    Array.prototype.forEach.call(document.querySelectorAll('#segEje button'), function (x) {
+      x.classList.toggle('active', x === b);
+    });
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>
