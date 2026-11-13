@@ -4292,6 +4292,53 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     }
   }
 
+  function actualizarVerifResumen() {
+    const sum = document.getElementById('verifSummary');
+    if (!sum) return;
+    const equipos = new Set(verifData.filter((p) => p.equipo).map((p) => p.equipo));
+    const sinEquipo = verifData.filter((p) => !p.equipo).length;
+    const acreditados = verifData.filter((p) => p.acreditado).length;
+    sum.innerHTML =
+      '<span class="chip">👥 ' + equipos.size + ' equipos</span>' +
+      '<span class="chip">🙋 ' + verifData.length + ' personas</span>' +
+      '<span class="chip" style="background:rgba(6,167,125,.14);color:#0a7d5a">✅ ' + acreditados + ' acreditados</span>' +
+      '<span class="chip" style="background:rgba(242,153,74,.14);color:#9a5b00">⏳ ' + (verifData.length - acreditados) + ' pendientes</span>' +
+      '<span class="chip">⚠️ ' + sinEquipo + ' sin equipo</span>';
+  }
+
+  (function initVerifCheck() {
+    const el = document.getElementById('verifList');
+    if (!el) return;
+    el.addEventListener('change', async (e) => {
+      if (!e.target.classList.contains('verif-check')) return;
+      const id = e.target.dataset.id;
+      const acreditado = e.target.checked ? 1 : 0;
+      const item = verifData.find((p) => String(p.id) === String(id));
+      if (item) item.acreditado = acreditado;
+      actualizarVerifResumen();
+      try {
+        const res = await fetch('/api/admin/acreditar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: Number(id), acreditado: !!acreditado }),
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          e.target.checked = !e.target.checked;
+          if (item) item.acreditado = acreditado ? 0 : 1;
+          actualizarVerifResumen();
+          alert(data.error || 'No se pudo guardar la acreditación.');
+        }
+      } catch (err) {
+        e.target.checked = !e.target.checked;
+        if (item) item.acreditado = acreditado ? 0 : 1;
+        actualizarVerifResumen();
+        alert('Error de red al guardar.');
+      }
+      if (typeof loadResumen === 'function') loadResumen();
+    });
+  })();
+
   function renderVerificacion() {
     const el = document.getElementById('verifList');
     if (!el) return;
@@ -4299,8 +4346,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
     const items = verifData.filter((p) => !q || (p.nombre + ' ' + p.correo + ' ' + p.codigo + ' ' + (p.equipo || '')).toLowerCase().includes(q));
     const equipos = new Set(verifData.filter((p) => p.equipo).map((p) => p.equipo));
     const sinEquipo = verifData.filter((p) => !p.equipo).length;
-    const sum = document.getElementById('verifSummary');
-    if (sum) sum.innerHTML = '<span class="chip">👥 ' + equipos.size + ' equipos</span><span class="chip">🙋 ' + verifData.length + ' personas</span><span class="chip">⚠️ ' + sinEquipo + ' sin equipo</span>';
+    actualizarVerifResumen();
     const cnt = document.getElementById('verifCount');
     if (cnt) cnt.textContent = items.length + ' personas';
     if (items.length === 0) { el.innerHTML = '<div class="empty">Sin resultados.</div>'; return; }
@@ -4315,7 +4361,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const codigo = miembros[0].codigo || '';
       html += '<div class="group-block" style="margin-bottom:14px"><div class="sp-top"><strong>👥 ' + esc(equipo) + '</strong><span class="k">Código: ' + esc(codigo) + ' · ' + miembros.length + ' integrante(s)</span></div>' +
         '<div class="table-wrap"><table class="data-table"><thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Año</th><th>Acreditado</th></tr></thead><tbody>' +
-        miembros.map((m, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(m.nombre) + '</td><td>' + esc(m.correo) + '</td><td>' + esc(m.anio || '—') + '</td><td>' + (m.acreditado ? '✅' : '☐') + '</td></tr>').join('') +
+        miembros.map((m, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(m.nombre) + '</td><td>' + esc(m.correo) + '</td><td>' + esc(m.anio || '—') + '</td><td><input type="checkbox" class="verif-check" data-id="' + m.id + '" ' + (m.acreditado ? 'checked' : '') + ' style="width:24px;height:24px;accent-color:#06A77D;cursor:pointer"></td></tr>').join('') +
         '</tbody></table></div></div>';
     }
     el.innerHTML = html;
