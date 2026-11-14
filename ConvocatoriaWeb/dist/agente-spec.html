@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agente de Especificaciones (SDD) · Hackathon UNETI IA 2026</title>
+<meta name="description" content="Agente de IA para redactar la especificación (SPEC.md) de tu proyecto bajo Specification-Driven Development. Hackathon UNETI IA 2026.">
+<style>
+  :root { --navy: #0B1F3A; --cyan: #00B4D8; --green: #06A77D; --violet: #7C3AED; --ink: #10243E; --soft: #5B6B7C; --line: #E4EAF1; --bg: #F5F8FB; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  .top { background: var(--navy); color: #fff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .top h1 { font-size: 1.02rem; font-weight: 700; }
+  .top a { color: #9BD9EE; text-decoration: none; font-size: .85rem; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 26px 18px 56px; }
+
+  .hero { text-align: center; padding: 10px 0 8px; }
+  .hero .eyebrow { display: inline-block; background: rgba(124,58,237,.12); color: var(--violet); font-weight: 800; font-size: .71rem; letter-spacing: .08em; text-transform: uppercase; padding: 7px 14px; border-radius: 999px; margin-bottom: 14px; }
+  .hero h2 { font-size: clamp(1.65rem, 4.8vw, 2.3rem); color: var(--navy); line-height: 1.13; margin-bottom: 12px; font-weight: 800; letter-spacing: -.02em; }
+  .hero p { color: var(--soft); font-size: 1rem; line-height: 1.65; max-width: 720px; margin: 0 auto; }
+
+  .cta-box { margin: 26px auto 0; max-width: 720px; background: #fff; border: 2px solid rgba(124,58,237,.32); border-radius: 20px; padding: 28px 24px; text-align: center; box-shadow: 0 16px 42px rgba(16,36,62,.1); }
+  .cta-box .ico { font-size: 2.8rem; margin-bottom: 10px; line-height: 1; }
+  .cta-box h3 { font-size: 1.2rem; color: var(--navy); font-weight: 800; margin-bottom: 8px; }
+  .cta-box p { color: var(--soft); font-size: .9rem; line-height: 1.55; margin-bottom: 18px; }
+  .btn-gem { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 420px; padding: 17px 24px; border: 0; border-radius: 13px; font-family: inherit; font-weight: 800; font-size: 1rem; color: #fff; text-decoration: none; background: linear-gradient(135deg, #7C3AED, #4F46E5); box-shadow: 0 12px 30px rgba(124,58,237,.38); transition: transform .15s ease, box-shadow .15s ease; }
+  .btn-gem:hover { transform: translateY(-2px); box-shadow: 0 18px 42px rgba(124,58,237,.5); }
+  .cta-box .nota { font-size: .76rem; color: var(--soft); margin: 14px 0 0; }
+
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-top: 20px; box-shadow: 0 5px 20px rgba(16,36,62,.06); }
+  .card h3 { font-size: 1.08rem; color: var(--navy); font-weight: 800; margin-bottom: 6px; }
+  .card > p.k { color: var(--soft); font-size: .87rem; line-height: 1.6; margin-bottom: 16px; }
+
+  .pasos { display: grid; gap: 12px; counter-reset: p; }
+  .paso { display: flex; gap: 14px; align-items: flex-start; background: #F8FBFE; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .paso .n { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #7C3AED, #4F46E5); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .82rem; }
+  .paso .t { font-size: .88rem; line-height: 1.55; }
+  .paso .t b { color: var(--navy); }
+
+  .spec-list { list-style: none; display: grid; gap: 10px; }
+  .spec-list li { display: flex; gap: 11px; font-size: .89rem; line-height: 1.55; padding: 12px 14px; background: #F8FBFE; border: 1px solid var(--line); border-radius: 11px; }
+  .spec-list li::before { content: "▸"; color: var(--violet); font-weight: 800; flex-shrink: 0; }
+  .spec-list li b { color: var(--navy); }
+
+  .prompt { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; margin-top: 12px; background: #F8FBFE; }
+  .prompt-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 14px; background: #EEF4FA; border-bottom: 1px solid var(--line); }
+  .prompt-head span { font-size: .78rem; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; }
+  .prompt-head button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; font-family: inherit; font-weight: 800; font-size: .73rem; color: #4F46E5; cursor: pointer; }
+  .prompt-head button:hover { background: #F3F0FF; }
+  .prompt pre { margin: 0; padding: 14px 16px; font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: .8rem; line-height: 1.62; color: #243B53; white-space: pre-wrap; word-break: break-word; }
+
+  .aviso { background: #FFF8E6; border: 1px solid #F2C94C; border-radius: 12px; padding: 14px 16px; font-size: .86rem; line-height: 1.6; color: #7A5B00; margin-top: 16px; }
+
+  .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 20px; }
+  .links a { display: block; background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 15px 16px; text-decoration: none; color: inherit; box-shadow: 0 4px 14px rgba(16,36,62,.05); transition: transform .15s, border-color .15s; }
+  .links a:hover { transform: translateY(-2px); border-color: rgba(0,180,216,.5); }
+  .links a b { display: block; font-size: .9rem; color: var(--navy); margin-bottom: 3px; }
+  .links a span { font-size: .78rem; color: var(--soft); }
+
+  .foot { margin-top: 38px; text-align: center; color: var(--soft); font-size: .81rem; line-height: 1.8; }
+  .foot a { color: #0B6E8A; text-decoration: none; font-weight: 700; }
+  .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); background: #0B1F3A; color: #fff; padding: 12px 20px; border-radius: 999px; font-size: .84rem; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 999; }
+  .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>🧠 Agente de Especificaciones (SDD) · Hackathon UNETI IA 2026</h1>
+    <a href="/">← Volver al sitio</a>
+  </header>
+
+  <div class="wrap">
+    <div class="hero">
+      <span class="eyebrow">Fase 0 y 1 · Especificación</span>
+      <h2>Escribe tu <code>SPEC.md</code> con ayuda de IA</h2>
+      <p>Usa el <strong>Agente de Especificaciones</strong> para transformar tu idea en una especificación clara y verificable antes de escribir una sola línea de código. Metodología <strong>Specification-Driven Development (SDD)</strong>.</p>
+    </div>
+
+    <div class="cta-box">
+      <div class="ico">🧠</div>
+      <h3>Abrir el Agente de Especificaciones</h3>
+      <p>Haz tus preguntas, valida el problema y genera tu especificación en minutos.</p>
+      <a class="btn-gem" href="https://gemini.google.com/gem/11gpXE9d6_lpnWVDwU91C5Qxtdnfzwdcb?usp=sharing" target="_blank" rel="noopener">🧠 Abrir Agente en Gemini</a>
+      <p class="nota">Se abre en una pestaña nueva · Requiere cuenta de Google · Necesita conexión a internet</p>
+    </div>
+
+    <div class="card">
+      <h3>🎯 ¿Para qué sirve?</h3>
+      <p class="k">El agente está entrenado para aplicar la metodología del evento.</p>
+      <ul class="spec-list">
+        <li><b>Enamorarte del problema:</b> te obliga a definir el dolor real (ciudadano o ente público) antes de la tecnología.</li>
+        <li><b>Acotar el alcance:</b> convierte una idea enorme en un MVP alcanzable en las horas que quedan.</li>
+        <li><b>Criterios verificables:</b> redacta los criterios de aceptación con los que el jurado evaluará tu MVP.</li>
+        <li><b>Eje correcto:</b> te ayuda a ubicar el proyecto en IA Ética o Ciberseguridad.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>🪜 Cómo usarlo (5 pasos)</h3>
+      <div class="pasos">
+        <div class="paso"><div class="n">1</div><div class="t"><b>Elige tu proyecto</b> del <a href="/biblioteca" style="color:#0B6E8A;font-weight:700">Banco de 40 proyectos SDD</a> o propón uno propio dentro de los ejes.</div></div>
+        <div class="paso"><div class="n">2</div><div class="t"><b>Preséntate al agente:</b> dile el nombre del proyecto, el eje, el problema que quieres resolver y quién lo sufre.</div></div>
+        <div class="paso"><div class="n">3</div><div class="t"><b>Responde sus preguntas:</b> te pedirá usuarios, alcance mínimo, datos, riesgos y límites éticos.</div></div>
+        <div class="paso"><div class="n">4</div><div class="t"><b>Genera tu <code>SPEC.md</code>:</b> pídele la versión final en Markdown y cópiala al repositorio.</div></div>
+        <div class="paso"><div class="n">5</div><div class="t"><b>Pásalo a código:</b> con la spec cerrada, divide el trabajo del <a href="/en-vivo" style="color:#0B6E8A;font-weight:700">minuto a minuto</a>.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📄 Qué debe contener tu SPEC.md</h3>
+      <p class="k">Verifica que la especificación generada incluya estos bloques.</p>
+      <ul class="spec-list">
+        <li><b>Problema central:</b> qué duele, a quién y cuánto (con cifra medible).</li>
+        <li><b>Usuarios objetivo:</b> el ente público o segmento específico que lo sufre.</li>
+        <li><b>Propuesta de valor:</b> la solución en una sola frase contundente.</li>
+        <li><b>Alcance del MVP:</b> qué SÍ entra y qué queda explícitamente fuera.</li>
+        <li><b>Criterios de aceptación:</b> cómo se verifica que la función principal funciona.</li>
+        <li><b>Arquitectura técnica:</b> frontend, backend, datos, modelo de IA o controles de seguridad.</li>
+        <li><b>Ética y privacidad:</b> qué datos tratas, cómo evitas sesgos y cómo garantizas explicabilidad.</li>
+        <li><b>Riesgos y supuestos:</b> qué puede fallar y qué estás asumiendo.</li>
+        <li><b>Declaración de uso de IA:</b> qué herramientas usaste y para qué (obligatoria en el evento).</li>
+      </ul>
+      <div class="aviso">
+        <strong>⚠️ Recuerda:</strong> el agente te ayuda a <em>pensar y redactar</em>, pero la validación del problema y el alcance final son decisión del equipo. Declara siempre el uso de IA en tu proyecto.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📋 Prompts listos para copiar</h3>
+      <p class="k">Pega cualquiera de estos textos en el agente y adáptalo a tu proyecto.</p>
+
+      <div class="prompt">
+        <div class="prompt-head"><span>Prompt 1 · Especificación inicial</span><button type="button" data-copy="p1">Copiar</button></div>
+        <pre id="p1">Actúa como arquitecto de soluciones para un hackathon de 48 horas. Mi proyecto se llama [NOMBRE] y pertenece al eje de [IA ÉTICA / CIBERSEGURIDAD]. El problema que quiero resolver es [DESCRIBE EL PROBLEMA] y lo sufren [USUARIOS / ENTE PÚBLICO]. Ayúdame a redactar una especificación (SPEC.md) bajo Specification-Driven Development que incluya: problema central con una cifra medible, usuarios objetivo, propuesta de valor en una frase, alcance mínimo del MVP, criterios de aceptación verificables, arquitectura técnica propuesta, consideraciones éticas y de privacidad, riesgos y supuestos. Sé concreto y realista: solo lo que se puede construir en las horas disponibles.</pre>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-head"><span>Prompt 2 · Recortar el alcance</span><button type="button" data-copy="p2">Copiar</button></div>
+        <pre id="p2">Esta es mi idea de proyecto: [DESCRIBE]. Solo tengo [N] horas de desarrollo y un equipo de [N] personas. Ayúdame a recortarla hasta un MVP que se pueda demostrar en vivo sin fallar. Dime: 1) cuál es la única función nuclear que debo construir, 2) qué debo eliminar del alcance, 3) qué puedo simular o dejar como maqueta, y 4) cuáles serían los criterios de aceptación de esa función nuclear.</pre>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-head"><span>Prompt 3 · Revisar mi spec</span><button type="button" data-copy="p3">Copiar</button></div>
+        <pre id="p3">Te comparto mi especificación actual: [PEGA TU SPEC]. Revísala como si fueras el jurado del Hackathon UNETI IA 2026 y evalúa los 6 criterios: viabilidad técnica del MVP, impacto y relevancia del problema, innovación y uso de IA, ética y responsabilidad, escalabilidad y sostenibilidad, y calidad del pitch. Señala los puntos débiles, las promesas que no se pueden cumplir en el tiempo disponible y qué tres cambios harían la propuesta más sólida.</pre>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-head"><span>Prompt 4 · Declaración de uso de IA</span><button type="button" data-copy="p4">Copiar</button></div>
+        <pre id="p4">Ayúdame a redactar la declaración obligatoria de uso de IA para mi proyecto [NOMBRE]. Usé las siguientes herramientas: [LISTA: Gemini, DeepSeek Harness, Unitron, Cloudflare Workers AI, etc.]. Para cada una indica: en qué parte del proyecto la usé, qué me aportó y qué verifiqué manualmente. Formato: una tabla con columnas Herramienta / Uso / Verificación humana.</pre>
+      </div>
+    </div>
+
+    <div class="links">
+      <a href="/en-vivo" target="_blank" rel="noopener"><b>⏱️ Minuto a minuto</b><span>Qué hacer ahora según la hora</span></a>
+      <a href="/biblioteca" target="_blank" rel="noopener"><b>📚 Biblioteca SDD</b><span>40 proyectos de referencia</span></a>
+      <a href="/remoto" target="_blank" rel="noopener"><b>💻 Panel remoto</b><span>Reportar proyecto y avances</span></a>
+      <a href="/datos" target="_blank" rel="noopener"><b>✅ Confirmar asistencia</b><span>Presenciales</span></a>
+    </div>
+
+    <div class="foot">
+      <p>Agente de Especificaciones · Metodología Specification-Driven Development (SDD)</p>
+      <p><a href="/">Hackathon UNETI IA 2026</a> · 13 y 14 de noviembre · Parque Tecnológico + Más Ciencia (IVIC)</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copiado ✓</div>
+
+<script>
+(function () {
+  var toast = document.getElementById('toast');
+  var timer = null;
+
+  function mostrarToast(txt) {
+    toast.textContent = txt;
+    toast.classList.add('on');
+    clearTimeout(timer);
+    timer = setTimeout(function () { toast.classList.remove('on'); }, 1800);
+  }
+
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-copy');
+      var el = document.getElementById(id);
+      if (!el) return;
+      var texto = el.textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto).then(function () {
+          mostrarToast('Prompt copiado ✓');
+        }).catch(function () {
+          fallback(texto);
+        });
+      } else {
+        fallback(texto);
+      }
+    });
+  });
+
+  function fallback(texto) {
+    var ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); mostrarToast('Prompt copiado ✓'); }
+    catch (e) { mostrarToast('No se pudo copiar'); }
+    document.body.removeChild(ta);
+  }
+})();
+</script>
+</body>
+</html>
