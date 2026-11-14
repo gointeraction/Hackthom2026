@@ -1,0 +1,2 @@
+ALTER TABLE teams ADD COLUMN oculto INTEGER NOT NULL DEFAULT 0;
+UPDATE teams SET oculto = 1 WHERE nombre = 'Grupo 4D25D469';

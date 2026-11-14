@@ -1,8 +1,9 @@
 // /api/admin/resultados — sumariza las evaluaciones del jurado y ordena por puntaje ponderado.
+// Los equipos con `oculto = 1` no aparecen en los resultados.
 export async function onRequestGet({ env }) {
   try {
     const { results: scores } = await env.DB.prepare('SELECT * FROM scores').all();
-    const { results: teams } = await env.DB.prepare('SELECT * FROM teams').all();
+    const { results: teams } = await env.DB.prepare('SELECT id, nombre, oculto FROM teams').all();
 
     const WEIGHTS = {
       viabilidad: 0.25,
@@ -20,25 +21,38 @@ export async function onRequestGet({ env }) {
       (c[s.criterio] = c[s.criterio] || []).push(s.puntaje);
     }
 
-    const names = new Map(teams.map((t) => [t.id, t.nombre]));
+    const infoById = new Map();
+    for (const t of teams) infoById.set(t.id, { nombre: t.nombre, oculto: Number(t.oculto) === 1 });
+
     const resultados = [];
 
     for (const [teamId, criterios] of teamMap.entries()) {
+      const info = infoById.get(teamId);
+      if (info && info.oculto) continue; // equipo oculto: no se muestra
+
       let weighted = 0;
       let totalPts = 0;
+      let sumaPuntajes = 0;
+      let nCriterios = 0;
+
       for (const [crit, w] of Object.entries(WEIGHTS)) {
         const pts = criterios[crit];
         if (pts && pts.length) {
           const avg = pts.reduce((a, b) => a + b, 0) / pts.length;
           weighted += avg * w;
           totalPts += pts.length;
+          sumaPuntajes += avg;
+          nCriterios++;
         }
       }
+
       resultados.push({
         team_id: teamId,
-        nombre: names.get(teamId) || ('Equipo ' + teamId),
+        nombre: (info && info.nombre) || ('Equipo ' + teamId),
         puntaje: Math.round(weighted * 100) / 100,
         evaluaciones: totalPts,
+        criterios_evaluados: nCriterios,
+        promedio_simple: nCriterios ? Math.round((sumaPuntajes / nCriterios) * 100) / 100 : 0,
       });
     }
 
