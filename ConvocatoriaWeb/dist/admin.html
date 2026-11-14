@@ -334,6 +334,7 @@
           <button class="menu-btn" data-panel="evaluacion"><span class="ic">🎯</span> Evaluación IA</button>
           <button class="menu-btn" data-panel="resultados"><span class="ic">🏆</span> Resultados</button>
           <button class="menu-btn" data-panel="triajeproyectos"><span class="ic">🔀</span> Triaje proyectos</button>
+          <button class="menu-btn" data-panel="entregas-equipo"><span class="ic">📦</span> Entregas de equipos <span class="cnt" id="cntEntregasEquipo">0</span></button>
           <button class="menu-btn" data-panel="encuestas"><span class="ic">📝</span> Encuestas</button>
         </div>
       </div>
@@ -1817,6 +1818,33 @@
       </div>
     </section>
 
+    <!-- ENTREGAS DE EQUIPOS -->
+    <section class="panel" id="panel-entregas-equipo">
+      <div class="sec-head">
+        <span class="kicker">Evaluación</span>
+        <h2>Entregas de equipos</h2>
+        <p>Repositorio de GitHub y presentación en Drive cargados por cada equipo desde <strong>/entrega-equipo</strong>.</p>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+        <input type="text" id="entEqSearch" placeholder="🔍 Buscar equipo, repo, Drive o descripción…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--line);border-radius:8px">
+        <select id="entEqFiltro" style="padding:10px 12px;border:1px solid var(--line);border-radius:8px">
+          <option value="todos">Todos</option>
+          <option value="entregados">✅ Entregaron</option>
+          <option value="pendientes">⏳ Pendientes</option>
+        </select>
+        <button type="button" class="btn" id="entEqRefresh">🔄 Actualizar</button>
+        <button type="button" class="btn" id="entEqCsv">⬇️ CSV</button>
+        <button type="button" class="btn" id="entEqPrint">🖨️ Imprimir</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <span class="count" id="entEqCount" style="margin:0">0 equipos</span>
+        <span id="entEqResumen" style="display:flex;gap:8px;flex-wrap:wrap"></span>
+      </div>
+
+      <div id="entEqList" style="display:grid;gap:12px"></div>
+    </section>
+
     <!-- BIBLIOTECA DE PROYECTOS -->
     <section class="panel" id="panel-biblioteca">
       <div class="sec-head">
@@ -2216,6 +2244,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Cada panel recarga sus datos al abrirse (el dashboard siempre).
   const PANEL_LOADERS = {
     dashboard: () => loadResumen(),
+    'entregas-equipo': () => loadEntregasEquipo(),
     equipos: () => { loadTeams(); loadParticipantesEquipo(); loadTeamsForScore(); },
     participantes: () => { loadTeams(); loadParticipantesEquipo(); },
     jurados: () => loadJudges(),
@@ -2286,7 +2315,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','enlaces','criterios','equipos','participantes','jurados','mentores','invitados','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','enlaces','entregas-equipo','criterios','equipos','participantes','jurados','mentores','invitados','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -3642,6 +3671,128 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       cont.innerHTML = `<div class="ar-item"><strong>📊 Datos:</strong> ${esc(data.datos)}</div><div class="ar-item">${esc(data.resumen || 'No se pudo generar el resumen.')}</div>`;
     } catch (e) { cont.innerHTML = '<span class="empty">Error.</span>'; }
   });
+
+  // ===== Entregas de equipos =====
+  let entEqData = [];
+
+  async function loadEntregasEquipo() {
+    const cont = document.getElementById('entEqList');
+    if (!cont) return;
+    try {
+      const res = await fetch('/api/entrega-equipo');
+      const data = await res.json();
+      entEqData = data.equipos || [];
+      const badge = document.getElementById('cntEntregasEquipo');
+      if (badge) badge.textContent = entEqData.filter((e) => e.entregado).length;
+      renderEntEq();
+    } catch (e) {
+      cont.innerHTML = '<div class="empty">Error al cargar las entregas.</div>';
+    }
+  }
+
+  function entEqFiltrados() {
+    const q = ((document.getElementById('entEqSearch') || {}).value || '').trim().toLowerCase();
+    const f = (document.getElementById('entEqFiltro') || {}).value || 'todos';
+    return entEqData.filter((e) => {
+      const okF = f === 'todos' || (f === 'entregados' ? e.entregado : !e.entregado);
+      const okQ = !q || ((e.nombre || '') + ' ' + (e.codigo || '') + ' ' + (e.repositorio || '') + ' ' + (e.deck || '') + ' ' + (e.descripcion || '')).toLowerCase().indexOf(q) !== -1;
+      return okF && okQ;
+    });
+  }
+
+  function renderEntEq() {
+    const cont = document.getElementById('entEqList');
+    if (!cont) return;
+    const items = entEqFiltrados();
+    const total = entEqData.length;
+    const entregados = entEqData.filter((e) => e.entregado).length;
+
+    const cnt = document.getElementById('entEqCount');
+    if (cnt) cnt.textContent = items.length + ' equipo(s)';
+    const res = document.getElementById('entEqResumen');
+    if (res) {
+      res.innerHTML =
+        '<span style="background:#DFF5E8;color:#1a9e5c;padding:5px 12px;border-radius:999px;font-weight:700;font-size:.78rem">✅ Entregaron: ' + entregados + '</span>' +
+        '<span style="background:#FFF3D6;color:#9a6a00;padding:5px 12px;border-radius:999px;font-weight:700;font-size:.78rem">⏳ Pendientes: ' + (total - entregados) + '</span>' +
+        '<span style="background:#EAF7FB;color:#0B6E8A;padding:5px 12px;border-radius:999px;font-weight:700;font-size:.78rem">Total: ' + total + '</span>';
+    }
+
+    if (!items.length) { cont.innerHTML = '<div class="empty">Sin equipos en este filtro.</div>'; return; }
+
+    cont.innerHTML = items.map((e) => {
+      const estado = e.entregado
+        ? '<span style="background:#DFF5E8;color:#1a9e5c;padding:3px 10px;border-radius:999px;font-weight:800;font-size:.72rem">✅ Entregó</span>'
+        : '<span style="background:#FFF3D6;color:#9a6a00;padding:3px 10px;border-radius:999px;font-weight:800;font-size:.72rem">⏳ Pendiente</span>';
+
+      const fila = (icono, label, url) => url
+        ? '<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #F1F5F9"><span style="flex-shrink:0">' + icono + '</span><span style="flex:1;min-width:0"><span style="display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:800;margin-bottom:2px">' + label + '</span><a href="' + esc(url) + '" target="_blank" rel="noopener" style="color:#0B6E8A;font-weight:700;font-size:.83rem;word-break:break-all;text-decoration:none">' + esc(url) + '</a></span></div>'
+        : '<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #F1F5F9;opacity:.55"><span style="flex-shrink:0">' + icono + '</span><span style="flex:1"><span style="display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:800;margin-bottom:2px">' + label + '</span><span style="font-size:.83rem;color:var(--ink-soft)">— sin cargar —</span></span></div>';
+
+      return '<div class="group-block" style="padding:16px 18px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">' +
+          '<div><strong style="font-size:1.05rem">📦 ' + esc(e.nombre) + '</strong>' +
+          (e.codigo ? ' <code style="background:#EAF7FB;color:#0B6E8A;padding:2px 8px;border-radius:5px;font-weight:800;font-size:.72rem;letter-spacing:.06em">' + esc(e.codigo) + '</code>' : '') +
+          '</div>' + estado +
+        '</div>' +
+        fila('🐙', 'Repositorio GitHub', e.repositorio) +
+        fila('📊', 'Presentación (Drive)', e.deck) +
+        fila('🌐', 'Demo en vivo', e.demo) +
+        fila('🎬', 'Video', e.video) +
+        (e.descripcion ? '<div style="margin-top:10px;background:#F8FBFE;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:.84rem;line-height:1.55;color:var(--ink)"><strong style="display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:4px">Descripción</strong>' + esc(e.descripcion) + '</div>' : '') +
+        (e.actualizado ? '<div style="margin-top:10px;font-size:.72rem;color:var(--ink-soft)">🕒 Actualizado: ' + esc(e.actualizado) + '</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  (function initEntregasEquipo() {
+    const s = document.getElementById('entEqSearch');
+    if (s) s.addEventListener('input', renderEntEq);
+    const f = document.getElementById('entEqFiltro');
+    if (f) f.addEventListener('change', renderEntEq);
+    const r = document.getElementById('entEqRefresh');
+    if (r) r.addEventListener('click', () => loadEntregasEquipo());
+
+    const csv = document.getElementById('entEqCsv');
+    if (csv) csv.addEventListener('click', () => {
+      const items = entEqFiltrados();
+      if (!items.length) { alert('No hay equipos para exportar.'); return; }
+      const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const filas = ['"#","Equipo","Código","Entregó","Repositorio GitHub","Presentación Drive","Demo","Video","Descripción","Actualizado"'];
+      items.forEach((e, i) => {
+        filas.push([cell(i + 1), cell(e.nombre), cell(e.codigo), cell(e.entregado ? 'Sí' : 'No'), cell(e.repositorio), cell(e.deck), cell(e.demo), cell(e.video), cell(e.descripcion), cell(e.actualizado)].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'entregas-equipos-2026.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    const pr = document.getElementById('entEqPrint');
+    if (pr) pr.addEventListener('click', () => {
+      const items = entEqFiltrados();
+      if (!items.length) { alert('No hay equipos para imprimir.'); return; }
+      const filas = items.map((e, i) => '<tr>' +
+        '<td>' + (i + 1) + '</td>' +
+        '<td>' + esc(e.nombre) + '</td>' +
+        '<td style="font-family:monospace">' + esc(e.codigo || '—') + '</td>' +
+        '<td>' + (e.entregado ? 'Sí' : 'No') + '</td>' +
+        '<td style="word-break:break-all;font-size:9px">' + esc(e.repositorio || '—') + '</td>' +
+        '<td style="word-break:break-all;font-size:9px">' + esc(e.deck || '—') + '</td>' +
+        '</tr>').join('');
+      const w = window.open('', '_blank');
+      if (!w) { alert('Permite ventanas emergentes.'); return; }
+      w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Entregas de equipos</title>' +
+        '<style>body{font-family:Arial,sans-serif;padding:14px}h1{font-size:16px;margin:0 0 4px}h2{font-size:11px;font-weight:400;color:#555;margin:0 0 12px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #999;padding:5px 6px;text-align:left}th{background:#eee;text-transform:uppercase;font-size:9px}@media print{@page{size:A4 landscape;margin:8mm}body{padding:0}thead{display:table-header-group}}</style></head><body>' +
+        '<h1>Hackathon UNETI IA 2026 — Entregas de equipos</h1>' +
+        '<h2>' + new Date().toLocaleString('es-VE') + ' · ' + items.length + ' equipo(s)</h2>' +
+        '<table><thead><tr><th>#</th><th>Equipo</th><th>Código</th><th>Entregó</th><th>GitHub</th><th>Presentación (Drive)</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+        '</body></html>');
+      w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+  })();
 
   // ===== Biblioteca de proyectos =====
   const PROYECTOS = [
