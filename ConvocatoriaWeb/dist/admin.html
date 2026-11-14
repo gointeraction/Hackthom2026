@@ -1227,6 +1227,29 @@
         </div>
       </div>
 
+      <div class="form-card" style="margin-top:16px">
+        <h3>🔎 Evaluación IA del repositorio (informativa)</h3>
+        <p style="font-size:.86rem;color:var(--ink-soft);line-height:1.55;margin-bottom:12px">
+          La IA analiza el <strong>GitHub real del equipo</strong> (README, archivos, lenguajes, actividad) y emite una nota orientativa con los 6 criterios.
+          <br><strong style="color:#B5179E">⚠️ No se suma al promedio de los jurados</strong>: vive en una tabla separada y solo sirve como referencia.
+        </p>
+        <div class="frow">
+          <div class="field">
+            <label>Equipo</label>
+            <select id="iaRepoTeam"><option value="">Cargando equipos…</option></select>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end;gap:8px">
+            <button type="button" class="btn" id="iaRepoRun" style="background:linear-gradient(135deg,#0EA5E9,#7C3AED)">🤖 Evaluar repositorio</button>
+            <button type="button" class="btn" id="iaRepoAll">Evaluar todos</button>
+          </div>
+        </div>
+        <div class="form-status" id="iaRepoStatus"></div>
+      </div>
+
+      <div id="iaRepoResult" style="display:grid;gap:12px;margin-top:14px"></div>
+
+      <div id="iaRepoHist" style="margin-top:22px"></div>
+
       <div class="counts">
         <span id="cntPreseleccionados">0/20 preseleccionados</span>
         <span id="cntFinales">0/10 finales</span>
@@ -3075,6 +3098,121 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       </div>`;
     return el;
   }
+
+  // ===== Evaluación IA del repositorio (informativa, NO afecta a los jurados) =====
+  async function loadIaRepoTeams() {
+    const sel = document.getElementById('iaRepoTeam');
+    if (!sel) return;
+    try {
+      const res = await fetch('/api/entrega-equipo');
+      const data = await res.json();
+      const eq = data.equipos || [];
+      sel.innerHTML = '<option value="">— Selecciona un equipo —</option>' + eq.map((e) =>
+        '<option value="' + e.id + '">' + esc(e.nombre) + (e.entregado ? '  ✅' : '  ⏳ sin repo') + '</option>'
+      ).join('');
+    } catch (e) {
+      sel.innerHTML = '<option value="">Error al cargar equipos</option>';
+    }
+  }
+
+  function renderIaRepoCard(r) {
+    const criterios = [
+      ['Viabilidad', r.viabilidad, '25 %'],
+      ['Impacto', r.impacto, '20 %'],
+      ['Innovación', r.innovacion, '20 %'],
+      ['Pitch', r.pitch, '15 %'],
+      ['Ética', r.etica, '10 %'],
+      ['Escalabilidad', r.escalabilidad, '10 %'],
+    ];
+    const barras = criterios.map(([n, v, p]) => {
+      const pct = Math.max(0, Math.min(100, (Number(v) / 5) * 100));
+      return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">' +
+        '<span style="width:110px;font-size:.76rem;font-weight:700;color:var(--ink-soft)">' + n + ' <span style="opacity:.6">' + p + '</span></span>' +
+        '<div style="flex:1;height:9px;background:#EEF4FA;border-radius:999px;overflow:hidden"><i style="display:block;height:100%;width:' + pct + '%;background:linear-gradient(90deg,#0EA5E9,#7C3AED);border-radius:999px"></i></div>' +
+        '<strong style="width:38px;text-align:right;font-size:.8rem">' + (Number(v) || 0).toFixed(1) + '</strong>' +
+        '</div>';
+    }).join('');
+
+    return '<div class="group-block" style="padding:16px 18px;border-left:4px solid #7C3AED">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">' +
+        '<div><strong style="font-size:1.05rem">🤖 ' + esc(r.equipo || r.equipo_nombre || '') + '</strong>' +
+        (r.codigo ? ' <code style="background:#F3F0FF;color:#7C3AED;padding:2px 8px;border-radius:5px;font-weight:800;font-size:.72rem">' + esc(r.codigo) + '</code>' : '') +
+        (r.repositorio ? '<div style="font-size:.74rem;color:var(--ink-soft);margin-top:3px;word-break:break-all">' + esc(r.repositorio) + '</div>' : '') +
+        '</div>' +
+        '<div style="text-align:right"><div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-weight:800">Puntaje IA</div><div style="font-size:1.5rem;font-weight:800;color:#7C3AED">' + (Number(r.puntaje) || 0).toFixed(2) + ' <span style="font-size:.7rem;color:var(--ink-soft)">/ 5</span></div></div>' +
+      '</div>' +
+      barras +
+      (r.justificacion ? '<div style="margin-top:12px;background:#F8FBFE;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:.84rem;line-height:1.55"><strong style="display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:4px">Justificación</strong>' + esc(r.justificacion) + '</div>' : '') +
+      (r.fortalezas ? '<div style="margin-top:8px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:11px 13px;font-size:.82rem;line-height:1.5"><strong style="display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:#15803D;margin-bottom:3px">✅ Fortalezas</strong>' + esc(r.fortalezas) + '</div>' : '') +
+      (r.riesgos ? '<div style="margin-top:8px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:11px 13px;font-size:.82rem;line-height:1.5"><strong style="display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:#C2410C;margin-bottom:3px">⚠️ Riesgos</strong>' + esc(r.riesgos) + '</div>' : '') +
+      (r.creado_en ? '<div style="margin-top:10px;font-size:.7rem;color:var(--ink-soft)">🕒 Evaluado: ' + esc(r.creado_en) + '</div>' : '') +
+      '</div>';
+  }
+
+  async function loadIaRepoHist() {
+    const cont = document.getElementById('iaRepoHist');
+    if (!cont) return;
+    try {
+      const res = await fetch('/api/admin/evaluacion-repo');
+      const data = await res.json();
+      const items = data.evaluaciones || [];
+      if (!items.length) { cont.innerHTML = ''; return; }
+      cont.innerHTML = '<h3 style="font-size:1rem;margin-bottom:10px">📊 Evaluaciones IA guardadas (' + items.length + ')</h3>' +
+        '<div style="background:#FFF8E6;border:1px solid #F2C94C;border-radius:10px;padding:10px 14px;font-size:.82rem;color:#7A5B00;margin-bottom:12px;line-height:1.5">' +
+        '<strong>⚠️ Informativo:</strong> estas notas NO se suman al promedio de los jurados ni afectan el ranking oficial.' +
+        '</div>' +
+        '<div style="display:grid;gap:12px">' + items.map(renderIaRepoCard).join('') + '</div>';
+    } catch (e) {}
+  }
+
+  async function runIaRepo(todos) {
+    const st = document.getElementById('iaRepoStatus');
+    const btn = todos ? document.getElementById('iaRepoAll') : document.getElementById('iaRepoRun');
+    const teamId = document.getElementById('iaRepoTeam').value;
+
+    if (!todos && !teamId) { setStatus('iaRepoStatus', 'Selecciona un equipo.', false); return; }
+
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = '⏳ Analizando repositorio…';
+    setStatus('iaRepoStatus', 'Leyendo el repositorio de GitHub y consultando la IA…', true);
+
+    try {
+      const res = await fetch('/api/admin/evaluacion-repo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(todos ? { todos: true } : { team_id: Number(teamId) }),
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        const res1 = document.getElementById('iaRepoResult');
+        if (res1) res1.innerHTML = (data.resultados || []).map(renderIaRepoCard).join('');
+        setStatus('iaRepoStatus', '✅ Evaluadas ' + data.evaluadas + ' repositorio(s). Nota: no afecta a los jurados.', true);
+        loadIaRepoHist();
+      } else {
+        const detalle = (data.errores || []).map((e) => e.equipo + ': ' + e.error).join(' · ');
+        setStatus('iaRepoStatus', (data.error || 'No se pudo evaluar.') + (detalle ? ' — ' + detalle : ''), false);
+      }
+    } catch (e) {
+      setStatus('iaRepoStatus', 'Error de conexión.', false);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  }
+
+  (function initIaRepo() {
+    const run = document.getElementById('iaRepoRun');
+    if (run) run.addEventListener('click', () => runIaRepo(false));
+    const all = document.getElementById('iaRepoAll');
+    if (all) all.addEventListener('click', () => {
+      if (!confirm('¿Evaluar con IA todos los equipos que ya cargaron su repositorio?')) return;
+      runIaRepo(true);
+    });
+    loadIaRepoTeams();
+    loadIaRepoHist();
+  })();
 
   document.getElementById('savePrompt').addEventListener('click', async () => {
     const prompt = document.getElementById('evalPrompt').value;
