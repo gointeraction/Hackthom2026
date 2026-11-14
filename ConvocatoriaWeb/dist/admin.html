@@ -299,6 +299,13 @@
       <button class="menu-btn active" data-panel="dashboard"><span class="ic">📊</span> Dashboard</button>
 
       <div class="menu-group">
+        <button type="button" class="menu-group-toggle" data-group="sitio">🔗 Páginas y herramientas <span class="gt">▾</span></button>
+        <div class="menu-group-items" data-group="sitio">
+          <button class="menu-btn" data-panel="enlaces"><span class="ic">🔗</span> Enlaces del evento</button>
+        </div>
+      </div>
+
+      <div class="menu-group">
         <button type="button" class="menu-group-toggle" data-group="inscripciones">👥 Inscripciones <span class="gt">▾</span></button>
         <div class="menu-group-items" data-group="inscripciones">
           <button class="menu-btn" data-panel="equipos"><span class="ic">👥</span> Equipos <span class="cnt" id="cntEquipos">0</span></button>
@@ -1723,6 +1730,86 @@
       </div>
     </section>
 
+    <!-- ENLACES DEL EVENTO -->
+    <section class="panel" id="panel-enlaces">
+      <div class="sec-head">
+        <span class="kicker">Accesos rápidos</span>
+        <h2>Enlaces del evento</h2>
+        <p>Todas las páginas públicas y herramientas del Hackathon UNETI IA 2026 en un solo lugar.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:8px">
+        <a href="/en-vivo" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:linear-gradient(135deg,#1A0B2E,#2D1052);border:1px solid #4C1D95;border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">⏱️</div>
+          <strong style="display:block;font-size:1.05rem;color:#fff;margin-bottom:4px">Minuto a minuto</strong>
+          <span style="font-size:.82rem;color:#C4B5FD;line-height:1.5">Fase actual, qué hacer ahora, turnos de relevo y checklist.</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:#A78BFA;letter-spacing:.06em">/en-vivo →</div>
+        </a>
+
+        <a href="/agente-spec" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:linear-gradient(135deg,#1B1140,#312E81);border:1px solid #4338CA;border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">🧠</div>
+          <strong style="display:block;font-size:1.05rem;color:#fff;margin-bottom:4px">Agente de Especificaciones</strong>
+          <span style="font-size:.82rem;color:#C7D2FE;line-height:1.5">Guía SDD, prompts listos y enlace al agente de Gemini.</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:#818CF8;letter-spacing:.06em">/agente-spec →</div>
+        </a>
+
+        <a href="/biblioteca" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">📚</div>
+          <strong style="display:block;font-size:1.05rem;color:var(--ink);margin-bottom:4px">Biblioteca SDD</strong>
+          <span style="font-size:.82rem;color:var(--ink-soft);line-height:1.5">40 documentos de proyecto con filtro por eje.</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:var(--cyan);letter-spacing:.06em">/biblioteca →</div>
+        </a>
+
+        <a href="/remoto" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">💻</div>
+          <strong style="display:block;font-size:1.05rem;color:var(--ink);margin-bottom:4px">Panel de remotos</strong>
+          <span style="font-size:.82rem;color:var(--ink-soft);line-height:1.5">Entrega de proyecto, consultas a mentores y Unitron.</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:var(--cyan);letter-spacing:.06em">/remoto →</div>
+        </a>
+
+        <a href="/jurado" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">⚖️</div>
+          <strong style="display:block;font-size:1.05rem;color:var(--ink);margin-bottom:4px">Panel de jurados</strong>
+          <span style="font-size:.82rem;color:var(--ink-soft);line-height:1.5">Acceso por código para evaluar equipos con la rúbrica.</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:var(--cyan);letter-spacing:.06em">/jurado →</div>
+        </a>
+
+        <a href="/datos" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">✅</div>
+          <strong style="display:block;font-size:1.05rem;color:var(--ink);margin-bottom:4px">Confirmar asistencia</strong>
+          <span style="font-size:.82rem;color:var(--ink-soft);line-height:1.5">Formulario de cédula y teléfono para presenciales.</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:var(--cyan);letter-spacing:.06em">/datos →</div>
+        </a>
+
+        <a href="/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">🌐</div>
+          <strong style="display:block;font-size:1.05rem;color:var(--ink);margin-bottom:4px">Sitio público</strong>
+          <span style="font-size:.82rem;color:var(--ink-soft);line-height:1.5">Página principal con agenda, comunicados y patrocinadores.</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:var(--cyan);letter-spacing:.06em">/ →</div>
+        </a>
+
+        <a href="/en-vivo" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;display:block">
+          <div style="font-size:2rem;margin-bottom:8px">📊</div>
+          <strong style="display:block;font-size:1.05rem;color:var(--ink);margin-bottom:4px">Dashboard en vivo</strong>
+          <span style="font-size:.82rem;color:var(--ink-soft);line-height:1.5">Estado del evento minuto a minuto (vista pública).</span>
+          <div style="margin-top:10px;font-size:.72rem;font-weight:800;color:var(--cyan);letter-spacing:.06em">/en-vivo →</div>
+        </a>
+      </div>
+
+      <h3 style="margin:26px 0 12px;font-size:1rem">🎥 Salas y canales</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+        <a href="https://www.youtube.com/watch?v=oNbL-NB3aXo" target="_blank" rel="noopener" class="btn" style="text-decoration:none;text-align:center;padding:14px">▶️ Transmisión en vivo (YouTube)</a>
+        <a href="https://meet.google.com/qjh-gaav-reo" target="_blank" rel="noopener" class="btn" style="text-decoration:none;text-align:center;padding:14px">🎥 Sala de Google Meet</a>
+        <a href="https://drive.google.com/drive/folders/12dciOXLuOc1RJdYkoWbCaHNlEv-kMKxO?usp=sharing" target="_blank" rel="noopener" class="btn" style="text-decoration:none;text-align:center;padding:14px">📁 Carpeta de Drive</a>
+        <a href="https://gemini.google.com/gem/11gpXE9d6_lpnWVDwU91C5Qxtdnfzwdcb?usp=sharing" target="_blank" rel="noopener" class="btn" style="text-decoration:none;text-align:center;padding:14px">🧠 Agente en Gemini</a>
+        <a href="https://t.me/+3u7vzOq8LBFmYzUx" target="_blank" rel="noopener" class="btn" style="text-decoration:none;text-align:center;padding:14px">📲 Canal de Telegram</a>
+      </div>
+
+      <div style="margin-top:26px;background:#EAF7FB;border:1px solid rgba(0,180,216,.35);border-radius:12px;padding:14px 16px;font-size:.86rem;color:#0B4A63;line-height:1.6">
+        <strong>💡 Tip:</strong> comparte estos enlaces por Telegram con los participantes. Todos son públicos y no requieren inicio de sesión (excepto el panel remoto y el de jurados, que piden código).
+      </div>
+    </section>
+
     <!-- BIBLIOTECA DE PROYECTOS -->
     <section class="panel" id="panel-biblioteca">
       <div class="sec-head">
@@ -2192,7 +2279,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','criterios','equipos','participantes','jurados','mentores','invitados','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','enlaces','criterios','equipos','participantes','jurados','mentores','invitados','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
