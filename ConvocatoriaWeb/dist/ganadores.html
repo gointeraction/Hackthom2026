@@ -158,6 +158,16 @@
     box-shadow: 0 16px 50px rgba(0,180,216,.30);
   }
 
+  /* ===== RECONOCIMIENTO ===== */
+  .reco-wrap { max-width: 1080px; margin: 0 auto; padding: 34px 18px 0; }
+  .reco { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; background: #FFFDF5; border: 2px dashed #E0A500; border-radius: 20px; padding: 24px 26px; box-shadow: 0 14px 40px rgba(224,165,0,.14); }
+  .reco .icono { font-size: 3rem; line-height: 1; flex-shrink: 0; }
+  .reco .txt { flex: 1; min-width: 220px; }
+  .reco .kicker2 { font-size: .64rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #B8860B; margin-bottom: 6px; }
+  .reco h3 { font-family: var(--font-display); font-size: clamp(1.15rem, 3vw, 1.5rem); color: var(--navy-900); font-weight: 700; margin-bottom: 6px; letter-spacing: -.01em; }
+  .reco p { font-size: .88rem; color: var(--ink-soft); line-height: 1.55; }
+  .reco .badge2 { font-size: .7rem; font-weight: 800; background: rgba(224,165,0,.15); color: #8A6500; padding: 6px 13px; border-radius: 999px; white-space: nowrap; }
+
   /* ===== MENSAJE ===== */
   .mensaje {
     position: relative; z-index: 4; max-width: 860px; margin: 46px auto 0; padding: 0 18px;
@@ -227,6 +237,10 @@
 </section>
 
 <div class="base"><div class="franja"></div></div>
+
+<div class="reco-wrap">
+  <div class="reco" id="reco" style="display:none"></div>
+</div>
 
 <div class="mensaje">
   <div class="card">
@@ -303,13 +317,46 @@
 
   var podio = document.getElementById('podio');
 
-  fetch('/api/leaderboard')
+  fetch('/api/ganadores')
     .then(function (r) { return r.json(); })
     .then(function (d) {
-      var top = (d && d.ranking) ? d.ranking.slice(0, 3) : [];
-      // top[0] = 1º, top[1] = 2º, top[2] = 3º
-      var porPuesto = { primero: top[0], segundo: top[1], tercero: top[2] };
-      podio.innerHTML = PUESTOS.map(function (p) { return tarjeta(p, porPuesto[p.clase]); }).join('');
+      var puestos = (d && d.puestos) ? d.puestos : [];
+      var recos = (d && d.reconocimientos) ? d.reconocimientos : [];
+      var porPuesto = {
+        primero: puestos.filter(function (p) { return Number(p.puesto) === 1; })[0] || null,
+        segundo: puestos.filter(function (p) { return Number(p.puesto) === 2; })[0] || null,
+        tercero: puestos.filter(function (p) { return Number(p.puesto) === 3; })[0] || null,
+      };
+
+      if (d && d.definido) {
+        podio.innerHTML = PUESTOS.map(function (p) {
+          var item = porPuesto[p.clase];
+          return tarjeta(p, item ? { equipo: item.equipo, proyecto: item.proyecto, puntaje: item.puntaje } : null);
+        }).join('');
+      } else {
+        // Respaldo: ranking del jurado
+        fetch('/api/leaderboard').then(function (r) { return r.json(); }).then(function (ld) {
+          var top = (ld && ld.ranking) ? ld.ranking.slice(0, 3) : [];
+          var porP = { primero: top[0], segundo: top[1], tercero: top[2] };
+          podio.innerHTML = PUESTOS.map(function (p) { return tarjeta(p, porP[p.clase]); }).join('');
+        }).catch(function () {
+          podio.innerHTML = PUESTOS.map(function (p) { return tarjeta(p, null); }).join('');
+        });
+      }
+
+      var reco = document.getElementById('reco');
+      if (reco && recos.length) {
+        reco.style.display = '';
+        reco.innerHTML = recos.map(function (r) {
+          return '<div class="icono">🏅</div>' +
+            '<div class="txt">' +
+            '<div class="kicker2">Reconocimiento especial</div>' +
+            '<h3>' + esc(r.equipo) + '</h3>' +
+            '<p>' + esc(r.nota || 'Equipo invitado · reconocimiento por su participación.') + '</p>' +
+            '</div>' +
+            '<span class="badge2">Equipo invitado</span>';
+        }).join('');
+      }
     })
     .catch(function () {
       podio.innerHTML = PUESTOS.map(function (p) { return tarjeta(p, null); }).join('');
