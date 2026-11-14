@@ -1279,9 +1279,10 @@ section { padding: 84px 0; }
     <div class="wrap">
       <div class="sec-head">
         <span class="sec-kicker">Galería</span>
-        <h2>Proyectos entregados</h2>
-        <p>Explora los proyectos que los equipos están construyendo.</p>
+        <h2>Entregas de los equipos</h2>
+        <p>Proyectos que los equipos están construyendo. Consulta su presentación, demo y video.</p>
       </div>
+      <p class="note" id="entregasCount" style="margin-bottom:16px"></p>
       <div class="projects-grid" id="projectsGrid"></div>
     </div>
   </section>
@@ -2305,31 +2306,35 @@ section { padding: 84px 0; }
     });
   })();
 
-  // ===== Proyectos entregados =====
+  // ===== Entregas de los equipos =====
   async function loadProyectos() {
     const g = document.getElementById('projectsGrid');
     if (!g) return;
     try {
       const res = await fetch('/api/proyectos');
       const data = await res.json();
-      const items = data.proyectos || [];
-      if (items.length === 0) { g.innerHTML = '<p class="note" style="grid-column:1/-1">Aún no hay proyectos entregados.</p>'; return; }
+      const items = (data.proyectos || []).filter((p) => p.deck || p.demo || p.video || p.descripcion);
+      const cnt = document.getElementById('entregasCount');
+      if (cnt) cnt.textContent = items.length ? items.length + ' entrega(s) publicada(s)' : '';
+      if (items.length === 0) { g.innerHTML = '<p class="note" style="grid-column:1/-1">Aún no hay entregas publicadas.</p>'; return; }
       g.innerHTML = items.map((p) => {
         const tags = (p.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
         const links = [];
-        if (p.repositorio) links.push('<a href="' + p.repositorio + '" target="_blank" rel="noopener">Repositorio ↗</a>');
-        if (p.demo) links.push('<a href="' + p.demo + '" target="_blank" rel="noopener">Demo ↗</a>');
-        if (p.video) links.push('<a href="' + p.video + '" target="_blank" rel="noopener">Video ↗</a>');
+        if (p.deck) links.push('<a href="' + esc(p.deck) + '" target="_blank" rel="noopener">📊 Presentación ↗</a>');
+        if (p.demo) links.push('<a href="' + esc(p.demo) + '" target="_blank" rel="noopener">🌐 Demo ↗</a>');
+        if (p.video) links.push('<a href="' + esc(p.video) + '" target="_blank" rel="noopener">🎬 Video ↗</a>');
+        const equipo = p.equipo && p.equipo !== p.proyecto ? '<span class="tag">👥 ' + esc(p.equipo) + '</span>' : '';
         return '<article class="card project-card">' +
           '<h3>' + esc(p.proyecto || 'Proyecto sin nombre') + '</h3>' +
           (p.eje ? '<span class="tag">' + esc(p.eje) + '</span>' : '') +
+          equipo +
           (p.descripcion ? '<p>' + esc(p.descripcion) + '</p>' : '') +
           (tags.length ? '<div class="project-tags">' + tags.map((t) => '<span>' + esc(t) + '</span>').join('') + '</div>' : '') +
           (links.length ? '<div class="project-links">' + links.join('') + '</div>' : '') +
           '</article>';
       }).join('');
     } catch (e) {
-      g.innerHTML = '<p class="note" style="grid-column:1/-1">No se pudieron cargar los proyectos.</p>';
+      g.innerHTML = '<p class="note" style="grid-column:1/-1">No se pudieron cargar las entregas.</p>';
     }
   }
 
