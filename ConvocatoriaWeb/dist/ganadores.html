@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏆 Ganadores · Hackathon UNETI IA 2026</title>
+<meta name="description" content="Los tres primeros ganadores del Hackathon UNETI IA 2026. ¡Felicitaciones!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-900: #0B1F3A;
+    --navy-800: #12345F;
+    --cyan: #00B4D8;
+    --green: #06A77D;
+    --rose: #E63966;
+    --bg: #F5F7FB;
+    --surface: #FFFFFF;
+    --ink: #0B1B2B;
+    --ink-soft: #4E5B6B;
+    --line: #E3E8EF;
+    --oro: #FFC93C;
+    --oro-2: #E0A500;
+    --plata: #C8D4E0;
+    --plata-2: #9FAFBF;
+    --bronce: #D08A4E;
+    --bronce-2: #A86532;
+    --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); color: var(--ink); background: var(--bg); min-height: 100vh; overflow-x: hidden; }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(1100px 480px at 50% -12%, rgba(0,180,216,.30), transparent 62%),
+      radial-gradient(760px 420px at 12% 108%, rgba(6,167,125,.22), transparent 60%),
+      radial-gradient(760px 420px at 88% 108%, rgba(230,57,102,.20), transparent 60%),
+      linear-gradient(160deg, #0B1F3A 0%, #12345F 55%, #0B1F3A 100%);
+    color: #fff; padding: 54px 20px 0; text-align: center;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px);
+    background-size: 26px 26px; opacity: .5;
+  }
+  .top-bar { position: relative; z-index: 3; max-width: 1180px; margin: 0 auto 34px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .top-bar .brand { font-family: var(--font-display); font-weight: 700; font-size: .95rem; letter-spacing: .02em; }
+  .top-bar a { color: #9BD9EE; text-decoration: none; font-size: .84rem; font-weight: 600; }
+  .top-bar a:hover { color: #fff; }
+
+  .kicker {
+    position: relative; z-index: 3;
+    display: inline-flex; align-items: center; gap: 9px;
+    background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.22);
+    padding: 8px 18px; border-radius: 999px;
+    font-size: .68rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+  .hero h1 {
+    position: relative; z-index: 3;
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(2rem, 6.4vw, 4.2rem); line-height: 1.04; letter-spacing: -.03em;
+    margin: 20px auto 14px; max-width: 920px;
+    background: linear-gradient(180deg, #FFFFFF 30%, #9BD9EE 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero .sub {
+    position: relative; z-index: 3;
+    color: #C7DAEA; font-size: clamp(.95rem, 2.2vw, 1.12rem); line-height: 1.65;
+    max-width: 660px; margin: 0 auto;
+  }
+  .hero .sub strong { color: #fff; }
+
+  /* ===== CONFETTI ===== */
+  .confetti { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+  .confetti i {
+    position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; opacity: .85;
+    animation: caer linear infinite;
+  }
+  @keyframes caer {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    10% { opacity: .9; }
+    100% { transform: translateY(105vh) rotate(680deg); opacity: 0; }
+  }
+
+  /* ===== PODIO ===== */
+  .podio-wrap { position: relative; z-index: 4; max-width: 1080px; margin: -10px auto 0; padding: 0 18px; }
+  .podio {
+    display: grid; grid-template-columns: 1fr 1.18fr 1fr; gap: 16px; align-items: end;
+    padding-top: 30px;
+  }
+  .lugar {
+    display: flex; flex-direction: column; justify-content: flex-start;
+    border-radius: 22px 22px 0 0;
+    padding: 22px 18px 26px;
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
+    border: 1px solid rgba(255,255,255,.20);
+    border-bottom: 0;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 -8px 40px rgba(0,0,0,.22);
+    animation: subir .9s cubic-bezier(.2,.8,.25,1) backwards;
+    text-align: center;
+  }
+  .lugar.primero { grid-column: 2; height: 400px; animation-delay: .1s; border-color: rgba(255,201,60,.75); background: linear-gradient(180deg, rgba(255,201,60,.30), rgba(255,201,60,.08) 58%, rgba(255,255,255,.04)); box-shadow: 0 -10px 70px rgba(255,201,60,.30), inset 0 0 0 1px rgba(255,201,60,.22); }
+  .lugar.primero .equipo { color: #FFF7DC; text-shadow: 0 2px 18px rgba(255,201,60,.45); }
+  .lugar.primero .puntos { color: var(--oro); text-shadow: 0 2px 20px rgba(255,201,60,.5); }
+  .lugar.primero::before {
+    content: ""; position: absolute; left: 50%; top: -140px; transform: translateX(-50%);
+    width: 320px; height: 320px; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(255,201,60,.30), transparent 68%);
+  }
+  .lugar.segundo { grid-column: 1; height: 315px; animation-delay: .25s; border-color: rgba(200,212,224,.45); }
+  .lugar.tercero { grid-column: 3; height: 262px; animation-delay: .4s; border-color: rgba(208,138,78,.45); }
+  @keyframes subir { from { opacity: 0; transform: translateY(60px) scale(.96); } to { opacity: 1; transform: none; } }
+
+  .medalla {
+    font-size: 3.1rem; line-height: 1; margin-bottom: 10px;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,.35));
+    animation: flotar 3.4s ease-in-out infinite;
+  }
+  .lugar.primero .medalla { font-size: 3.9rem; }
+  @keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+  .puesto {
+    display: inline-block; font-size: .63rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 12px;
+  }
+  .primero .puesto { background: rgba(255,201,60,.22); color: var(--oro); border: 1px solid rgba(255,201,60,.5); }
+  .segundo .puesto { background: rgba(200,212,224,.18); color: var(--plata); border: 1px solid rgba(200,212,224,.45); }
+  .tercero .puesto { background: rgba(208,138,78,.20); color: var(--bronce); border: 1px solid rgba(208,138,78,.5); }
+
+  .equipo {
+    font-family: var(--font-display); font-weight: 700; color: #fff;
+    font-size: clamp(1.05rem, 2.6vw, 1.42rem); line-height: 1.2; margin-bottom: 8px;
+    letter-spacing: -.01em; word-break: break-word;
+  }
+  .primero .equipo { font-size: clamp(1.3rem, 3.4vw, 1.85rem); }
+  .proyecto { color: #B9CEE0; font-size: .84rem; line-height: 1.5; margin-bottom: 14px; }
+  .puntos {
+    margin-top: auto; font-family: var(--font-display); font-weight: 700; color: #fff;
+    font-size: 1.55rem; letter-spacing: -.02em;
+  }
+  .primero .puntos { font-size: 2rem; }
+  .puntos small { font-size: .6em; color: #9FB6CB; font-weight: 600; margin-left: 3px; }
+
+  .base {
+    position: relative; z-index: 4; max-width: 1080px; margin: -16px auto 0; padding: 0 18px;
+  }
+  .base .franja {
+    height: 18px; border-radius: 0 0 18px 18px;
+    background: linear-gradient(90deg, var(--green), var(--cyan), var(--rose));
+    box-shadow: 0 16px 50px rgba(0,180,216,.30);
+  }
+
+  /* ===== MENSAJE ===== */
+  .mensaje {
+    position: relative; z-index: 4; max-width: 860px; margin: 46px auto 0; padding: 0 18px;
+    text-align: center;
+  }
+  .mensaje .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 22px;
+    padding: 38px 30px; box-shadow: 0 18px 50px rgba(11,31,58,.09);
+  }
+  .mensaje .icono { font-size: 2.6rem; margin-bottom: 14px; }
+  .mensaje h2 {
+    font-family: var(--font-display); font-weight: 700; color: var(--navy-900);
+    font-size: clamp(1.4rem, 3.6vw, 1.95rem); line-height: 1.15; margin-bottom: 14px; letter-spacing: -.02em;
+  }
+  .mensaje p { color: var(--ink-soft); font-size: .98rem; line-height: 1.75; margin-bottom: 12px; }
+  .mensaje p strong { color: var(--navy-900); }
+  .firma { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); font-size: .86rem; color: var(--ink-soft); line-height: 1.7; }
+  .firma b { color: var(--navy-900); display: block; font-size: .95rem; margin-bottom: 2px; }
+
+  .acciones { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 14px 24px; border-radius: 12px; font-weight: 800; font-size: .9rem;
+    text-decoration: none; border: 0; cursor: pointer; font-family: inherit;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.primary { background: linear-gradient(135deg, var(--cyan), var(--green)); color: #fff; box-shadow: 0 12px 30px rgba(0,180,216,.32); }
+  .btn.ghost { background: #fff; color: var(--navy-900); border: 2px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--cyan); }
+
+  .foot { text-align: center; padding: 46px 18px 40px; color: var(--ink-soft); font-size: .82rem; line-height: 1.9; }
+  .foot a { color: var(--cyan); font-weight: 700; text-decoration: none; }
+
+  .cargando { text-align: center; color: #C7DAEA; padding: 40px 0; font-size: .9rem; }
+  .sin-datos { text-align: center; color: #C7DAEA; padding: 30px 0; font-size: .9rem; line-height: 1.7; }
+
+  @media (max-width: 760px) {
+    .podio { grid-template-columns: 1fr; gap: 12px; padding-top: 10px; }
+    .lugar.primero, .lugar.segundo, .lugar.tercero { grid-column: 1; height: auto; border-radius: 18px; border-bottom: 1px solid rgba(255,255,255,.2); padding: 20px 18px; }
+    .lugar.primero { order: -1; }
+    .lugar.segundo { order: 0; }
+    .lugar.tercero { order: 1; }
+    .hero { padding-top: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="confetti" id="confetti"></div>
+
+  <div class="top-bar">
+    <div class="brand">HACKATHON UNETI IA 2026</div>
+    <a href="/">← Volver al sitio</a>
+  </div>
+
+  <span class="kicker">🏆 Resultados oficiales</span>
+  <h1>¡Felicitaciones a los ganadores!</h1>
+  <p class="sub">Tres equipos, <strong>48 horas</strong> de trabajo y una misma misión: construir el futuro con <strong>IA Ética</strong> y <strong>Ciberseguridad</strong>.</p>
+
+  <div class="podio-wrap">
+    <div class="podio" id="podio">
+      <div class="cargando">Cargando resultados…</div>
+    </div>
+  </div>
+</section>
+
+<div class="base"><div class="franja"></div></div>
+
+<div class="mensaje">
+  <div class="card">
+    <div class="icono">🎉</div>
+    <h2>Gracias por hacer posible este hackathon</h2>
+    <p>A los <strong>tres equipos ganadores</strong>: su esfuerzo, su rigor técnico y su compromiso con una tecnología responsable los colocan en lo más alto. Disfruten este momento, lo construyeron con sus propias manos.</p>
+    <p>A <strong>todos los participantes</strong>: cada prototipo, cada commit a las 3 de la mañana y cada idea defendida frente al jurado deja huella. Este hackathon no termina aquí; apenas comienza el camino.</p>
+    <p>A los <strong>jurados, mentores y al Comité Organizador</strong>: gracias por acompañar, exigir y creer en el talento venezolano.</p>
+    <div class="firma">
+      <b>Comité Organizador · Hackathon UNETI IA 2026</b>
+      Universidad Nacional Experimental de las Telecomunicaciones e Informática · Parque Tecnológico + Más Ciencia · CAVECOM-E · FONACIT
+    </div>
+    <div class="acciones">
+      <a class="btn primary" href="/en-vivo">⏱️ Revivir el evento</a>
+      <a class="btn ghost" href="/biblioteca">📚 Biblioteca SDD</a>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <p>🏛️ Parque Tecnológico + Más Ciencia (IVIC) · 13 y 14 de noviembre de 2026</p>
+  <p><a href="/">Sitio principal</a> · <a href="/#entregados">Entregas de los equipos</a> · <a href="/remoto">Panel remoto</a></p>
+</div>
+
+<script>
+(function () {
+  // Confetti
+  var colores = ['#FFC93C', '#00B4D8', '#06A77D', '#E63966', '#FFFFFF', '#9BD9EE'];
+  var cont = document.getElementById('confetti');
+  var n = window.innerWidth < 760 ? 28 : 56;
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < n; i++) {
+    var p = document.createElement('i');
+    p.style.left = (Math.random() * 100).toFixed(2) + '%';
+    p.style.background = colores[Math.floor(Math.random() * colores.length)];
+    p.style.animationDuration = (5 + Math.random() * 7).toFixed(2) + 's';
+    p.style.animationDelay = (Math.random() * 6).toFixed(2) + 's';
+    p.style.width = (6 + Math.random() * 6).toFixed(0) + 'px';
+    p.style.height = (10 + Math.random() * 9).toFixed(0) + 'px';
+    p.style.opacity = (0.5 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(p);
+  }
+  cont.appendChild(frag);
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var PUESTOS = [
+    { clase: 'segundo', medalla: '🥈', texto: '2do lugar', col: 1 },
+    { clase: 'primero', medalla: '🥇', texto: '1er lugar', col: 2 },
+    { clase: 'tercero', medalla: '🥉', texto: '3er lugar', col: 3 }
+  ];
+
+  function tarjeta(p, datos) {
+    if (!datos) {
+      return '<div class="lugar ' + p.clase + '">' +
+        '<div class="medalla">' + p.medalla + '</div>' +
+        '<span class="puesto">' + p.texto + '</span>' +
+        '<div class="equipo">Por definir</div>' +
+        '<div class="proyecto">El jurado está deliberando.</div>' +
+        '<div class="puntos">—</div>' +
+        '</div>';
+    }
+    var pts = Number(datos.puntaje || 0);
+    return '<div class="lugar ' + p.clase + '">' +
+      '<div class="medalla">' + p.medalla + '</div>' +
+      '<span class="puesto">' + p.texto + '</span>' +
+      '<div class="equipo">' + esc(datos.equipo) + '</div>' +
+      (datos.proyecto ? '<div class="proyecto">' + esc(datos.proyecto) + '</div>' : '') +
+      '<div class="puntos">' + pts.toFixed(2) + '<small>/ 5</small></div>' +
+      '</div>';
+  }
+
+  var podio = document.getElementById('podio');
+
+  fetch('/api/leaderboard')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var top = (d && d.ranking) ? d.ranking.slice(0, 3) : [];
+      // top[0] = 1º, top[1] = 2º, top[2] = 3º
+      var porPuesto = { primero: top[0], segundo: top[1], tercero: top[2] };
+      podio.innerHTML = PUESTOS.map(function (p) { return tarjeta(p, porPuesto[p.clase]); }).join('');
+    })
+    .catch(function () {
+      podio.innerHTML = PUESTOS.map(function (p) { return tarjeta(p, null); }).join('');
+    });
+})();
+</script>
+</body>
+</html>
