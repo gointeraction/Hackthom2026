@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -97,15 +97,33 @@
   .sign span { font-size: .78rem; color: #A9C2D6; letter-spacing: .3px; }
   .code { font-size: .78rem; color: #7F98AE; letter-spacing: .8px; font-variant-numeric: tabular-nums; }
 
+  .print-hint { margin-top: 18px; font-size: .8rem; color: #4E5B6B; background: #fff; border: 1px solid #dbe4f0; border-radius: 10px; padding: 10px 16px; display: inline-block; }
   .actions { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
   .actions button { font-family: 'Inter', sans-serif; font-weight: 600; font-size: .9rem; padding: 12px 24px; border: 0; border-radius: 999px; cursor: pointer; background: linear-gradient(135deg, #7C3AED, #06A77D); color: #fff; box-shadow: 0 10px 24px -10px rgba(124,58,237,.6); }
   .actions a, .actions button.ghost { font-size: .9rem; color: #0B1F3A; text-decoration: none; padding: 12px 18px; border: 1px solid #cfd9e8; border-radius: 999px; background: #fff; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; }
 
   @media print {
-    body { background: #fff; padding: 0; }
-    .gate { display: none !important; }
-    .actions { display: none; }
-    .cert { box-shadow: none; border-radius: 0; width: 100%; aspect-ratio: auto; height: 100vh; padding: 40px 52px; }
+    html, body {
+      margin: 0 !important; padding: 0 !important;
+      width: 297mm !important; height: 210mm !important;
+      min-height: 0 !important; max-height: 210mm !important;
+      display: block !important; background: #fff !important;
+      overflow: hidden !important;
+    }
+    .gate, .actions, .print-hint { display: none !important; }
+    #certWrap { display: block !important; margin: 0 !important; padding: 0 !important; text-align: left !important; }
+    .cert {
+      width: 297mm !important; max-width: 297mm !important;
+      height: 210mm !important; max-height: 210mm !important;
+      aspect-ratio: auto !important;
+      margin: 0 !important; padding: 10mm 14mm !important;
+      border-radius: 0 !important; box-shadow: none !important;
+      box-sizing: border-box !important;
+      page-break-inside: avoid !important; break-inside: avoid !important;
+      page-break-after: avoid !important; break-after: avoid !important;
+      overflow: hidden !important;
+    }
+    .cert .inner { height: 100% !important; }
     @page { size: A4 landscape; margin: 0; }
   }
 </style>
@@ -163,6 +181,8 @@
       </div>
     </div>
   </div>
+
+  <div class="print-hint">🖨️ Al imprimir elige: <strong>A4</strong> · <strong>Horizontal (paisaje)</strong> · <strong>Márgenes: Ninguno</strong></div>
 
   <div class="actions">
     <button type="button" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
