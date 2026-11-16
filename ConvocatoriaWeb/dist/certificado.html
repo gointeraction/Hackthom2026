@@ -4,10 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Certificado — Hackathon UNETI IA 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Inter', system-ui, sans-serif; background: #e9eef7; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+
+  /* ===== PORTADA DE INGRESO ===== */
+  .gate { width: 100%; max-width: 460px; }
+  .gate-card {
+    background: #fff; border: 1px solid #dbe4f0; border-radius: 22px; padding: 40px 32px; text-align: center;
+    box-shadow: 0 30px 70px -30px rgba(11,31,58,.4);
+  }
+  .gate-icon { font-size: 3.4rem; line-height: 1; margin-bottom: 14px; }
+  .gate-card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; color: #0B1F3A; letter-spacing: .5px; margin-bottom: 8px; }
+  .gate-card p { font-size: .9rem; color: #5b6b82; line-height: 1.6; margin-bottom: 22px; }
+  #codeInput {
+    width: 100%; padding: 16px; border: 2px solid #dbe4f0; border-radius: 13px;
+    font-family: 'Inter', sans-serif; font-size: 1.25rem; font-weight: 800; text-align: center;
+    letter-spacing: .18em; text-transform: uppercase; color: #0B1F3A; background: #f7fafd;
+  }
+  #codeInput:focus { outline: none; border-color: #00B4D8; box-shadow: 0 0 0 4px rgba(0,180,216,.14); background: #fff; }
+  #btnCode {
+    width: 100%; margin-top: 16px; padding: 16px; border: 0; border-radius: 13px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1rem; color: #fff;
+    background: linear-gradient(135deg, #00B4D8, #06A77D); box-shadow: 0 12px 28px -8px rgba(0,180,216,.6);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  #btnCode:hover { transform: translateY(-2px); box-shadow: 0 18px 38px -10px rgba(0,180,216,.7); }
+  #btnCode:disabled { opacity: .6; cursor: wait; transform: none; }
+  .gate-msg { margin-top: 14px; font-size: .86rem; line-height: 1.5; min-height: 20px; }
+  .gate-msg.err { color: #d64545; font-weight: 600; }
+  .gate-msg.ok { color: #169a6a; font-weight: 600; }
+  .gate-hint { margin-top: 18px !important; font-size: .76rem !important; color: #8a99ad !important; margin-bottom: 0 !important; }
+  .gate-back { display: inline-block; margin-top: 16px; font-size: .8rem; color: #0B6E8A; font-weight: 700; text-decoration: none; }
+
+  /* ===== CERTIFICADO ===== */
   .cert {
     width: 1000px; max-width: 100%; aspect-ratio: 1.414 / 1; background: #fff; position: relative;
     border: 3px solid #0B1F3A; border-radius: 8px; padding: 48px 56px;
@@ -30,12 +61,14 @@
   .sign .line { width: 220px; border-top: 1.5px solid #0B1F3A; margin-bottom: 6px; }
   .sign span { font-size: .72rem; color: #5b6b82; }
   .code { font-size: .72rem; color: #8a99ad; }
-  .actions { margin-top: 22px; display: flex; gap: 12px; }
+  .actions { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
   .actions button { font-family: 'Inter', sans-serif; font-weight: 600; font-size: .9rem; padding: 12px 24px; border: 0; border-radius: 999px; cursor: pointer; background: linear-gradient(135deg, #00B4D8, #06A77D); color: #fff; box-shadow: 0 10px 24px -10px rgba(0,180,216,.6); }
-  .actions a { font-size: .9rem; color: #0B1F3A; text-decoration: none; padding: 12px 18px; border: 1px solid #cfd9e8; border-radius: 999px; }
+  .actions a, .actions button.ghost { font-size: .9rem; color: #0B1F3A; text-decoration: none; padding: 12px 18px; border: 1px solid #cfd9e8; border-radius: 999px; background: #fff; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; }
   .err { color: #d64545; font-weight: 600; }
+
   @media print {
     body { background: #fff; padding: 0; }
+    .gate { display: none !important; }
     .actions { display: none; }
     .cert { box-shadow: none; border-radius: 0; width: 100%; aspect-ratio: auto; height: 100vh; }
     @page { size: A4 landscape; margin: 0; }
@@ -43,6 +76,23 @@
 </style>
 </head>
 <body>
+
+<!-- PORTADA: ingreso de código -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-icon">🎓</div>
+    <h2>Tu certificado</h2>
+    <p>Ingresa tu <strong>código de participante</strong> para generar tu certificado personalizado.</p>
+    <input type="text" id="codeInput" placeholder="AB12CD34" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" autofocus>
+    <button type="button" id="btnCode">Ver mi certificado</button>
+    <div class="gate-msg" id="gateMsg"></div>
+    <p class="gate-hint">Tu código lo recibiste por correo al inscribirte.</p>
+    <a class="gate-back" href="/">← Volver al sitio</a>
+  </div>
+</div>
+
+<!-- CERTIFICADO -->
+<div id="certWrap" style="display:none; text-align:center">
   <div class="cert" id="cert">
     <div class="head">
       <div class="brand">
@@ -69,33 +119,90 @@
       <div class="code" id="codigo"></div>
     </div>
   </div>
+
   <div class="actions">
-    <button onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    <button type="button" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    <button type="button" class="ghost" id="btnOtro">🔑 Usar otro código</button>
     <a href="/">← Volver al sitio</a>
   </div>
-  <script>
-    const params = new URLSearchParams(location.search);
-    const codigo = (params.get('codigo') || '').trim().toUpperCase();
-    const nombreEl = document.getElementById('nombre');
-    const codigoEl = document.getElementById('codigo');
-    if (!codigo) {
-      nombreEl.textContent = '—';
-      nombreEl.classList.add('err');
-      document.getElementById('cuerpo').textContent = 'Agrega tu código en la URL: /certificado.html?codigo=XXXX';
-    } else {
-      fetch('/api/certificado?codigo=' + encodeURIComponent(codigo))
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.ok) {
-            nombreEl.textContent = d.nombre;
-            codigoEl.textContent = 'Código: ' + d.codigo;
-          } else {
-            nombreEl.textContent = 'Código no válido';
-            nombreEl.classList.add('err');
-          }
-        })
-        .catch(() => { nombreEl.textContent = 'Error de conexión'; });
-    }
-  </script>
+</div>
+
+<script>
+(function () {
+  var gate = document.getElementById('gate');
+  var certWrap = document.getElementById('certWrap');
+  var input = document.getElementById('codeInput');
+  var btn = document.getElementById('btnCode');
+  var msg = document.getElementById('gateMsg');
+  var nombreEl = document.getElementById('nombre');
+  var codigoEl = document.getElementById('codigo');
+  var btnOtro = document.getElementById('btnOtro');
+
+  function setMsg(texto, ok) {
+    msg.className = 'gate-msg ' + (ok ? 'ok' : 'err');
+    msg.textContent = texto || '';
+  }
+
+  function validar(codigo) {
+    var code = String(codigo || '').trim().toUpperCase();
+    if (!code) { setMsg('Ingresa tu código de participante.', false); input.focus(); return; }
+
+    btn.disabled = true;
+    var orig = btn.textContent;
+    btn.textContent = 'Buscando…';
+    setMsg('', true);
+
+    fetch('/api/certificado?codigo=' + encodeURIComponent(code))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.ok) {
+          nombreEl.textContent = d.nombre;
+          nombreEl.classList.remove('err');
+          codigoEl.textContent = 'Código: ' + d.codigo;
+          setMsg('', true);
+          gate.style.display = 'none';
+          certWrap.style.display = 'block';
+          try {
+            var u = new URL(location.href);
+            u.searchParams.set('codigo', d.codigo);
+            history.replaceState(null, '', u.toString());
+          } catch (e) {}
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          setMsg((d && d.error) || 'Código no válido. Verifícalo e intenta de nuevo.', false);
+        }
+      })
+      .catch(function () { setMsg('Error de conexión. Intenta de nuevo.', false); })
+      .then(function () { btn.disabled = false; btn.textContent = orig; });
+  }
+
+  btn.addEventListener('click', function () { validar(input.value); });
+
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); validar(input.value); }
+  });
+
+  if (btnOtro) btnOtro.addEventListener('click', function () {
+    certWrap.style.display = 'none';
+    gate.style.display = 'block';
+    input.value = '';
+    setMsg('', true);
+    try {
+      var u = new URL(location.href);
+      u.searchParams.delete('codigo');
+      history.replaceState(null, '', u.toString());
+    } catch (e) {}
+    input.focus();
+  });
+
+  // Si viene un código en la URL, se usa automáticamente
+  var params = new URLSearchParams(location.search);
+  var codeFromUrl = (params.get('codigo') || '').trim().toUpperCase();
+  if (codeFromUrl) {
+    input.value = codeFromUrl;
+    validar(codeFromUrl);
+  }
+})();
+</script>
 </body>
 </html>
