@@ -329,6 +329,20 @@
   .site-footer a { color: #fff; }
   .site-footer .links { display: flex; gap: 20px; }
 
+  .footer-credito {
+    margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.10);
+    display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+    font-size: .84rem; color: rgba(255,255,255,.55); letter-spacing: .01em;
+  }
+  .footer-credito a {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: #7FD4EA; text-decoration: none; font-weight: 800;
+    padding: 3px 2px; border-bottom: 1px solid rgba(127,212,234,.35);
+    transition: color .16s ease, border-color .16s ease;
+  }
+  .footer-credito a:hover { color: #fff; border-bottom-color: #fff; }
+  .footer-credito .fc-arrow { font-size: .78rem; opacity: .8; }
+
   /* Responsive */
   @media (max-width: 900px) {
     .about-grid, .agenda, .grid-2, .prizes { grid-template-columns: 1fr; }
@@ -1709,6 +1723,14 @@ section { padding: 84px 0; }
     </div>
   </div>
   <p class="wrap" style="margin-top:16px; font-size:.78rem; color:rgba(255,255,255,.5)">Tus datos personales se tratan conforme al aviso de privacidad del evento y se utilizan únicamente para la gestión de tu participación.</p>
+
+  <div class="wrap footer-credito">
+    <span>Desarrollada por</span>
+    <a href="https://gointeraction.biz/" target="_blank" rel="noopener">
+      <strong>Go Interaction Marketing</strong>
+      <span class="fc-arrow">↗</span>
+    </a>
+  </div>
 </footer>
 
 <!-- ASISTENTE IA -->
