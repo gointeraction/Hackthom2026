@@ -103,6 +103,14 @@
   .actions button { font-family: 'Inter', sans-serif; font-weight: 600; font-size: .9rem; padding: 12px 24px; border: 0; border-radius: 999px; cursor: pointer; background: linear-gradient(135deg, #00B4D8, #06A77D); color: #fff; box-shadow: 0 10px 24px -10px rgba(0,180,216,.6); }
   .actions a, .actions button.ghost { font-size: .9rem; color: #0B1F3A; text-decoration: none; padding: 12px 18px; border: 1px solid #cfd9e8; border-radius: 999px; background: #fff; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; }
 
+  .qr-box { display: flex; align-items: center; gap: 12px; }
+  .qr-frame { background: #fff; padding: 6px; border-radius: 9px; box-shadow: 0 8px 22px rgba(0,0,0,.35); flex-shrink: 0; }
+  .qr-frame img { display: block; width: 84px; height: 84px; }
+  .qr-txt { text-align: left; }
+  .qr-txt b { display: block; font-size: .72rem; color: #fff; letter-spacing: .5px; }
+  .qr-txt span { display: block; font-size: .62rem; color: #8FA8C4; margin-top: 3px; letter-spacing: .4px; }
+  .qr-txt .code { font-size: .68rem; color: #A9C2D6; margin-top: 4px; letter-spacing: .8px; font-variant-numeric: tabular-nums; }
+
   @media print {
     html, body {
       margin: 0 !important; padding: 0 !important;
@@ -178,7 +186,15 @@
           <div class="line"></div>
           <span>Comité Organizador · UNETI</span>
         </div>
-        <div class="code" id="codigo"></div>
+        <div class="qr-box">
+          <div class="qr-frame"><img id="qrImg" alt="QR de verificación" width="84" height="84"></div>
+          <div class="qr-txt">
+            <b>Verificable en línea</b>
+            <span>Escanea o visita</span>
+            <span>/verificar</span>
+            <div class="code" id="codigo"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -228,6 +244,12 @@
         if (d && d.ok) {
           nombreEl.textContent = d.nombre;
           codigoEl.textContent = 'Código: ' + d.codigo;
+          try {
+            var verifUrl = location.origin + '/verificar?codigo=' + encodeURIComponent(d.codigo);
+            var qrImg = document.getElementById('qrImg');
+            if (qrImg) qrImg.src = '/api/qr?size=300&data=' + encodeURIComponent(verifUrl);
+            if (qrImg) qrImg.title = verifUrl;
+          } catch (e) {}
 
           if (d.titulo) {
             charlaEl.style.display = 'inline-block';

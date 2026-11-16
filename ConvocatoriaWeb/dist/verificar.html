@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificación de certificado — Hackathon UNETI IA 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-900: #0B1F3A; --navy-800: #12345F;
+    --cyan: #00B4D8; --green: #06A77D; --rose: #E63966;
+    --bg: #F5F7FB; --surface: #fff; --ink: #0B1B2B; --ink-soft: #4E5B6B;
+    --line: #E3E8EF; --ok: #169A6A; --err: #D64545;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; padding: 0 0 60px; }
+
+  .hero {
+    background:
+      radial-gradient(900px 400px at 85% -10%, rgba(0,180,216,.28), transparent 60%),
+      linear-gradient(160deg, var(--navy-900), var(--navy-800));
+    color: #fff; padding: 40px 20px 46px; text-align: center;
+    border-bottom: 3px solid var(--cyan);
+  }
+  .hero .kicker { font-size: .68rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: #7FD4EA; }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.7rem, 5vw, 2.6rem); letter-spacing: 1px; margin-top: 8px; }
+  .hero p { color: #A9C2D6; font-size: .88rem; margin-top: 8px; }
+
+  .wrap { max-width: 860px; margin: -26px auto 0; padding: 0 18px; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 18px 44px rgba(11,31,58,.09); padding: 26px; margin-bottom: 18px; }
+
+  .estado { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .estado .icono { font-size: 3rem; line-height: 1; flex-shrink: 0; }
+  .estado .txt { flex: 1; min-width: 200px; }
+  .estado .badge {
+    display: inline-block; font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 8px;
+  }
+  .estado.valido .badge { background: rgba(22,154,106,.12); color: var(--ok); }
+  .estado.invalido .badge { background: rgba(214,69,69,.12); color: var(--err); }
+  .estado h2 { font-size: 1.35rem; line-height: 1.2; margin-bottom: 4px; color: var(--navy-900); }
+  .estado .sub { font-size: .86rem; color: var(--ink-soft); }
+
+  .titular { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 16px; }
+  .campo .l { font-size: .64rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #94A3B8; margin-bottom: 3px; }
+  .campo .v { font-size: .98rem; font-weight: 700; color: var(--navy-900); word-break: break-word; }
+  .campo .v.code { font-family: ui-monospace, monospace; letter-spacing: .1em; color: #7C3AED; }
+
+  h3.sec { font-size: .82rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th { text-align: left; font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); padding: 8px 10px; border-bottom: 2px solid var(--line); }
+  td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td.dia { white-space: nowrap; font-weight: 700; color: var(--navy-800); }
+
+  .linea { display: flex; gap: 16px; padding: 13px 0; border-bottom: 1px dashed var(--line); }
+  .linea:last-child { border-bottom: 0; }
+  .linea .h { font-weight: 800; color: var(--cyan); font-size: .84rem; min-width: 104px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .linea .c { flex: 1; }
+  .linea .c b { display: block; font-size: .92rem; color: var(--navy-900); margin-bottom: 2px; }
+  .linea .c span { font-size: .8rem; color: var(--ink-soft); }
+
+  .aviso { background: #EAF7FB; border: 1px solid rgba(0,180,216,.35); border-radius: 12px; padding: 15px 17px; font-size: .85rem; color: #0B4A63; line-height: 1.65; }
+  .aviso strong { color: #075E7D; }
+
+  .buscador { display: flex; gap: 10px; flex-wrap: wrap; }
+  .buscador input {
+    flex: 1; min-width: 200px; padding: 14px 16px; border: 2px solid var(--line); border-radius: 12px;
+    font-family: inherit; font-size: 1.05rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; text-align: center;
+  }
+  .buscador input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(0,180,216,.14); }
+  .buscador button {
+    padding: 14px 26px; border: 0; border-radius: 12px; cursor: pointer; font-family: inherit; font-weight: 800; font-size: .92rem; color: #fff;
+    background: linear-gradient(135deg, var(--cyan), var(--green)); box-shadow: 0 10px 26px -8px rgba(0,180,216,.6);
+  }
+
+  .pie { text-align: center; font-size: .78rem; color: #8A99AD; line-height: 1.8; margin-top: 26px; }
+  .pie a { color: var(--cyan); font-weight: 700; text-decoration: none; }
+
+  .cargando { text-align: center; padding: 40px 0; color: var(--ink-soft); }
+
+  @media print {
+    body { background: #fff; }
+    .hero { background: #fff !important; color: #000; border-bottom: 2px solid #000; }
+    .hero h1, .hero .kicker, .hero p { color: #000 !important; }
+    .card { box-shadow: none; }
+    .buscador, .pie a { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="kicker">Verificación en línea</div>
+  <h1>Certificado · Hackathon UNETI IA 2026</h1>
+  <p>Consulta la autenticidad de un certificado y el programa académico del evento.</p>
+</div>
+
+<div class="wrap">
+  <div id="resultado"><div class="cargando">Cargando…</div></div>
+
+  <div class="card" id="buscadorCard" style="display:none">
+    <h3 class="sec">Buscar otro código</h3>
+    <div class="buscador">
+      <input type="text" id="codeInput" placeholder="AB12CD34" maxlength="12" autocomplete="off" spellcheck="false">
+      <button type="button" id="btnBuscar">Verificar</button>
+    </div>
+  </div>
+
+  <div class="pie">
+    <p>Comité Organizador · Hackathon UNETI IA 2026</p>
+    <p>Parque Tecnológico + Más Ciencia · Caracas · 13 y 14 de noviembre de 2026</p>
+    <p><a href="/">← Volver al sitio principal</a></p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var cont = document.getElementById('resultado');
+  var buscadorCard = document.getElementById('buscadorCard');
+  var input = document.getElementById('codeInput');
+  var btn = document.getElementById('btnBuscar');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function talleresHTML(talleres) {
+    if (!talleres || !talleres.length) return '';
+    return '<div class="card">' +
+      '<h3 class="sec">🎤 Talleres y charlas del evento</h3>' +
+      '<table><thead><tr><th>Día</th><th>Hora</th><th>Taller</th><th>Ponente</th></tr></thead><tbody>' +
+      talleres.map(function (t) {
+        var dia = Number(t.dia) === 1 ? 'Vie 13' : 'Sáb 14';
+        return '<tr><td class="dia">' + dia + '</td><td>' + esc(t.hora) + '</td><td>' + esc(t.titulo) + '</td><td>' + esc(t.ponente || '—') + '</td></tr>';
+      }).join('') +
+      '</tbody></table></div>';
+  }
+
+  function itinerarioHTML(it) {
+    if (!it || !it.length) return '';
+    var bloques = '';
+    var diaActual = null;
+    it.forEach(function (f) {
+      if (f.dia !== diaActual) {
+        if (diaActual !== null) bloques += '</div></div>';
+        diaActual = f.dia;
+        bloques += '<div style="margin-bottom:18px"><h3 class="sec" style="color:var(--navy-800)">' +
+          (Number(f.dia) === 1 ? '📅 Día 1 · Viernes 13 de noviembre' : '📅 Día 2 · Sábado 14 de noviembre') +
+          '</h3><div>';
+      }
+      bloques += '<div class="linea"><div class="h">' + esc(f.hora) + '</div><div class="c"><b>' +
+        esc(f.fase) + '</b><span>' + esc(f.titulo) + '</span></div></div>';
+    });
+    if (diaActual !== null) bloques += '</div></div>';
+    return '<div class="card"><h3 class="sec">🗓️ Itinerario del evento</h3>' + bloques + '</div>';
+  }
+
+  function avisoHTML() {
+    return '<div class="card"><div class="aviso">' +
+      '<strong>🔒 Cómo verificamos este certificado</strong><br>' +
+      'Cada certificado lleva un <strong>código único</strong> y un <strong>QR</strong> que apuntan a esta página. ' +
+      'Si el código aparece aquí con el nombre correcto, el certificado es auténtico y fue emitido por el Comité Organizador. ' +
+      'Cualquier copia con un código alterado, inventado o de otra persona <strong>no aparecerá</strong> en esta verificación.' +
+      '</div></div>';
+  }
+
+  function render(d) {
+    if (!d || !d.ok) {
+      cont.innerHTML = '<div class="card"><div class="estado invalido"><div class="icono">⚠️</div><div class="txt">' +
+        '<span class="badge">Error</span><h2>No se pudo verificar</h2>' +
+        '<div class="sub">' + esc((d && d.error) || 'Intenta de nuevo en unos segundos.') + '</div></div></div></div>';
+      buscadorCard.style.display = 'block';
+      return;
+    }
+
+    if (!d.valido) {
+      cont.innerHTML =
+        '<div class="card"><div class="estado invalido"><div class="icono">❌</div><div class="txt">' +
+        '<span class="badge">No verificado</span><h2>Certificado no encontrado</h2>' +
+        '<div class="sub">El código <strong>' + esc(d.codigo) + '</strong> no corresponde a ningún certificado emitido.</div>' +
+        '</div></div></div>' +
+        avisoHTML() +
+        talleresHTML(d.talleres) +
+        itinerarioHTML(d.itinerario);
+      buscadorCard.style.display = 'block';
+      return;
+    }
+
+    var t = d.titular;
+    cont.innerHTML =
+      '<div class="card"><div class="estado valido"><div class="icono">' + (t.emoji || '✅') + '</div><div class="txt">' +
+      '<span class="badge">✅ Certificado válido</span><h2>' + esc(t.nombre) + '</h2>' +
+      '<div class="sub">' + esc(t.etiqueta) + (t.detalle ? ' · ' + esc(t.detalle) : '') + '</div>' +
+      '</div></div>' +
+      '<div class="titular">' +
+      '<div class="campo"><div class="l">Código</div><div class="v code">' + esc(d.codigo) + '</div></div>' +
+      '<div class="campo"><div class="l">Tipo</div><div class="v">' + esc(t.etiqueta) + '</div></div>' +
+      (t.extra ? '<div class="campo"><div class="l">' + (t.tipo === 'ponente' ? 'Horario' : (t.tipo === 'participante' ? 'Inscripción' : 'Organización')) + '</div><div class="v">' + esc(t.extra) + '</div></div>' : '') +
+      '<div class="campo"><div class="l">Evento</div><div class="v">13 y 14 nov 2026</div></div>' +
+      '</div></div>' +
+      avisoHTML() +
+      talleresHTML(d.talleres) +
+      itinerarioHTML(d.itinerario);
+
+    buscadorCard.style.display = 'block';
+  }
+
+  function cargar(codigo) {
+    cont.innerHTML = '<div class="card"><div class="cargando">Verificando…</div></div>';
+    fetch('/api/verificar?codigo=' + encodeURIComponent(codigo))
+      .then(function (r) { return r.json(); })
+      .then(function (d) { render(d); })
+      .catch(function () {
+        cont.innerHTML = '<div class="card"><div class="estado invalido"><div class="icono">⚠️</div><div class="txt">' +
+          '<span class="badge">Error</span><h2>Error de conexión</h2>' +
+          '<div class="sub">Revisa tu conexión e intenta de nuevo.</div></div></div></div>';
+        buscadorCard.style.display = 'block';
+      });
+  }
+
+  var params = new URLSearchParams(location.search);
+  var codigo = (params.get('codigo') || '').trim().toUpperCase();
+
+  if (codigo) {
+    if (input) input.value = codigo;
+    cargar(codigo);
+  } else {
+    cont.innerHTML = '<div class="card"><div class="estado invalido" style="gap:14px"><div class="icono">🔍</div><div class="txt">' +
+      '<span class="badge">Verificación</span><h2>Ingresa el código del certificado</h2>' +
+      '<div class="sub">El código aparece al pie del certificado, junto al QR.</div></div></div></div>';
+    buscadorCard.style.display = 'block';
+  }
+
+  if (btn) btn.addEventListener('click', function () {
+    var c = String(input.value || '').trim().toUpperCase();
+    if (!c) { input.focus(); return; }
+    try {
+      var u = new URL(location.href);
+      u.searchParams.set('codigo', c);
+      history.replaceState(null, '', u.toString());
+    } catch (e) {}
+    cargar(c);
+  });
+
+  if (input) input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
+  });
+})();
+</script>
+</body>
+</html>
