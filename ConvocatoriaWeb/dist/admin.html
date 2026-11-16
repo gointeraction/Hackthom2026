@@ -1904,9 +1904,41 @@
             <button type="button" class="btn" data-copy-url="/certificado-ponente" style="padding:9px 14px;font-size:.8rem">Copiar enlace</button>
           </div>
         </div>
+        <div style="background:linear-gradient(135deg,#1B1140,#312E81);border:1px solid rgba(167,139,250,.55);border-radius:16px;padding:20px;color:#fff">
+          <div style="font-size:2rem;margin-bottom:8px">🧑‍🏫</div>
+          <strong style="display:block;font-size:1.05rem;margin-bottom:4px">Certificado de mentor</strong>
+          <span style="font-size:.82rem;color:#C7D2FE;line-height:1.5">Cada mentor ingresa su código personal.</span>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <a href="/certificado-mentor" target="_blank" rel="noopener" class="btn" style="padding:9px 14px;font-size:.8rem;text-decoration:none;background:linear-gradient(135deg,#7C3AED,#06A77D)">Abrir</a>
+            <button type="button" class="btn" data-copy-url="/certificado-mentor" style="padding:9px 14px;font-size:.8rem">Copiar enlace</button>
+          </div>
+        </div>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <h3 style="font-size:1rem;margin:0">🧑‍🏫 Certificados de mentores</h3>
+        <span class="count" id="certMenCount" style="margin:0">0 mentores</span>
+        <button type="button" class="btn" id="certMenCopyAll" style="padding:8px 14px;font-size:.8rem">📋 Copiar todos los enlaces</button>
+        <button type="button" class="btn" id="certMenCsv" style="padding:8px 14px;font-size:.8rem">⬇️ CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mentor</th>
+              <th>Organización</th>
+              <th>Código</th>
+              <th>Enlace directo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="certMenBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:26px 0 12px">
         <h3 style="font-size:1rem;margin:0">🎤 Certificados de ponentes</h3>
         <span class="count" id="certPonCount" style="margin:0">0 ponentes</span>
         <button type="button" class="btn" id="certPonCopyAll" style="padding:8px 14px;font-size:.8rem">📋 Copiar todos los enlaces</button>
@@ -4003,6 +4035,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
 
   // ===== Certificados =====
   let certPonData = [];
+  let certMenData = [];
 
   function copiarAlPortapapeles(texto, btn) {
     const marcar = () => {
@@ -4030,40 +4063,68 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
 
   async function loadCertificados() {
     const body = document.getElementById('certPonBody');
-    if (!body) return;
+    const bodyMen = document.getElementById('certMenBody');
     try {
       const res = await fetch('/api/admin/certificados');
       const data = await res.json();
       certPonData = data.ponentes || [];
+      certMenData = data.mentores || [];
+
       const cnt = document.getElementById('certPonCount');
       if (cnt) cnt.textContent = certPonData.length + ' ponente(s)';
+      const cntMen = document.getElementById('certMenCount');
+      if (cntMen) cntMen.textContent = certMenData.length + ' mentor(es)';
       const badge = document.getElementById('cntCertificados');
-      if (badge) badge.textContent = certPonData.length;
+      if (badge) badge.textContent = certPonData.length + certMenData.length;
 
-      if (!certPonData.length) {
-        body.innerHTML = '<tr><td colspan="7" class="empty">Sin certificados de ponentes.</td></tr>';
-        return;
+      // Mentores
+      if (bodyMen) {
+        if (!certMenData.length) {
+          bodyMen.innerHTML = '<tr><td colspan="6" class="empty">Sin certificados de mentores.</td></tr>';
+        } else {
+          bodyMen.innerHTML = certMenData.map((m, i) =>
+            '<tr>' +
+            '<td>' + (i + 1) + '</td>' +
+            '<td><strong>' + esc(m.nombre) + '</strong></td>' +
+            '<td>' + esc(m.organizacion || '—') + '</td>' +
+            '<td><code style="background:#F3F0FF;color:#7C3AED;padding:2px 8px;border-radius:5px;font-weight:800;font-size:.74rem;letter-spacing:.05em">' + esc(m.codigo) + '</code></td>' +
+            '<td style="word-break:break-all;font-size:.72rem;max-width:250px;color:#0B6E8A">' + esc(m.enlace) + '</td>' +
+            '<td style="white-space:nowrap">' +
+            '<a href="' + esc(m.enlace) + '" target="_blank" rel="noopener" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;font-weight:700;color:#0B6E8A;text-decoration:none;margin-right:4px">Abrir</a>' +
+            '<button type="button" data-copy-url="' + esc(m.enlace) + '" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#7C3AED">Copiar</button>' +
+            '</td>' +
+            '</tr>'
+          ).join('');
+        }
       }
 
-      body.innerHTML = certPonData.map((p, i) => {
-        const detalle = [];
-        if (p.dia) detalle.push('Día ' + p.dia);
-        if (p.hora_inicio) detalle.push(p.hora_inicio + (p.hora_fin ? '–' + p.hora_fin : ''));
-        return '<tr>' +
-          '<td>' + (i + 1) + '</td>' +
-          '<td><strong>' + esc(p.ponente) + '</strong></td>' +
-          '<td>' + esc(p.titulo || '—') + '</td>' +
-          '<td>' + esc(detalle.join(' · ') || '—') + '</td>' +
-          '<td><code style="background:#F3F0FF;color:#7C3AED;padding:2px 8px;border-radius:5px;font-weight:800;font-size:.74rem;letter-spacing:.05em">' + esc(p.codigo) + '</code></td>' +
-          '<td style="word-break:break-all;font-size:.72rem;max-width:250px;color:#0B6E8A">' + esc(p.enlace) + '</td>' +
-          '<td style="white-space:nowrap">' +
-            '<a href="' + esc(p.enlace) + '" target="_blank" rel="noopener" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;font-weight:700;color:#0B6E8A;text-decoration:none;margin-right:4px">Abrir</a>' +
-            '<button type="button" data-copy-url="' + esc(p.enlace) + '" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#7C3AED">Copiar</button>' +
-          '</td>' +
-          '</tr>';
-      }).join('');
+      // Ponentes
+      if (body) {
+        if (!certPonData.length) {
+          body.innerHTML = '<tr><td colspan="7" class="empty">Sin certificados de ponentes.</td></tr>';
+        } else {
+          body.innerHTML = certPonData.map((p, i) => {
+            const detalle = [];
+            if (p.dia) detalle.push('Día ' + p.dia);
+            if (p.hora_inicio) detalle.push(p.hora_inicio + (p.hora_fin ? '–' + p.hora_fin : ''));
+            return '<tr>' +
+              '<td>' + (i + 1) + '</td>' +
+              '<td><strong>' + esc(p.ponente) + '</strong></td>' +
+              '<td>' + esc(p.titulo || '—') + '</td>' +
+              '<td>' + esc(detalle.join(' · ') || '—') + '</td>' +
+              '<td><code style="background:#F3F0FF;color:#7C3AED;padding:2px 8px;border-radius:5px;font-weight:800;font-size:.74rem;letter-spacing:.05em">' + esc(p.codigo) + '</code></td>' +
+              '<td style="word-break:break-all;font-size:.72rem;max-width:250px;color:#0B6E8A">' + esc(p.enlace) + '</td>' +
+              '<td style="white-space:nowrap">' +
+                '<a href="' + esc(p.enlace) + '" target="_blank" rel="noopener" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;font-weight:700;color:#0B6E8A;text-decoration:none;margin-right:4px">Abrir</a>' +
+                '<button type="button" data-copy-url="' + esc(p.enlace) + '" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#7C3AED">Copiar</button>' +
+              '</td>' +
+              '</tr>';
+          }).join('');
+        }
+      }
     } catch (e) {
-      body.innerHTML = '<tr><td colspan="7" class="empty">Error al cargar los certificados.</td></tr>';
+      if (body) body.innerHTML = '<tr><td colspan="7" class="empty">Error al cargar los certificados.</td></tr>';
+      if (bodyMen) bodyMen.innerHTML = '<tr><td colspan="6" class="empty">Error al cargar los certificados.</td></tr>';
     }
   }
 
@@ -4096,6 +4157,30 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const a = document.createElement('a');
       a.href = u;
       a.download = 'certificados-ponentes-2026.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(u);
+    });
+
+    const allMen = document.getElementById('certMenCopyAll');
+    if (allMen) allMen.addEventListener('click', () => {
+      if (!certMenData.length) { alert('No hay enlaces para copiar.'); return; }
+      const txt = certMenData.map((m) => m.nombre + '\t' + (m.organizacion || '') + '\t' + m.enlace).join('\n');
+      copiarAlPortapapeles(txt, allMen);
+    });
+
+    const csvMen = document.getElementById('certMenCsv');
+    if (csvMen) csvMen.addEventListener('click', () => {
+      if (!certMenData.length) { alert('No hay certificados para exportar.'); return; }
+      const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const filas = ['"#","Mentor","Organización","Código","Enlace"'];
+      certMenData.forEach((m, i) => {
+        filas.push([cell(i + 1), cell(m.nombre), cell(m.organizacion), cell(m.codigo), cell(m.enlace)].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const u = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = u;
+      a.download = 'certificados-mentores-2026.csv';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(u);
     });
