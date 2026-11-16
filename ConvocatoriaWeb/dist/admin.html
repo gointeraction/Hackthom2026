@@ -1913,9 +1913,41 @@
             <button type="button" class="btn" data-copy-url="/certificado-mentor" style="padding:9px 14px;font-size:.8rem">Copiar enlace</button>
           </div>
         </div>
+        <div style="background:linear-gradient(135deg,#0F172A,#1E293B);border:1px solid rgba(203,213,225,.55);border-radius:16px;padding:20px;color:#fff">
+          <div style="font-size:2rem;margin-bottom:8px">⚖️</div>
+          <strong style="display:block;font-size:1.05rem;margin-bottom:4px">Certificado de jurado</strong>
+          <span style="font-size:.82rem;color:#CBD5E1;line-height:1.5">Cada jurado usa el mismo código de evaluación.</span>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <a href="/certificado-jurado" target="_blank" rel="noopener" class="btn" style="padding:9px 14px;font-size:.8rem;text-decoration:none;background:linear-gradient(135deg,#94A3B8,#00B4D8)">Abrir</a>
+            <button type="button" class="btn" data-copy-url="/certificado-jurado" style="padding:9px 14px;font-size:.8rem">Copiar enlace</button>
+          </div>
+        </div>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <h3 style="font-size:1rem;margin:0">⚖️ Certificados de jurados</h3>
+        <span class="count" id="certJudCount" style="margin:0">0 jurados</span>
+        <button type="button" class="btn" id="certJudCopyAll" style="padding:8px 14px;font-size:.8rem">📋 Copiar todos los enlaces</button>
+        <button type="button" class="btn" id="certJudCsv" style="padding:8px 14px;font-size:.8rem">⬇️ CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Jurado</th>
+              <th>Organización</th>
+              <th>Código</th>
+              <th>Enlace directo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="certJudBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:26px 0 12px">
         <h3 style="font-size:1rem;margin:0">🧑‍🏫 Certificados de mentores</h3>
         <span class="count" id="certMenCount" style="margin:0">0 mentores</span>
         <button type="button" class="btn" id="certMenCopyAll" style="padding:8px 14px;font-size:.8rem">📋 Copiar todos los enlaces</button>
@@ -4036,6 +4068,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // ===== Certificados =====
   let certPonData = [];
   let certMenData = [];
+  let certJudData = [];
 
   function copiarAlPortapapeles(texto, btn) {
     const marcar = () => {
@@ -4069,13 +4102,38 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const data = await res.json();
       certPonData = data.ponentes || [];
       certMenData = data.mentores || [];
+      certJudData = data.jurados || [];
 
       const cnt = document.getElementById('certPonCount');
       if (cnt) cnt.textContent = certPonData.length + ' ponente(s)';
       const cntMen = document.getElementById('certMenCount');
       if (cntMen) cntMen.textContent = certMenData.length + ' mentor(es)';
+      const cntJud = document.getElementById('certJudCount');
+      if (cntJud) cntJud.textContent = certJudData.length + ' jurado(s)';
       const badge = document.getElementById('cntCertificados');
-      if (badge) badge.textContent = certPonData.length + certMenData.length;
+      if (badge) badge.textContent = certPonData.length + certMenData.length + certJudData.length;
+
+      // Jurados
+      const bodyJud = document.getElementById('certJudBody');
+      if (bodyJud) {
+        if (!certJudData.length) {
+          bodyJud.innerHTML = '<tr><td colspan="6" class="empty">Sin certificados de jurados.</td></tr>';
+        } else {
+          bodyJud.innerHTML = certJudData.map((j, i) =>
+            '<tr>' +
+            '<td>' + (i + 1) + '</td>' +
+            '<td><strong>' + esc(j.nombre) + '</strong></td>' +
+            '<td>' + esc(j.organizacion || '—') + '</td>' +
+            '<td><code style="background:#EEF2F7;color:#334155;padding:2px 8px;border-radius:5px;font-weight:800;font-size:.74rem;letter-spacing:.05em">' + esc(j.codigo) + '</code></td>' +
+            '<td style="word-break:break-all;font-size:.72rem;max-width:250px;color:#0B6E8A">' + esc(j.enlace) + '</td>' +
+            '<td style="white-space:nowrap">' +
+            '<a href="' + esc(j.enlace) + '" target="_blank" rel="noopener" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;font-weight:700;color:#0B6E8A;text-decoration:none;margin-right:4px">Abrir</a>' +
+            '<button type="button" data-copy-url="' + esc(j.enlace) + '" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#334155">Copiar</button>' +
+            '</td>' +
+            '</tr>'
+          ).join('');
+        }
+      }
 
       // Mentores
       if (bodyMen) {
@@ -4181,6 +4239,30 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
       const a = document.createElement('a');
       a.href = u;
       a.download = 'certificados-mentores-2026.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(u);
+    });
+
+    const allJud = document.getElementById('certJudCopyAll');
+    if (allJud) allJud.addEventListener('click', () => {
+      if (!certJudData.length) { alert('No hay enlaces para copiar.'); return; }
+      const txt = certJudData.map((j) => j.nombre + '\t' + (j.organizacion || '') + '\t' + j.enlace).join('\n');
+      copiarAlPortapapeles(txt, allJud);
+    });
+
+    const csvJud = document.getElementById('certJudCsv');
+    if (csvJud) csvJud.addEventListener('click', () => {
+      if (!certJudData.length) { alert('No hay certificados para exportar.'); return; }
+      const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const filas = ['"#","Jurado","Organización","Código","Enlace"'];
+      certJudData.forEach((j, i) => {
+        filas.push([cell(i + 1), cell(j.nombre), cell(j.organizacion), cell(j.codigo), cell(j.enlace)].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const u = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = u;
+      a.download = 'certificados-jurados-2026.csv';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(u);
     });
