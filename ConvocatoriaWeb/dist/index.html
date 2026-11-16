@@ -413,6 +413,61 @@
   .zona-cta p { margin: 0 0 18px; color: var(--ink-soft); font-size: .94rem; }
   .zona-cta .btn-zona { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #00B4D8, #0B6E8A); color: #fff; font-weight: 800; font-size: 1.05rem; padding: 17px 32px; border-radius: 14px; text-decoration: none; box-shadow: 0 10px 28px rgba(0,180,216,.4); transition: transform .16s ease, box-shadow .16s ease; animation: remote-pulse 2.4s infinite; }
   .zona-cta .btn-zona:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 38px rgba(0,180,216,.6); }
+
+  /* ===== CTA Certificado ===== */
+  .cert-cta {
+    display: flex; align-items: center; gap: 36px; flex-wrap: wrap;
+    background:
+      radial-gradient(700px 320px at 88% -20%, rgba(0,180,216,.35), transparent 62%),
+      linear-gradient(135deg, #0B1F3A, #12345F 62%, #0B1F3A);
+    border: 2px solid rgba(0,180,216,.45);
+    border-radius: 24px; padding: 40px 44px; color: #fff;
+    box-shadow: 0 26px 60px -26px rgba(11,31,58,.6);
+    position: relative; overflow: hidden;
+  }
+  .cert-cta::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(600px 340px at 50% 0%, #000 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(600px 340px at 50% 0%, #000 40%, transparent 80%);
+  }
+  .cert-cta-txt { position: relative; z-index: 2; flex: 1; min-width: 280px; }
+  .cert-cta-kicker {
+    display: inline-block; font-size: .68rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+    color: #7FD4EA; background: rgba(0,180,216,.14); border: 1px solid rgba(0,180,216,.4);
+    padding: 6px 14px; border-radius: 999px; margin-bottom: 14px;
+  }
+  .cert-cta h2 {
+    font-family: var(--font-display); font-size: clamp(1.45rem, 3.4vw, 2.05rem);
+    line-height: 1.15; letter-spacing: -.02em; margin-bottom: 12px; color: #fff;
+  }
+  .cert-cta p { color: #B9CEE0; font-size: .96rem; line-height: 1.7; margin-bottom: 22px; max-width: 560px; }
+  .cert-cta-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 17px 32px; border-radius: 14px; text-decoration: none;
+    font-weight: 800; font-size: 1.05rem; color: #fff;
+    background: linear-gradient(135deg, #00B4D8, #06A77D);
+    box-shadow: 0 12px 30px rgba(0,180,216,.45);
+    transition: transform .16s ease, box-shadow .16s ease;
+  }
+  .cert-cta-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 18px 42px rgba(0,180,216,.65); }
+  .cert-cta-links { margin-top: 18px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .cert-cta-links a { color: #8FB9D6; font-size: .82rem; font-weight: 700; text-decoration: none; border-bottom: 1px dashed rgba(143,185,214,.4); padding-bottom: 2px; }
+  .cert-cta-links a:hover { color: #fff; border-bottom-color: #fff; }
+  .cert-cta-art {
+    position: relative; z-index: 2; font-size: 7rem; line-height: 1; flex-shrink: 0;
+    filter: drop-shadow(0 16px 40px rgba(0,180,216,.5));
+    animation: certificado-flota 4s ease-in-out infinite;
+  }
+  @keyframes certificado-flota { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+  @media (max-width: 760px) {
+    .cert-cta { padding: 30px 24px; gap: 20px; }
+    .cert-cta-art { font-size: 4.4rem; }
+    .cert-cta-btn { width: 100%; justify-content: center; }
+  }
 </style>
 <style>
 /* ===== Modern motion & pro UX upgrade ===== */
@@ -1296,6 +1351,27 @@ section { padding: 84px 0; }
         <p>Posiciones según el promedio de los jurados.</p>
       </div>
       <div id="rankingList"></div>
+    </div>
+  </section>
+
+  <!-- CERTIFICADO -->
+  <section id="certificado">
+    <div class="wrap">
+      <div class="cert-cta">
+        <div class="cert-cta-txt">
+          <span class="cert-cta-kicker">🎓 Certificados</span>
+          <h2>Descarga tu certificado de participación</h2>
+          <p>Si participaste en el <strong>Hackathon UNETI IA 2026</strong>, ya puedes descargar tu certificado personalizado. Solo necesitas tu código de participante.</p>
+          <a class="cert-cta-btn" href="/certificado">🎓 Descargar mi certificado →</a>
+          <div class="cert-cta-links">
+            <a href="/certificado-ponente">🎤 Soy ponente</a>
+            <a href="/certificado-mentor">🧑‍🏫 Soy mentor</a>
+            <a href="/certificado-jurado">⚖️ Soy jurado</a>
+            <a href="/verificar">🔍 Verificar un certificado</a>
+          </div>
+        </div>
+        <div class="cert-cta-art">🎓</div>
+      </div>
     </div>
   </section>
 
