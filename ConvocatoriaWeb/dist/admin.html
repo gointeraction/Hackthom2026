@@ -367,6 +367,7 @@
           <button class="menu-btn" data-panel="metodologia"><span class="ic">📘</span> Metodología</button>
           <button class="menu-btn" data-panel="charlas"><span class="ic">🎤</span> Charlas</button>
           <button class="menu-btn" data-panel="galeria"><span class="ic">🖼️</span> Galería</button>
+          <button class="menu-btn" data-panel="certificados"><span class="ic">🎓</span> Certificados <span class="cnt" id="cntCertificados">0</span></button>
         </div>
       </div>
 
@@ -1875,6 +1876,66 @@
       <div id="entEqList" style="display:grid;gap:12px"></div>
     </section>
 
+    <!-- CERTIFICADOS -->
+    <section class="panel" id="panel-certificados">
+      <div class="sec-head">
+        <span class="kicker">Comunicación</span>
+        <h2>Certificados</h2>
+        <p>Enlaces de los certificados de <strong>participantes</strong> y <strong>ponentes</strong>. Cada persona ingresa su código y descarga el suyo.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:6px 0 22px">
+        <div style="background:linear-gradient(135deg,#0B1F3A,#12345F);border:1px solid rgba(0,180,216,.5);border-radius:16px;padding:20px;color:#fff">
+          <div style="font-size:2rem;margin-bottom:8px">🎓</div>
+          <strong style="display:block;font-size:1.05rem;margin-bottom:4px">Certificado de participante</strong>
+          <span style="font-size:.82rem;color:#A9C2D6;line-height:1.5">Cada participante ingresa su código de inscripción.</span>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <a href="/certificado" target="_blank" rel="noopener" class="btn" style="padding:9px 14px;font-size:.8rem;text-decoration:none">Abrir</a>
+            <button type="button" class="btn" data-copy-url="/certificado" style="padding:9px 14px;font-size:.8rem">Copiar enlace</button>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#1A1206,#3D2C0A);border:1px solid rgba(255,201,60,.55);border-radius:16px;padding:20px;color:#fff">
+          <div style="font-size:2rem;margin-bottom:8px">🎤</div>
+          <strong style="display:block;font-size:1.05rem;margin-bottom:4px">Certificado de ponente</strong>
+          <span style="font-size:.82rem;color:#E8D9A8;line-height:1.5">Cada ponente ingresa su código personal.</span>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <a href="/certificado-ponente" target="_blank" rel="noopener" class="btn" style="padding:9px 14px;font-size:.8rem;text-decoration:none;background:linear-gradient(135deg,#FFC93C,#E0A500);color:#241A00">Abrir</a>
+            <button type="button" class="btn" data-copy-url="/certificado-ponente" style="padding:9px 14px;font-size:.8rem">Copiar enlace</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <h3 style="font-size:1rem;margin:0">🎤 Certificados de ponentes</h3>
+        <span class="count" id="certPonCount" style="margin:0">0 ponentes</span>
+        <button type="button" class="btn" id="certPonCopyAll" style="padding:8px 14px;font-size:.8rem">📋 Copiar todos los enlaces</button>
+        <button type="button" class="btn" id="certPonCsv" style="padding:8px 14px;font-size:.8rem">⬇️ CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ponente</th>
+              <th>Charla</th>
+              <th>Día / Hora</th>
+              <th>Código</th>
+              <th>Enlace directo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="certPonBody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:22px;background:#EAF7FB;border:1px solid rgba(0,180,216,.35);border-radius:12px;padding:14px 16px;font-size:.86rem;color:#0B4A63;line-height:1.6">
+        <strong>💡 Cómo compartir:</strong> envía a cada ponente su <strong>enlace directo</strong> (ya incluye el código) o su <strong>código</strong> para que lo ingrese manualmente.
+        A los participantes, compárteles el enlace general <code>/certificado</code>.
+      </div>
+    </section>
+
     <!-- BIBLIOTECA DE PROYECTOS -->
     <section class="panel" id="panel-biblioteca">
       <div class="sec-head">
@@ -2274,6 +2335,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Cada panel recarga sus datos al abrirse (el dashboard siempre).
   const PANEL_LOADERS = {
     dashboard: () => loadResumen(),
+    certificados: () => loadCertificados(),
     'entregas-equipo': () => loadEntregasEquipo(),
     equipos: () => { loadTeams(); loadParticipantesEquipo(); loadTeamsForScore(); },
     participantes: () => { loadTeams(); loadParticipantesEquipo(); },
@@ -2345,7 +2407,7 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
   // Control de rol (administrador vs acreditación)
   function applyRole(role) {
     const allowed = {
-      admin: ['dashboard','enlaces','entregas-equipo','criterios','equipos','participantes','jurados','mentores','invitados','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
+      admin: ['dashboard','enlaces','entregas-equipo','certificados','criterios','equipos','participantes','jurados','mentores','invitados','remotos','presenciales','verificacion','evaluaciones','patrocinadores','instructivo','instructivo-presencial','metodologia','charlas','galeria','itinerario','logistica','insumos','acreditacion','acreditacion-personal','tickets','estimado','plan-maestro','responsables','evaluacion','resultados','triajeproyectos','encuestas','cartas','presupuesto','auditoria','emails-log','errores','backups','api-keys','accesos','agentes','biblioteca','comunicados','entregas','consultas','asistencia'],
       acreditacion: ['acreditacion'],
       jurado: ['equipos', 'evaluaciones', 'resultados'],
       logistica: ['logistica'],
@@ -3936,6 +3998,106 @@ hmac.compare_digest(expected, request.headers['X-Webhook-Signature'])</code></pr
         '<table><thead><tr><th>#</th><th>Equipo</th><th>Código</th><th>Entregó</th><th>GitHub</th><th>Presentación (Drive)</th></tr></thead><tbody>' + filas + '</tbody></table>' +
         '</body></html>');
       w.document.close(); w.focus(); setTimeout(() => w.print(), 350);
+    });
+  })();
+
+  // ===== Certificados =====
+  let certPonData = [];
+
+  function copiarAlPortapapeles(texto, btn) {
+    const marcar = () => {
+      if (!btn) return;
+      const orig = btn.textContent;
+      btn.textContent = '✅ Copiado';
+      setTimeout(() => { btn.textContent = orig; }, 1700);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(marcar).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = texto; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); marcar(); } catch (e) { alert('No se pudo copiar.'); }
+        document.body.removeChild(ta);
+      });
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = texto; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); marcar(); } catch (e) { alert('No se pudo copiar.'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  async function loadCertificados() {
+    const body = document.getElementById('certPonBody');
+    if (!body) return;
+    try {
+      const res = await fetch('/api/admin/certificados');
+      const data = await res.json();
+      certPonData = data.ponentes || [];
+      const cnt = document.getElementById('certPonCount');
+      if (cnt) cnt.textContent = certPonData.length + ' ponente(s)';
+      const badge = document.getElementById('cntCertificados');
+      if (badge) badge.textContent = certPonData.length;
+
+      if (!certPonData.length) {
+        body.innerHTML = '<tr><td colspan="7" class="empty">Sin certificados de ponentes.</td></tr>';
+        return;
+      }
+
+      body.innerHTML = certPonData.map((p, i) => {
+        const detalle = [];
+        if (p.dia) detalle.push('Día ' + p.dia);
+        if (p.hora_inicio) detalle.push(p.hora_inicio + (p.hora_fin ? '–' + p.hora_fin : ''));
+        return '<tr>' +
+          '<td>' + (i + 1) + '</td>' +
+          '<td><strong>' + esc(p.ponente) + '</strong></td>' +
+          '<td>' + esc(p.titulo || '—') + '</td>' +
+          '<td>' + esc(detalle.join(' · ') || '—') + '</td>' +
+          '<td><code style="background:#F3F0FF;color:#7C3AED;padding:2px 8px;border-radius:5px;font-weight:800;font-size:.74rem;letter-spacing:.05em">' + esc(p.codigo) + '</code></td>' +
+          '<td style="word-break:break-all;font-size:.72rem;max-width:250px;color:#0B6E8A">' + esc(p.enlace) + '</td>' +
+          '<td style="white-space:nowrap">' +
+            '<a href="' + esc(p.enlace) + '" target="_blank" rel="noopener" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;font-weight:700;color:#0B6E8A;text-decoration:none;margin-right:4px">Abrir</a>' +
+            '<button type="button" data-copy-url="' + esc(p.enlace) + '" style="padding:3px 9px;font-size:.72rem;border:1px solid #E4EAF1;background:#fff;border-radius:6px;cursor:pointer;font-weight:700;color:#7C3AED">Copiar</button>' +
+          '</td>' +
+          '</tr>';
+      }).join('');
+    } catch (e) {
+      body.innerHTML = '<tr><td colspan="7" class="empty">Error al cargar los certificados.</td></tr>';
+    }
+  }
+
+  (function initCertificados() {
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-copy-url]');
+      if (!b) return;
+      let url = b.getAttribute('data-copy-url') || '';
+      if (url && !/^https?:/i.test(url)) url = location.origin + url;
+      copiarAlPortapapeles(url, b);
+    });
+
+    const all = document.getElementById('certPonCopyAll');
+    if (all) all.addEventListener('click', () => {
+      if (!certPonData.length) { alert('No hay enlaces para copiar.'); return; }
+      const txt = certPonData.map((p) => p.ponente + '\t' + (p.titulo || '') + '\t' + p.enlace).join('\n');
+      copiarAlPortapapeles(txt, all);
+    });
+
+    const csv = document.getElementById('certPonCsv');
+    if (csv) csv.addEventListener('click', () => {
+      if (!certPonData.length) { alert('No hay certificados para exportar.'); return; }
+      const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const filas = ['"#","Ponente","Charla","Día","Hora inicio","Hora fin","Código","Enlace"'];
+      certPonData.forEach((p, i) => {
+        filas.push([cell(i + 1), cell(p.ponente), cell(p.titulo), cell(p.dia || ''), cell(p.hora_inicio), cell(p.hora_fin), cell(p.codigo), cell(p.enlace)].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const u = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = u;
+      a.download = 'certificados-ponentes-2026.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(u);
     });
   })();
 
